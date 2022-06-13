@@ -17,15 +17,15 @@ class OrdersController extends Controller {
 
     public function index(Request $request)
     {
+        die('Exit');
         $limit = (int)($request->get('limit')?:10);
         $orders = $this->shopify->getOrders([
-            'limit' => $limit,
-            'fields' => 'id,name,processed_at,email,note,shipping_address,created_at,line_items'
+            'limit' => $limit
         ]);
         $total = $this->shopify->getOrdersCount();
-        //echo "<pre/>";
-        //print_r($orders->toArray());
-        //exit;
+        echo "<pre/>";
+        print_r($orders->toArray());
+        exit;
         $orders = $this->processFlatOrdersByOrderItems($orders->toArray());
         return view('orders', compact('orders', 'limit', 'total'));
     }

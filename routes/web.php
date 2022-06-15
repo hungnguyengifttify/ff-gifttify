@@ -13,15 +13,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/', [\App\Http\Controllers\DashboardUsController::class, 'index'])
+        ->name('home');
+
+    Route::get('/dashboard_us', [\App\Http\Controllers\DashboardUsController::class, 'index'])
+        ->name('dashboard_us');
+
+    Route::get('/dashboard_au', [\App\Http\Controllers\DashboardAuController::class, 'index'])
+        ->name('dashboard_au');
 });
-
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth'])->name('dashboard');
-
-Route::get('/orders', [\App\Http\Controllers\OrdersController::class, 'index'])
-    ->middleware(['auth'])->name('orders');;
 
 require __DIR__.'/auth.php';

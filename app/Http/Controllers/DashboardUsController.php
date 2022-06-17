@@ -12,8 +12,9 @@ class DashboardUsController extends Controller {
     public function index(Request $request)
     {
         $title = "US Dashboard";
-        $fromDate = $request->date('fromDate') ? $request->date('fromDate')->format('Y-m-d') : date('Y-m-d');
-        $toDate = $request->date('toDate') ? $request->date('toDate')->format('Y-m-d 23:59:59') : date('Y-m-d 23:59:59');
+        $dateTime = new \DateTime("now", new \DateTimeZone('America/Los_Angeles'));
+        $fromDate = $request->date('fromDate') ? $request->date('fromDate')->format('Y-m-d') : $dateTime->format('Y-m-d');
+        $toDate = $request->date('toDate') ? $request->date('toDate')->format('Y-m-d 23:59:59') : $dateTime->format('Y-m-d 23:59:59');
         $labelDate = $request->input('labelDate') ?? 'Today';
 
         $params = array(
@@ -22,12 +23,11 @@ class DashboardUsController extends Controller {
             'labelDate' => $labelDate,
         );
 
-        $fbAds = DB::table('facebook_ads_ad_insights')
-            ->select(DB::raw('sum(spend) as totalSpend'))
-            ->whereIn('account_name', FbAds::$usAccount)
-            ->where('account_name', 'not like', 'Phong%')
-            ->where('date_start', '>=', $fromDate)
-            ->where('date_stop', '<=', $toDate)
+        $fbAds = DB::table('fb_campaign_insights')
+            ->select(DB::raw('sum(spend) as totalSpend, sum(unique_clicks) as totalUniqueClicks'))
+            ->whereIn('account_id', FbAds::$usAccountIds)
+            ->where('date_record', '>=', $fromDate)
+            ->where('date_record', '<=', $toDate)
             ->first();
 
         $orders = DB::select("select count(*) as total from shopify_thecreattify_orders where CONVERT_TZ(created_at,'UTC','US/Pacific') >= :fromDate and CONVERT_TZ(created_at,'UTC','US/Pacific') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);

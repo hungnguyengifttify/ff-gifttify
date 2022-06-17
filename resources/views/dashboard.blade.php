@@ -20,6 +20,12 @@
                         <span id="reportrangetext"><?php echo $params['fromDate']->format('d-m-Y') . ' => ' . $params['toDate']->format('d-m-Y');?></span>
 
                         <script type="text/javascript">
+                            <?php if ($title == "US Dashboard"):; ?>
+                                moment.tz.setDefault("America/Los_Angeles");
+                            <?php else: ?>
+                                moment.tz.setDefault("Australia/Sydney");
+                            <?php endif; ?>
+
                             $(function() {
 
                                 var url_string = window.location.href;
@@ -87,6 +93,7 @@
             <div class="bg-white overflow-hidden shadow-sm">
                 <div class="p-6 bg-white border-b border-gray-200">
                     <?php $totalSpend = $fbAds ? $fbAds->totalSpend : 0; ?>
+                    <?php $cpc = ($fbAds && isset($fbAds->totalUniqueClicks) && $fbAds->totalUniqueClicks > 0) ? $fbAds->totalSpend / $fbAds->totalUniqueClicks : 0; ?>
                     <?php $totalOrders = $orders ? $orders[0]->total : 0; ?>
                     <?php $totalAmount = $totalAmount ? $totalAmount[0]->total : 0; ?>
                     <table class="table" style="width: auto">
@@ -94,6 +101,10 @@
                             <tr>
                                 <td>Số lượng đơn hàng</td>
                                 <td><?php echo $totalOrders; ?></td>
+                            </tr>
+                            <tr>
+                                <td>CPC</td>
+                                <td><?php echo number_format($cpc, 2); ?></td>
                             </tr>
                             <tr>
                                 <td>Doanh thu</td>

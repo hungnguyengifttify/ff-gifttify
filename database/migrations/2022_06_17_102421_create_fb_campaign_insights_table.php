@@ -16,14 +16,14 @@ return new class extends Migration
         Schema::create('fb_campaign_insights', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('account_id');
-            $table->bigInteger('account_name');
+            $table->string('account_name');
             $table->string('account_currency');
             $table->unsignedBigInteger('ad_id');
-            $table->bigInteger('ad_name');
+            $table->string('ad_name');
             $table->unsignedBigInteger('adset_id');
-            $table->bigInteger('adset_name');
+            $table->string('adset_name');
             $table->unsignedBigInteger('campaign_id');
-            $table->bigInteger('campaign_name');
+            $table->string('campaign_name');
             $table->string('country');
             $table->float('cpc');
             $table->float('cpm');

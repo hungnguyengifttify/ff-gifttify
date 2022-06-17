@@ -20,11 +20,8 @@
         <script src="{{ asset('js/app.js') }}" defer></script>
         <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
         <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-        <script type="text/javascript" src="https://momentjs.com/downloads/moment-timezone.js"></script>
+        <script type="text/javascript" src="https://momentjs.com/downloads/moment-timezone-with-data.js"></script>
         <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-        <script>
-            moment.tz.setDefault("America/Los_Angeles");
-        </script>
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">

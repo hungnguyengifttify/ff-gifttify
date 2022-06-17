@@ -19,67 +19,7 @@ class DashboardTestController extends Controller {
 
     public function index(Request $request)
     {
-        $access_token = env('FB_ADS_ACCESS_TOKEN', '');
-        $app_secret = env('FB_ADS_APP_SECRET', '');
-        $app_id = env('FB_ADS_APP_ID', '');
-
-        $api = Api::init($app_id, $app_secret, $access_token);
-        $api->setDefaultGraphVersion('14.0');
-        $api->setLogger(new CurlLogger());
-
-        $fields = array(
-            'cost_per_unique_click',
-            'account_currency',
-            'account_id',
-            'account_name',
-            'ad_id',
-            'ad_name',
-            'adset_id',
-            'adset_name',
-            'campaign_id',
-            'campaign_name',
-            'cpc',
-            'cpm',
-            'cpp',
-            'ctr',
-            'date_start',
-            'date_stop',
-            'impressions',
-            'labels',
-            'location',
-            'objective',
-            'reach',
-            'social_spend',
-            'spend',
-            'inline_link_clicks',
-            'outbound_clicks',
-            'unique_clicks',
-            'reach',
-            'unique_actions',
-            'unique_link_clicks_ctr',
-            'clicks',
-            'cost_per_unique_action_type',
-            'actions',
-        );
-        $params = array(
-            'time_ranges' => array(
-                array('since' => '2022-06-15','until' => '2022-06-15'),
-                array('since' => '2022-06-16','until' => '2022-06-16'),
-                array('since' => '2022-06-17','until' => '2022-06-17'),
-            ),
-            'level' => 'campaign',
-            'breakdowns' => array('country'),
-        );
-
-        $result = (new AdAccount('act_209267284523548'))->getInsights(
-            $fields,
-            $params
-        )->getResponse()->getContent();
-
-        dd($result);
-
-
-        $title = "Test Dashboard";
+        $title = "AU Dashboard";
         $fromDate = $request->date('fromDate') ? $request->date('fromDate')->format('Y-m-d') : date('Y-m-d');
         $toDate = $request->date('toDate') ? $request->date('toDate')->format('Y-m-d 23:59:59') : date('Y-m-d 23:59:59');
         $labelDate = $request->input('labelDate') ?? 'Today';
@@ -90,15 +30,40 @@ class DashboardTestController extends Controller {
             'labelDate' => $labelDate,
         );
 
-        $fbAds = DB::table('facebook_ads_ad_insights')
-            ->select(DB::raw('sum(spend) as totalSpend'))
-            ->whereIn('account_name', FbAds::$usAccount)
-            ->where('account_name', 'not like', 'Phong%')
-            ->where('date_start', '>=', $fromDate)
-            ->where('date_stop', '<=', $toDate)
+        $fbAds = DB::table('fb_campaign_insights')
+            ->select(DB::raw('sum(spend) as totalSpend, sum(unique_clicks) as totalUniqueClicks'))
+            ->whereIn('account_id', FbAds::$auAccountIds)
+            ->where('date_record', '>=', $fromDate)
+            ->where('date_record', '<=', $toDate)
             ->first();
 
-        $orders = DB::select("select * from shopify_thecreattify_orders where CONVERT_TZ(created_at,'UTC','US/Pacific') >= :fromDate and CONVERT_TZ(created_at,'UTC','US/Pacific') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
-        return view('dashboard', compact('title', 'params', 'orders', 'fbAds'));
+        $orders = DB::select("select count(*) as total from shopify_au_thecreattify_orders where CONVERT_TZ(created_at,'UTC','Australia/Sydney') >= :fromDate and CONVERT_TZ(created_at,'UTC','Australia/Sydney') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
+        $totalAmount = DB::select("select sum(total_price)/1.4 as total from shopify_au_thecreattify_orders where CONVERT_TZ(created_at,'UTC','Australia/Sydney') >= :fromDate and CONVERT_TZ(created_at,'UTC','Australia/Sydney') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
+
+        return view('dashboard', compact('title','totalAmount', 'params', 'orders', 'fbAds'));
+
+
+        /*$title = "US Dashboard";
+        $fromDate = $request->date('fromDate') ? $request->date('fromDate')->format('Y-m-d') : date('Y-m-d');
+        $toDate = $request->date('toDate') ? $request->date('toDate')->format('Y-m-d 23:59:59') : date('Y-m-d 23:59:59');
+        $labelDate = $request->input('labelDate') ?? 'Today';
+
+        $params = array(
+            'fromDate' => new \DateTime($fromDate),
+            'toDate' => new \DateTime($toDate),
+            'labelDate' => $labelDate,
+        );
+
+        $fbAds = DB::table('fb_campaign_insights')
+            ->select(DB::raw('sum(spend) as totalSpend, sum(unique_clicks) as totalUniqueClicks'))
+            ->whereIn('account_id', FbAds::$usAccountIds)
+            ->where('date_record', '>=', $fromDate)
+            ->where('date_record', '<=', $toDate)
+            ->first();
+
+        $orders = DB::select("select count(*) as total from shopify_thecreattify_orders where CONVERT_TZ(created_at,'UTC','US/Pacific') >= :fromDate and CONVERT_TZ(created_at,'UTC','US/Pacific') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
+        $totalAmount = DB::select("select sum(total_price) as total from shopify_thecreattify_orders where CONVERT_TZ(created_at,'UTC','US/Pacific') >= :fromDate and CONVERT_TZ(created_at,'UTC','US/Pacific') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
+        return view('dashboard', compact('title','totalAmount', 'params', 'orders', 'fbAds'));
+        */
     }
 }

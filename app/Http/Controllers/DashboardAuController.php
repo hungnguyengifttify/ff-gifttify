@@ -29,7 +29,9 @@ class DashboardAuController extends Controller {
             ->where('date_stop', '<=', $toDate)
             ->first();
 
-        $orders = DB::select("select * from shopify_au_thecreattify_orders where CONVERT_TZ(created_at,'UTC','Australia/Sydney') >= :fromDate and CONVERT_TZ(created_at,'UTC','Australia/Sydney') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
-        return view('dashboard', compact('title', 'params', 'orders', 'fbAds'));
+        $orders = DB::select("select count(*) as total from shopify_au_thecreattify_orders where CONVERT_TZ(created_at,'UTC','Australia/Sydney') >= :fromDate and CONVERT_TZ(created_at,'UTC','Australia/Sydney') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
+        $totalAmount = DB::select("select sum(total_price)/1.4 as total from shopify_au_thecreattify_orders where CONVERT_TZ(created_at,'UTC','Australia/Sydney') >= :fromDate and CONVERT_TZ(created_at,'UTC','Australia/Sydney') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
+
+        return view('dashboard', compact('title','totalAmount', 'params', 'orders', 'fbAds'));
     }
 }

@@ -29,4 +29,25 @@ class FbAds extends Model
     static $deAccount = array(
         'Phong 16.6 DE V38Cre'
     );
+
+    static $usAccountIds = array(
+        '2978647975730170',
+        '612291543439190',
+        '309846854338542',
+        '588068822423832',
+        '651874502834964',
+        '748598509494241'
+    );
+
+    static $auAccountIds = array(
+        '209267284523548',
+        '4065060523598849',
+        '199757128777881',
+        '619094789457793',
+        '333511255213931',
+    );
+
+    static $deAccountIds = array(
+        '697732767946862'
+    );
 }

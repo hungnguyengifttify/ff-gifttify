@@ -87,7 +87,8 @@
             <div class="bg-white overflow-hidden shadow-sm">
                 <div class="p-6 bg-white border-b border-gray-200">
                     <?php $totalSpend = $fbAds ? $fbAds->totalSpend : 0; ?>
-                    <?php $totalOrders = $orders ? count($orders) : 0; ?>
+                    <?php $totalOrders = $orders ? $orders[0]->total : 0; ?>
+                    <?php $totalAmount = $totalAmount ? $totalAmount[0]->total : 0; ?>
                     <table class="table" style="width: auto">
                         <tbody>
                             <tr>
@@ -95,8 +96,16 @@
                                 <td><?php echo $totalOrders; ?></td>
                             </tr>
                             <tr>
-                                <td>Số tiền đã chi tiêu</td>
-                                <td><?php echo '$' . number_format($totalSpend, 2); ?></td>
+                                <td>Doanh thu</td>
+                                <td><?php echo '$' . number_format($totalAmount, 2) . ' USD' ?></td>
+                            </tr>
+                            <tr>
+                                <td>Chi phí Ads</td>
+                                <td><?php echo '$' . number_format($totalSpend, 2) . ' USD'; ?></td>
+                            </tr>
+                            <tr>
+                                <td>MO</td>
+                                <td><?php echo $totalAmount != 0 ? number_format($totalSpend/$totalAmount*100, 2) . '%' : 0; ?></td>
                             </tr>
                         </tbody>
                     </table>

@@ -19,10 +19,9 @@ class DashboardTestController extends Controller {
 
     public function index(Request $request)
     {
-        $access_token = 'EAAIa3A2G9ykBAIddfZBrAX9TrHaaJiWFUxJlTCFhRUl1rMwexv64TvjuSIQWtVxY1NMXDS05ujXhFamTnSNkrj70A37JhF9TeZCi9iXYZCPzZASoMST5cEGouqGl1prPwaEHhkZBHPZC4eJZBO6D6g8yQr210SaCRCQEEJpHMFVHGEXUEF7oSHFi518UoZC2I7KPidJSoELZBsAZDZD';
-        $ad_account_id = 'act_334978668640347';
-        $app_secret = '516a00449114697582df9e2c4b18610b';
-        $app_id = '592482375497513';
+        $access_token = env('FB_ADS_ACCESS_TOKEN', '');
+        $app_secret = env('FB_ADS_APP_SECRET', '');
+        $app_id = env('FB_ADS_APP_ID', '');
 
         $api = Api::init($app_id, $app_secret, $access_token);
         $api->setDefaultGraphVersion('14.0');
@@ -42,11 +41,9 @@ class DashboardTestController extends Controller {
             'cpc',
             'cpm',
             'cpp',
-            'created_time',
             'ctr',
             'date_start',
             'date_stop',
-            'gender_targeting',
             'impressions',
             'labels',
             'location',
@@ -54,7 +51,6 @@ class DashboardTestController extends Controller {
             'reach',
             'social_spend',
             'spend',
-            'updated_time',
             'inline_link_clicks',
             'outbound_clicks',
             'unique_clicks',
@@ -64,8 +60,6 @@ class DashboardTestController extends Controller {
             'clicks',
             'cost_per_unique_action_type',
             'actions',
-            'purchase_roas',
-            'website_purchase_roas'
         );
         $params = array(
             'time_ranges' => array(

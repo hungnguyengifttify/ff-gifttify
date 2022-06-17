@@ -40,7 +40,6 @@ return new class extends Migration
             $table->integer('clicks');
             $table->timestamps();
 
-            $table->primary('id');
             $table->index('account_id');
             $table->index('campaign_id');
             $table->index('date_record');

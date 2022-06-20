@@ -15,7 +15,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('fbads:update_campaign_insights')->everyFiveMinutes();
+        $schedule->command('fbads:update_campaign_insights')->everyMinute();
     }
 
     /**

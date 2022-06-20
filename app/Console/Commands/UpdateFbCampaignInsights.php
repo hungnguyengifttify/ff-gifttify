@@ -35,26 +35,6 @@ class UpdateFbCampaignInsights extends Command
         $this->info("Cron Job running at ". now());
         $fbAccountIds = array_merge(FbAds::$usAccountIds, FbAds::$auAccountIds, FbAds::$deAccountIds);
 
-        $timeReport = $this->argument('time_report');
-
-        $begin = new \DateTime();
-        if ($timeReport == 'all') {
-            $begin = $begin->modify( '-10 day' );
-        } else {
-            $begin = $begin->modify( '-1 day' );
-        }
-
-        $end = new \DateTime();
-        $end = $end->modify( '+2 day' );
-
-        $interval = new \DateInterval('P1D');
-        $dateRange = new \DatePeriod($begin, $interval ,$end);
-
-        $fbTimeRanges = array();
-        foreach($dateRange as $date){
-            $fbTimeRanges[] = array('since' => $date->format("Y-m-d"),'until' => $date->format("Y-m-d"));
-        }
-
         $access_token = env('FB_ADS_ACCESS_TOKEN', '');
         $app_secret = env('FB_ADS_APP_SECRET', '');
         $app_id = env('FB_ADS_APP_ID', '');
@@ -94,12 +74,40 @@ class UpdateFbCampaignInsights extends Command
             'clicks',
         );
         $params = array(
-            'time_ranges' => $fbTimeRanges,
             'level' => 'campaign',
             'breakdowns' => array('country'),
         );
 
         foreach ($fbAccountIds as $accountId) {
+            $dateTimeZone = "";
+            if (in_array($accountId, FbAds::$usAccountIds)) {
+                $dateTimeZone = new \DateTimeZone('America/Los_Angeles');
+            } elseif (in_array($accountId, FbAds::$auAccountIds)) {
+                $dateTimeZone = new \DateTimeZone('Australia/Sydney');
+            } elseif (in_array($accountId, FbAds::$deAccountIds)) {
+                $dateTimeZone = new \DateTimeZone('Europe/Berlin');
+            }
+            $timeReport = $this->argument('time_report');
+
+            $begin = new \DateTime("now", $dateTimeZone);
+            if ($timeReport == 'all') {
+                $begin = $begin->modify( '-10 day' );
+            } else {
+                $begin = $begin->modify( '-1 day' );
+            }
+
+            $end = new \DateTime("now", $dateTimeZone);
+            $end = $end->modify( '+1 day' );
+
+            $interval = new \DateInterval('P1D');
+            $dateRange = new \DatePeriod($begin, $interval ,$end);
+
+            $fbTimeRanges = array();
+            foreach($dateRange as $date){
+                $fbTimeRanges[] = array('since' => $date->format("Y-m-d"),'until' => $date->format("Y-m-d"));
+            }
+            $params['time_ranges'] = $fbTimeRanges;
+
             $cursor = (new AdAccount("act_$accountId"))->getInsights(
                 $fields,
                 $params

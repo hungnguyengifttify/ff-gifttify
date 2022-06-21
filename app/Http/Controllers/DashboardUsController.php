@@ -30,8 +30,8 @@ class DashboardUsController extends Controller {
             ->where('date_record', '<=', $toDate)
             ->first();
 
-        $orders = DB::select("select count(*) as total from shopify_thecreattify_orders where CONVERT_TZ(created_at,'UTC','US/Pacific') >= :fromDate and CONVERT_TZ(created_at,'UTC','US/Pacific') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
-        $totalAmount = DB::select("select sum(total_price) as total from shopify_thecreattify_orders where CONVERT_TZ(created_at,'UTC','US/Pacific') >= :fromDate and CONVERT_TZ(created_at,'UTC','US/Pacific') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
+        $orders = DB::select("select count(*) as total from orders where store='us' and CONVERT_TZ(shopify_created_at,'UTC','US/Pacific') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','US/Pacific') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
+        $totalAmount = DB::select("select sum(total_price) as total from orders where store='us' and CONVERT_TZ(shopify_created_at,'UTC','US/Pacific') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','US/Pacific') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
         return view('dashboard', compact('title','totalAmount', 'params', 'orders', 'fbAds'));
     }
 }

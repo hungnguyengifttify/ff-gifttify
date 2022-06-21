@@ -25,4 +25,7 @@ Route::get('/dashboard_au', [\App\Http\Controllers\DashboardAuController::class,
 Route::get('/dashboard_test', [\App\Http\Controllers\DashboardTestController::class, 'index'])
     ->name('dashboard_test');
 
+Route::get('/orders', [\App\Http\Controllers\OrdersController::class, 'index'])
+    ->name('orders');
+
 require __DIR__.'/auth.php';

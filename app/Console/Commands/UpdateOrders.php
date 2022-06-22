@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Orders;
+use App\Models\OrderLineItems;
 use Signifly\Shopify\Shopify;
 
 class UpdateOrders extends Command
@@ -159,6 +160,45 @@ class UpdateOrders extends Command
                         'shipping_address' => json_encode($v['shipping_address'] ?? '') ?? '',
                         'shipping_lines' => json_encode($v['shipping_lines'] ?? '') ?? '',
                     ]);
+
+                    foreach ($v['line_items'] as $li) {
+                        $li['shopify_id'] = $li['id'] ?? 0;
+                        $li['shopify_created_at'] = $li['created_at'] ?? '1000-01-01';
+                        $li['shopify_updated_at'] = $li['updated_at'] ?? '1000-01-01';
+
+                        OrderLineItems::updateOrCreate([
+                            'store' => $store ?? '',
+                            'shopify_id' => $li['shopify_id'] ?? 0,
+                        ], [
+                            'order_id' => $v['id'] ?? 0, // Id => Order ID
+                            'product_id' => $li['product_id'] ?? 0,
+                            'variant_id' => $li['variant_id'] ?? 0,
+                            'admin_graphql_api_id' => $li['admin_graphql_api_id'] ?? '',
+                            'fulfillable_quantity' => $li['fulfillable_quantity'] ?? 0,
+                            'fulfillment_service' => $li['fulfillment_service'] ?? '',
+                            'fulfillment_status' => $li['fulfillment_status'] ?? '',
+                            'gift_card' => $li['gift_card'] ?? 0,
+                            'grams' => $li['grams'] ?? 0,
+                            'name' => $li['name'] ?? '',
+                            'price' => $li['price'] ?? 0,
+                            'price_set' => (json_encode($li['price_set']) ?? '') ?? '',
+                            'product_exists' => $li['product_exists'] ?? 0,
+                            'properties' => (json_encode($li['properties']) ?? '') ?? '',
+                            'quantity' => $li['quantity'] ?? 0,
+                            'requires_shipping' => $li['requires_shipping'] ?? 0,
+                            'sku' => $li['sku'] ?? '',
+                            'taxable' => $li['taxable'] ?? 0,
+                            'title' => $li['title'] ?? '',
+                            'total_discount' => $li['total_discount'] ?? 0,
+                            'total_discount_set' => (json_encode($li['total_discount_set']) ?? '') ?? '',
+                            'variant_inventory_management' => $li['variant_inventory_management'] ?? '',
+                            'variant_title' => $li['variant_title'] ?? '',
+                            'vendor' => $li['vendor'] ?? '',
+                            'tax_lines' => (json_encode($li['tax_lines']) ?? '') ?? '',
+                            'duties' => (json_encode($li['duties']) ?? '') ?? '',
+                            'discount_allocations' => (json_encode($li['discount_allocations']) ?? '') ?? '',
+                        ]);
+                    }
                 }
             }
 

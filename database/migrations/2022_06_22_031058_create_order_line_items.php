@@ -20,7 +20,7 @@ return new class extends Migration
             $table->unsignedBigInteger('order_id')->default(0);
             $table->unsignedBigInteger('product_id')->default(0);
             $table->unsignedBigInteger('variant_id')->default(0);
-            $table->string('admin_graphql_api_id');
+            $table->string('admin_graphql_api_id')->default('');
             $table->bigInteger('fulfillable_quantity')->default(0);
             $table->string('fulfillment_service')->default('');
             $table->string('fulfillment_status')->default('');

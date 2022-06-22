@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Products;
+use App\Models\ProductVariants;
 use Signifly\Shopify\Shopify;
 
 class UpdateProducts extends Command
@@ -52,16 +53,16 @@ class UpdateProducts extends Command
 
             $dateTime = new \DateTime("now", $dateTimeZone);
             $dateTime->modify('-1 day');
-            $createdAtMin = $dateTime->format('Y-m-d');
+            $updatedAtMin = $dateTime->format('Y-m-d');
 
             $timeReport = $this->argument('time_report') ?? '';
             if ($timeReport == 'all') {
-                $createdAtMin = '1900-01-01';
+                $updatedAtMin = '1900-01-01';
             }
 
             $shopify = new Shopify($apiKey, $password, $domain, $apiVersion);
             $products = $shopify->paginateProducts([
-                'created_at_min' => $createdAtMin,
+                'updated_at_min' => $updatedAtMin,
                 'limit' => 250
             ]);
 
@@ -88,11 +89,47 @@ class UpdateProducts extends Command
                         'published_scope' => $v['published_scope'] ?? '',
                         'tags' => $v['tags'] ?? '',
                         'admin_graphql_api_id' => $v['admin_graphql_api_id'] ?? '',
-                        'variants' => json_encode($v['admin_graphql_api_id'] ?? '') ?? '',
+                        'variants' => json_encode($v['variants'] ?? '') ?? '',
                         'options' => json_encode($v['options'] ?? '') ?? '',
                         'images' => json_encode($v['images'] ?? '') ?? '',
                         'image' => json_encode($v['image'] ?? '') ?? '',
                     ]);
+
+                    if (!empty($v['variants'])) {
+                        foreach ($v['variants'] as $variant) {
+                            $variant['shopify_id'] = $variant['id'] ?? 0;
+                            $variant['shopify_created_at'] = $variant['created_at'] ?? '1000-01-01';
+                            $variant['shopify_updated_at'] = $variant['updated_at'] ?? '1000-01-01';
+
+                            ProductVariants::updateOrCreate([
+                                'store' => $store ?? '',
+                                'shopify_id' => $variant['shopify_id'] ?? 0,
+                            ], [
+                                'product_id' => $variant['product_id'] ?? 0,
+                                'shopify_created_at' => $variant['shopify_created_at'] ?? '1900-01-01',
+                                'shopify_updated_at' => $variant['shopify_updated_at'] ?? '1900-01-01',
+                                'barcode' => $variant['barcode'] ?? '',
+                                'compare_at_price' => $variant['compare_at_price'] ?? 0,
+                                'fulfillment_service' => $variant['fulfillment_service'] ?? '',
+                                'grams' => $variant['grams'] ?? 0,
+                                'weight' => $variant['weight'] ?? 0,
+                                'weight_unit' => $variant['weight_unit'] ?? '',
+                                'inventory_item_id' => $variant['inventory_item_id'] ?? 0,
+                                'inventory_management' => $variant['inventory_management'] ?? '',
+                                'inventory_policy' => $variant['inventory_policy'] ?? '',
+                                'inventory_quantity' => $variant['inventory_quantity'] ?? 0,
+                                'option1' => $variant['option1'] ?? '',
+                                'option2' => $variant['option2'] ?? '',
+                                'option3' => $variant['option3'] ?? '',
+                                'position' => $variant['position'] ?? 0,
+                                'price' => $variant['price'] ?? 0,
+                                'requires_shipping' => $variant['requires_shipping'] ?? 0,
+                                'sku' => $variant['sku'] ?? '',
+                                'taxable' => $variant['taxable'] ?? 0,
+                                'title' => $variant['title'] ?? '',
+                            ]);
+                        }
+                    }
 
                 }
             }

@@ -24,7 +24,7 @@ class DashboardUsController extends Controller {
         );
 
         $fbAds = DB::table('fb_campaign_insights')
-            ->select(DB::raw('sum(spend) as totalSpend, sum(unique_clicks) as totalUniqueClicks'))
+            ->select(DB::raw('sum(spend) as totalSpend, sum(inline_link_clicks) as totalUniqueClicks'))
             ->whereIn('account_id', FbAds::$usAccountIds)
             ->where('date_record', '>=', $fromDate)
             ->where('date_record', '<=', $toDate)

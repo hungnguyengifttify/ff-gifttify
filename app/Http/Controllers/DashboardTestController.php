@@ -6,40 +6,25 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\FbAds;
-
-use FacebookAds\Api;
-use FacebookAds\Logger\CurlLogger;
-use FacebookAds\Object\AdAccount;
-use FacebookAds\Object\Campaign;
-use FacebookAds\Object\Fields\CampaignFields;
-use FacebookAds\Object\AdSet;
-use FacebookAds\Object\AdsInsights;
+use App\Models\Dashboard;
 
 class DashboardTestController extends Controller {
 
     public function index(Request $request)
     {
-        $title = "US Dashboard";
-        $dateTime = new \DateTime("now", new \DateTimeZone('America/Los_Angeles'));
-        $fromDate = $request->date('fromDate') ? $request->date('fromDate')->format('Y-m-d') : $dateTime->format('Y-m-d');
-        $toDate = $request->date('toDate') ? $request->date('toDate')->format('Y-m-d 23:59:59') : $dateTime->format('Y-m-d 23:59:59');
-        $labelDate = $request->input('labelDate') ?? 'Today';
+        $result = Dashboard::getReportByDate('us', 'today');
+        $result2 = Dashboard::getReportByDate('us', 'yesterday');
+        $result3 = Dashboard::getReportByDate('us', 'this_week');
+        $result4 = Dashboard::getReportByDate('us', 'last_week');
+        $result5 = Dashboard::getReportByDate('us', 'this_month');
 
-        $params = array(
-            'fromDate' => new \DateTime($fromDate),
-            'toDate' => new \DateTime($toDate),
-            'labelDate' => $labelDate,
-        );
+        $result6 = Dashboard::getReportByDate('au', 'today');
+        $result7 = Dashboard::getReportByDate('au', 'yesterday');
+        $result8 = Dashboard::getReportByDate('au', 'this_week');
+        $result9 = Dashboard::getReportByDate('au', 'last_week');
+        $result10 = Dashboard::getReportByDate('au', 'this_month');
 
-        $fbAds = DB::table('fb_campaign_insights')
-            ->select(DB::raw('sum(spend) as totalSpend, sum(inline_link_clicks) as totalUniqueClicks'))
-            ->whereIn('account_id', FbAds::$usAccountIds)
-            ->where('date_record', '>=', $fromDate)
-            ->where('date_record', '<=', $toDate)
-            ->first();
+        dd($result, $result2, $result3, $result4, $result5, $result6, $result7, $result8, $result9, $result10);
 
-        $orders = DB::select("select count(*) as total from orders where store='us' and CONVERT_TZ(shopify_created_at,'UTC','US/Pacific') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','US/Pacific') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
-        $totalAmount = DB::select("select sum(total_price) as total from orders where store='us' and CONVERT_TZ(shopify_created_at,'UTC','US/Pacific') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','US/Pacific') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
-        return view('dashboard', compact('title','totalAmount', 'params', 'orders', 'fbAds'));
     }
 }

@@ -34,4 +34,9 @@ class DashboardUsController extends Controller {
         $totalAmount = DB::select("select sum(total_price) as total from orders where store='us' and CONVERT_TZ(shopify_created_at,'UTC','US/Pacific') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','US/Pacific') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
         return view('dashboard', compact('title','totalAmount', 'params', 'orders', 'fbAds'));
     }
+
+    public function report_detail(Request $request) {
+        $store = $request->input('store');
+        dd($store);
+    }
 }

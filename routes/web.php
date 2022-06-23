@@ -13,19 +13,23 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', [\App\Http\Controllers\DashboardUsController::class, 'index'])
+Route::get('/', [\App\Http\Controllers\DashboardController::class, 'index'])
     ->name('home');
-
-Route::get('/dashboard_us', [\App\Http\Controllers\DashboardUsController::class, 'index'])
-    ->name('dashboard_us');
-
-Route::get('/dashboard_au', [\App\Http\Controllers\DashboardAuController::class, 'index'])
-    ->name('dashboard_au');
 
 Route::get('/dashboard_test', [\App\Http\Controllers\DashboardTestController::class, 'index'])
     ->name('dashboard_test');
 
-Route::get('/orders', [\App\Http\Controllers\OrdersController::class, 'index'])
-    ->name('orders');
+Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])
+    ->name('dashboard');
+
+Route::get('/dashboard_au', [\App\Http\Controllers\DashboardController::class, 'index'])
+    ->name('dashboard');
+
+Route::get('/dashboard_us', [\App\Http\Controllers\DashboardController::class, 'index'])
+    ->name('dashboard');
+
+Route::get('/report_detail/{store}', [\App\Http\Controllers\DashboardController::class, 'report_detail'])
+    ->name('report_detail');
+
 
 require __DIR__.'/auth.php';

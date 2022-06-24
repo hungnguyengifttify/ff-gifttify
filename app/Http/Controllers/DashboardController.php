@@ -42,6 +42,30 @@ class DashboardController extends Controller {
             }
         }
 
-        return view('dashboard_sum', array('reports' => $reports));
+        return view('report.dashboard_sum', array('reports' => $reports));
+    }
+
+    public function report_detail(Request $request, $store = 'us', $range_report = 'today') {
+        if ($store == 'us') {
+            $title = "US Report Detail";
+            $dateTimeZone = new \DateTimeZone('America/Los_Angeles');
+        } else {
+            $title = "AU Report Detail";
+            $dateTimeZone = new \DateTimeZone('Australia/Sydney');
+        }
+
+        $dateTime = new \DateTime("now", $dateTimeZone);
+        $fromDate = $request->date('fromDate') ? $request->date('fromDate')->format('Y-m-d') : $dateTime->format('Y-m-d');
+        $toDate = $request->date('toDate') ? $request->date('toDate')->format('Y-m-d 23:59:59') : $dateTime->format('Y-m-d 23:59:59');
+        $labelDate = $request->input('labelDate') ?? 'Today';
+
+        $params = array(
+            'fromDate' => new \DateTime($fromDate),
+            'toDate' => new \DateTime($toDate),
+            'labelDate' => $labelDate,
+        );
+
+
+        return view('report.dashboard_detail', compact('title', 'store', 'params'));
     }
 }

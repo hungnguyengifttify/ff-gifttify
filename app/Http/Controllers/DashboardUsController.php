@@ -35,8 +35,4 @@ class DashboardUsController extends Controller {
         return view('dashboard', compact('title','totalAmount', 'params', 'orders', 'fbAds'));
     }
 
-    public function report_detail(Request $request) {
-        $store = $request->input('store');
-        dd($store);
-    }
 }

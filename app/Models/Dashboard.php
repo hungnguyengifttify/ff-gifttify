@@ -42,7 +42,7 @@ class Dashboard extends Model
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 
-        $fbAccountIds = $storeConfig['fbAccountIds'];;
+        $fbAccountIds = $storeConfig['fbAccountIds'];
         $mysqlTimeZone = $storeConfig['mysqlTimeZone'];
         $radioCurrency = $storeConfig['radioCurrency'];
 
@@ -125,7 +125,88 @@ class Dashboard extends Model
         );
     }
 
-    public static function getReportDetailByDate($store = 'us', $rangeDate = 'today') {
+    public static function getAccountsAdsReportByDate($store = 'us', $rangeDate = 'today') {
+        $storeConfig = self::getStoreConfig($store);
+        if (!$storeConfig) return false;
+
+        $fbAccountIds = $storeConfig['fbAccountIds'];
+
+        $dateTimeRange = self::getDatesByRangeDateLabel($store, $rangeDate);
+        $fromDate = $dateTimeRange['fromDate'];
+        $toDate = $dateTimeRange['toDate'];
+
+        $fbAds = DB::table('fb_campaign_insights')
+            ->select(DB::raw('account_name, sum(spend) as totalSpend, sum(inline_link_clicks) as totalUniqueClicks'))
+            ->whereIn('account_id', $fbAccountIds)
+            ->where('date_record', '>=', $fromDate)
+            ->where('date_record', '<=', $toDate)
+            ->groupBy('account_name')->get();
+
+        $result = array();
+        foreach ($fbAds->all() as $acc) {
+            $result[] = array(
+                'account_name' => $acc->account_name,
+                'totalSpend' => $acc->totalSpend,
+                'cpc' => $acc->totalUniqueClicks != 0 ? $acc->totalSpend / $acc->totalUniqueClicks : 0,
+            );
+        }
+
+        return $result;
+
+    }
+
+    public static function getCountryAdsReportByDate($store = 'us', $rangeDate = 'today') {
+        $storeConfig = self::getStoreConfig($store);
+        if (!$storeConfig) return false;
+
+        $fbAccountIds = $storeConfig['fbAccountIds'];
+        $mysqlTimeZone = $storeConfig['mysqlTimeZone'];
+        $radioCurrency = $storeConfig['radioCurrency'];
+
+        $dateTimeRange = self::getDatesByRangeDateLabel($store, $rangeDate);
+        $fromDate = $dateTimeRange['fromDate'];
+        $toDate = $dateTimeRange['toDate'];
+
+        $orders = DB::select("select shipping_address->>\"$.country_code\" as country_code,count(*) as total_order, sum(total_price)/$radioCurrency as total_order_amount from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate group by shipping_address->>\"$.country_code\";"
+            , ['fromDate' => $fromDate, 'toDate' => $toDate]
+        );
+        $ordersResult = array();
+        foreach ($orders as $o) {
+            $o->country_code = $o->country_code ?? 'UNKNOWN';
+            $ordersResult[$o->country_code]['total_order'] = $o->total_order;
+            $ordersResult[$o->country_code]['total_order_amount'] = $o->total_order_amount;
+        }
+
+        $fbAds = DB::table('fb_campaign_insights')
+            ->select(DB::raw('country, sum(spend) as totalSpend, sum(inline_link_clicks) as totalUniqueClicks'))
+            ->whereIn('account_id', $fbAccountIds)
+            ->where('date_record', '>=', $fromDate)
+            ->where('date_record', '<=', $toDate)
+            ->groupBy('country')->get();
+
+        $adsResult = array();
+        foreach ($fbAds->all() as $acc) {
+            $acc->country = $acc->country ?? 'UNKNOWN';
+            $adsResult[$acc->country] = array(
+                'country' => $acc->country,
+                'totalSpend' => $acc->totalSpend,
+                'cpc' => $acc->totalUniqueClicks != 0 ? $acc->totalSpend / $acc->totalUniqueClicks : 0,
+            );
+        }
+
+        $countries = array_merge(array_keys($ordersResult) , array_keys($adsResult));
+        $countries = array_unique($countries);
+        $result = array();
+        foreach ($countries as $country) {
+            $result[$country]['country_code'] = $country ?? 'UNKNOWN';
+            $result[$country]['total_order'] = $ordersResult[$country]['total_order'] ?? 0;
+            $result[$country]['total_order_amount'] = $ordersResult[$country]['total_order_amount'] ?? 0;
+            $result[$country]['totalSpend'] = $adsResult[$country]['totalSpend'] ?? 0;
+            $result[$country]['cpc'] = $adsResult[$country]['cpc'] ?? 0;
+            $result[$country]['mo'] = ($result[$country]['total_order_amount']) > 0 ? 100*($result[$country]['totalSpend'] / $result[$country]['total_order_amount']) : 0;
+        }
+
+        return $result;
 
     }
 }

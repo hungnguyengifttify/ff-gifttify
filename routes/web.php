@@ -22,7 +22,7 @@ Route::get('/dashboard_test', [\App\Http\Controllers\DashboardTestController::cl
 Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])
     ->name('dashboard');
 
-Route::get('/report_detail/{store}/{range_report?}', [\App\Http\Controllers\DashboardController::class, 'report_detail'])
+Route::get('/report_detail/{store}', [\App\Http\Controllers\DashboardController::class, 'report_detail'])
     ->name('report_detail');
 
 

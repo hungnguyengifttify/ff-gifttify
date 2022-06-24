@@ -6,7 +6,12 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            <?php echo $title; ?>
+            Store Report Detail
+
+            <select onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
+                <option <?php if (str_contains(url()->current(), '/report_detail/us') ) echo "selected"; ?> value="/report_detail/us">US</option>
+                <option <?php if (str_contains(url()->current(), '/report_detail/au') ) echo "selected"; ?> value="/report_detail/au">AU</option>
+            </select>
         </h2>
     </x-slot>
 
@@ -30,6 +35,8 @@
                             <?php else: ?>
                             moment.tz.setDefault("Australia/Sydney");
                             <?php endif; ?>
+
+                            moment().startOf('isoWeek');
 
                             $(function() {
 
@@ -57,12 +64,11 @@
                                     ranges: {
                                         'Today': [moment(), moment()],
                                         'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                                        'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                                        'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                                        'This Month': [moment().startOf('month'), moment().endOf('month')],
-                                        'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                                        'This Week': [moment().startOf('isoWeek'), moment().endOf('isoWeek')],
+                                        'Last Week': [moment().subtract(7, 'days').startOf('isoWeek'), moment().subtract(7, 'days').endOf('isoWeek')],
                                     },
                                     "alwaysShowCalendars": true,
+                                    "showCustomRangeLabel": false,
                                     startDate: start,
                                     endDate: end
                                 }, displayDate);
@@ -97,7 +103,49 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white">
                 <div class="p-6 bg-white border-b border-gray-200">
-                    Detail
+                    <table class="table table-responsive table-bordered" style="width: auto">
+                        <h1>By Account</h1>
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>AdsCost</th>
+                            <th>CPC</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($accountsAds as $acc): ?>
+                        <tr>
+                            <td><?php echo $acc['account_name'] ?></td>
+                            <td><?php echo gifttify_price_format($acc['totalSpend']); ?></td>
+                            <td><?php echo number_format($acc['cpc'], 2); ?></td>
+                        </tr>
+                        <?php endforeach;?>
+                        </tbody>
+                    </table>
+
+                    <table class="table table-responsive table-bordered" style="width: auto">
+                        <h1>By Country</h1>
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>AdsCost</th>
+                            <th>Rev</th>
+                            <th>CPC</th>
+                            <th>MO</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($countriesAds as $v): ?>
+                        <tr>
+                            <td><?php echo $v['country_code']; ?></td>
+                            <td><?php echo gifttify_price_format($v['totalSpend']); ?></td>
+                            <td><?php echo gifttify_price_format($v['total_order_amount']); ?></td>
+                            <td><?php echo number_format($v['cpc'], 2); ?></td>
+                            <td><?php echo round($v['mo']) . '%'; ?></td>
+                        </tr>
+                        <?php endforeach;?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

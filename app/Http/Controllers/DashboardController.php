@@ -48,8 +48,10 @@ class DashboardController extends Controller {
     public function report_detail(Request $request, $store = 'us') {
         if ($store == 'us') {
             $title = "US Report Detail";
-        } else {
+        } elseif ($store == 'au') {
             $title = "AU Report Detail";
+        } else {
+            dd('Not Allowed');
         }
 
         $labelDate = $request->input('labelDate') ?? 'Today';
@@ -67,8 +69,8 @@ class DashboardController extends Controller {
 
         $accountsAds = Dashboard::getAccountsAdsReportByDate($store, $range_report);
         $countriesAds = Dashboard::getCountryAdsReportByDate($store, $range_report);
+        $productTypes = Dashboard::getProductTypesReportByDate($store, $range_report);
 
-
-        return view('report.dashboard_detail', compact('title', 'store', 'params', 'accountsAds', 'countriesAds'));
+        return view('report.dashboard_detail', compact('title', 'store', 'params', 'accountsAds', 'countriesAds', 'productTypes'));
     }
 }

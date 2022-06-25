@@ -41,7 +41,7 @@
                     </table>
 
                     <table class="table table-responsive table-bordered" style="width: auto">
-                        <h1>Store US <a href="/report_detail/us" style="font-size: x-large;display: none">Xem chi tiết</a></h1>
+                        <h1>Store US <a href="/report_detail/us" style="font-size: x-large;">View Detail</a></h1>
                         <thead>
                             <tr>
                                 <th></th>
@@ -73,7 +73,7 @@
                     </table>
 
                     <table class="table table-responsive table-bordered" style="width: auto">
-                        <h1>Store AU <a href="/report_detail/au" style="font-size: x-large;display: none">Xem chi tiết</a></h1>
+                        <h1>Store AU <a href="/report_detail/au" style="font-size: x-large;">View Detail</a></h1>
                         <thead>
                         <tr>
                             <th></th>

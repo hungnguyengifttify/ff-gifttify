@@ -204,6 +204,7 @@ class Dashboard extends Model
             $result[$country]['totalSpend'] = $adsResult[$country]['totalSpend'] ?? 0;
             $result[$country]['cpc'] = $adsResult[$country]['cpc'] ?? 0;
             $result[$country]['mo'] = ($result[$country]['total_order_amount']) > 0 ? 100*($result[$country]['totalSpend'] / $result[$country]['total_order_amount']) : 0;
+            $result[$country]['aov'] = $result[$country]['total_order'] != 0 ? $result[$country]['total_order_amount'] / $result[$country]['total_order'] : 0;
         }
 
         return $result;
@@ -228,7 +229,7 @@ class Dashboard extends Model
             left join order_line_items ol ON o.shopify_id = ol.order_id
             left join products p on ol.product_id = p.shopify_id and p.store = '$store'
             left join shopify_product_type pt on p.product_type = pt.product_type_name
-            where o.store = '$store' and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate
+            where o.store = '$store' and ol.product_id > 0 and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate
             group by p.product_type;
             ;"
             , ['fromDate' => $fromDate, 'toDate' => $toDate]
@@ -293,5 +294,60 @@ class Dashboard extends Model
             $productType = $result[1] ?? '';
         }
         return $productType ?: 'UNKNOWN';
+    }
+
+    public static function getAdsTypesReportByDate ($store = 'us', $rangeDate = 'today') {
+        $storeConfig = self::getStoreConfig($store);
+        if (!$storeConfig) return false;
+
+        $fbAccountIds = $storeConfig['fbAccountIds'];
+        $mysqlTimeZone = $storeConfig['mysqlTimeZone'];
+        $radioCurrency = $storeConfig['radioCurrency'];
+
+        $dateTimeRange = self::getDatesByRangeDateLabel($store, $rangeDate);
+        $fromDate = $dateTimeRange['fromDate'];
+        $toDate = $dateTimeRange['toDate'];
+
+        $fbAds = DB::table('fb_campaign_insights')
+            ->select(DB::raw('campaign_name, sum(spend) as totalSpend, sum(inline_link_clicks) as totalUniqueClicks'))
+            ->whereIn('account_id', $fbAccountIds)
+            ->where('date_record', '>=', $fromDate)
+            ->where('date_record', '<=', $toDate)
+            ->groupBy('campaign_name')->get();
+
+        $adsResult = array(
+            'Test' => array(
+                'ads_type' => 'Test',
+                'totalSpend' => 0,
+                'percent' => 0,
+            ),
+            'Scale' => array(
+                'ads_type' => 'Scale',
+                'totalSpend' => 0,
+                'percent' => 0,
+            ),
+        );
+        $totalSpend = 0;
+        foreach ($fbAds->all() as $v) {
+            $totalSpend += $v->totalSpend;
+
+            $ads_type = self::getAdsTypeFromCampaignName ($v->campaign_name);
+            $adsResult[$ads_type]['ads_type'] = $ads_type;
+            $adsResult[$ads_type]['totalSpend'] += $v->totalSpend;
+        }
+        $adsResult['Test']['percent'] = $totalSpend > 0 ? round(100 * $adsResult['Test']['totalSpend'] / $totalSpend, 2) : 0;
+        $adsResult['Scale']['percent'] = $adsResult['Test']['percent'] > 0 ? (100 - $adsResult['Test']['percent']) : 0;
+
+        return $adsResult;
+    }
+
+    public static function getAdsTypeFromCampaignName ($campaignName) {
+        $result = array();
+        if (preg_match('/.*test.*/', strtolower($campaignName), $result)) {
+            $adsType = 'Test';
+        } else {
+            $adsType = 'Scale';
+        }
+        return $adsType;
     }
 }

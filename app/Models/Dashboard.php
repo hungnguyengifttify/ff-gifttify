@@ -242,6 +242,9 @@ class Dashboard extends Model
             $ordersResult[$o->product_type_code]['total_order_amount'] = $o->total_order_amount;
         }
 
+        $campaignProductTypeTable = DB::table('campaign_product_type')->get();
+        $campaignProductTypeData = $campaignProductTypeTable->keyBy('campaign_name')->all();
+
         $fbAds = DB::table('fb_campaign_insights')
             ->select(DB::raw('campaign_name, sum(spend) as totalSpend, sum(inline_link_clicks) as totalUniqueClicks'))
             ->whereIn('account_id', $fbAccountIds)
@@ -251,7 +254,7 @@ class Dashboard extends Model
 
         $adsResult = array();
         foreach ($fbAds->all() as $v) {
-            $v->product_type = $v->campaign_name ? self::getProductTypeFromCampaignName($v->campaign_name) : 'UNKNOWN';
+            $v->product_type = $v->campaign_name ? self::getProductTypeFromCampaignName($v->campaign_name, $campaignProductTypeData) : 'UNKNOWN';
             if (!isset($adsResult[$v->product_type])) {
                 $adsResult[$v->product_type]['product_type'] = 'UNKNOWN';
                 $adsResult[$v->product_type]['totalSpend'] = 0;
@@ -283,7 +286,11 @@ class Dashboard extends Model
 
     }
 
-    public static function getProductTypeFromCampaignName ($campaignName) {
+    public static function getProductTypeFromCampaignName ($campaignName, $campaignProductTypeData = array()) {
+        if (isset($campaignProductTypeData[$campaignName]) && $campaignProductTypeData[$campaignName] != '') {
+            return $campaignProductTypeData[$campaignName]->product_type_code;
+        }
+
         $result = array();
         preg_match('/.*Type(\w+)/', $campaignName, $result);
 

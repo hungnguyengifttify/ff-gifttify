@@ -18,7 +18,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('fbads:update_campaign_insights')->everyMinute();
         $schedule->command('orders:update')->everyMinute();
         $schedule->command('products:update')->everyTwoHours();
-        $schedule->command('fbads:update_campaigns')->everyFiveMinutes();
+        $schedule->command('fbads:update_campaigns')->everyFourMinutes();
+        $schedule->command('fbads:update_adsets')->everyFiveMinutes();
     }
 
     /**

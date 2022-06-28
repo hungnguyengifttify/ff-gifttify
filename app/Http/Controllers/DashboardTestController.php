@@ -19,7 +19,7 @@ class DashboardTestController extends Controller {
         $reports = array();
         foreach ($rangeDates as $v) {
             foreach ($stores as $store) {
-                $value = Dashboard::getReportByDate($store, $v);
+                $value = Dashboard::getReportByDateTest($store, $v);
                 $reports[$store][] = $value;
 
                 if (!isset($reports['all'][$v])) {
@@ -43,7 +43,7 @@ class DashboardTestController extends Controller {
             }
         }
 
-        return view('report.dashboard_sum', array('reports' => $reports));
+        return view('report.dashboard_detail_test', array('reports' => $reports));
     }
 
     public function report_detail(Request $request, $store = 'us') {

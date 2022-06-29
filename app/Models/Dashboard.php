@@ -17,6 +17,7 @@ class Dashboard extends Model
         'yesterday' => 'Yesterday',
         'this_week' => 'This Week',
         'last_week' => 'Last Week',
+        'custom_range' => 'Custom Range',
     );
 
     public static function getStoreConfig ($store) {
@@ -38,7 +39,7 @@ class Dashboard extends Model
         return false;
     }
 
-    public static function getReportByDate($store = 'us', $rangeDate = 'today') {
+    public static function getReportByDate($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '') {
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 
@@ -46,7 +47,7 @@ class Dashboard extends Model
         $mysqlTimeZone = $storeConfig['mysqlTimeZone'];
         $radioCurrency = $storeConfig['radioCurrency'];
 
-        $dateTimeRange = self::getDatesByRangeDateLabel($store, $rangeDate);
+        $dateTimeRange = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq);
         $fromDate = $dateTimeRange['fromDate'];
         $toDate = $dateTimeRange['toDate'];
 
@@ -99,7 +100,7 @@ class Dashboard extends Model
             . Carbon::createFromFormat('Y-m-d H:i:s', $dateTimeEnd)->format('d/m');
     }
 
-    public static function getDatesByRangeDateLabel ($store = 'us', $rangeDate = 'today') {
+    public static function getDatesByRangeDateLabel ($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '') {
         if ($store == 'us') {
             $phpTimeZone = 'America/Los_Angeles';
         } elseif ($store == 'au') {
@@ -132,20 +133,29 @@ class Dashboard extends Model
         } elseif ($rangeDate == 'this_month') {
             $fromDate = $dateTimeStart->startOfMonth()->format('Y-m-d');
             $toDate = $dateTimeEnd->endOfMonth()->format('Y-m-d 23:59:59');
+        } elseif ($rangeDate == 'custom_range') {
+            if (!$fromDateReq || !$toDateReq) {
+                $fromDate = $dateTimeStart->format('Y-m-d');
+                $toDate = $dateTimeEnd->format('Y-m-d 23:59:59');
+            } else {
+                $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateReq, $phpTimeZone)->format('Y-m-d');
+                $toDate = Carbon::createFromFormat('Y-m-d', $toDateReq, $phpTimeZone)->format('Y-m-d 23:59:59');
+            }
         }
+
         return array (
             'fromDate' => $fromDate,
             'toDate' => $toDate,
         );
     }
 
-    public static function getAccountsAdsReportByDate($store = 'us', $rangeDate = 'today') {
+    public static function getAccountsAdsReportByDate($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '') {
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 
         $fbAccountIds = $storeConfig['fbAccountIds'];
 
-        $dateTimeRange = self::getDatesByRangeDateLabel($store, $rangeDate);
+        $dateTimeRange = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq);
         $fromDate = $dateTimeRange['fromDate'];
         $toDate = $dateTimeRange['toDate'];
 
@@ -169,7 +179,7 @@ class Dashboard extends Model
 
     }
 
-    public static function getCountryAdsReportByDate($store = 'us', $rangeDate = 'today') {
+    public static function getCountryAdsReportByDate($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '') {
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 
@@ -177,7 +187,7 @@ class Dashboard extends Model
         $mysqlTimeZone = $storeConfig['mysqlTimeZone'];
         $radioCurrency = $storeConfig['radioCurrency'];
 
-        $dateTimeRange = self::getDatesByRangeDateLabel($store, $rangeDate);
+        $dateTimeRange = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq);
         $fromDate = $dateTimeRange['fromDate'];
         $toDate = $dateTimeRange['toDate'];
 
@@ -225,7 +235,7 @@ class Dashboard extends Model
 
     }
 
-    public static function getProductTypesReportByDate($store = 'us', $rangeDate = 'today') {
+    public static function getProductTypesReportByDate($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '') {
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 
@@ -233,7 +243,7 @@ class Dashboard extends Model
         $mysqlTimeZone = $storeConfig['mysqlTimeZone'];
         $radioCurrency = $storeConfig['radioCurrency'];
 
-        $dateTimeRange = self::getDatesByRangeDateLabel($store, $rangeDate);
+        $dateTimeRange = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq);
         $fromDate = $dateTimeRange['fromDate'];
         $toDate = $dateTimeRange['toDate'];
 
@@ -316,13 +326,13 @@ class Dashboard extends Model
         $productType = $result[1] ?? '';
         if (!$productType) {
             $result = array();
-            preg_match('/\w{2}\d{4,5}(.+)D\w{1,2}/', $campaignName, $result);
+            preg_match('/\w{2}\d{4,5}(\w{2,7})D\w{1,2}/', $campaignName, $result);
             $productType = $result[1] ?? '';
         }
         return $productType ?: 'UNKNOWN';
     }
 
-    public static function getAdsTypesReportByDate ($store = 'us', $rangeDate = 'today') {
+    public static function getAdsTypesReportByDate ($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '') {
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 
@@ -330,7 +340,7 @@ class Dashboard extends Model
         $mysqlTimeZone = $storeConfig['mysqlTimeZone'];
         $radioCurrency = $storeConfig['radioCurrency'];
 
-        $dateTimeRange = self::getDatesByRangeDateLabel($store, $rangeDate);
+        $dateTimeRange = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq);
         $fromDate = $dateTimeRange['fromDate'];
         $toDate = $dateTimeRange['toDate'];
 
@@ -377,7 +387,7 @@ class Dashboard extends Model
         return $adsType;
     }
 
-    public static function getDesignerReportByDate ($store = 'us', $rangeDate = 'today') {
+    public static function getDesignerReportByDate ($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '') {
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 
@@ -385,7 +395,7 @@ class Dashboard extends Model
         $mysqlTimeZone = $storeConfig['mysqlTimeZone'];
         $radioCurrency = $storeConfig['radioCurrency'];
 
-        $dateTimeRange = self::getDatesByRangeDateLabel($store, $rangeDate);
+        $dateTimeRange = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq);
         $fromDate = $dateTimeRange['fromDate'];
         $toDate = $dateTimeRange['toDate'];
 
@@ -470,7 +480,7 @@ class Dashboard extends Model
         return $designer ?: 'UNKNOWN';
     }
 
-    public static function getIdeaReportByDate ($store = 'us', $rangeDate = 'today') {
+    public static function getIdeaReportByDate ($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '') {
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 
@@ -478,7 +488,7 @@ class Dashboard extends Model
         $mysqlTimeZone = $storeConfig['mysqlTimeZone'];
         $radioCurrency = $storeConfig['radioCurrency'];
 
-        $dateTimeRange = self::getDatesByRangeDateLabel($store, $rangeDate);
+        $dateTimeRange = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq);
         $fromDate = $dateTimeRange['fromDate'];
         $toDate = $dateTimeRange['toDate'];
 

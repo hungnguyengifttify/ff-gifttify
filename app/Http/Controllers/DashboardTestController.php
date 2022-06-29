@@ -56,9 +56,11 @@ class DashboardTestController extends Controller {
         }
 
         $labelDate = $request->input('labelDate') ?? 'Today';
+        $fromDateReq = $request->input('fromDate') ?? '';
+        $toDateReq = $request->input('toDate') ?? '';
         $range_report = array_search ($labelDate, Dashboard::$rangeDate);
 
-        $dateTimeRange = Dashboard::getDatesByRangeDateLabel($store, $range_report);
+        $dateTimeRange = Dashboard::getDatesByRangeDateLabel($store, $range_report, $fromDateReq, $toDateReq);
         $fromDate = $dateTimeRange['fromDate'];
         $toDate = $dateTimeRange['toDate'];
 
@@ -68,12 +70,12 @@ class DashboardTestController extends Controller {
             'labelDate' => $labelDate,
         );
 
-        $accountsAds = Dashboard::getAccountsAdsReportByDate($store, $range_report);
-        $countriesAds = Dashboard::getCountryAdsReportByDate($store, $range_report);
-        $productTypes = Dashboard::getProductTypesReportByDate($store, $range_report);
-        $adsTypes = Dashboard::getAdsTypesReportByDate($store, $range_report);
-        $designerAds = Dashboard::getDesignerReportByDate($store, $range_report);
-        $ideaAds = Dashboard::getIdeaReportByDate($store, $range_report);
+        $accountsAds = Dashboard::getAccountsAdsReportByDate($store, $range_report, $fromDateReq, $toDateReq);
+        $countriesAds = Dashboard::getCountryAdsReportByDate($store, $range_report, $fromDateReq, $toDateReq);
+        $productTypes = Dashboard::getProductTypesReportByDate($store, $range_report, $fromDateReq, $toDateReq);
+        $adsTypes = Dashboard::getAdsTypesReportByDate($store, $range_report, $fromDateReq, $toDateReq);
+        $designerAds = Dashboard::getDesignerReportByDate($store, $range_report, $fromDateReq, $toDateReq);
+        $ideaAds = Dashboard::getIdeaReportByDate($store, $range_report, $fromDateReq, $toDateReq);
 
         return view('report.dashboard_detail_test', compact('title', 'store', 'params', 'accountsAds', 'countriesAds', 'productTypes', 'adsTypes', 'designerAds', 'ideaAds'));
     }

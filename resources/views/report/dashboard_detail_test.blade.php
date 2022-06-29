@@ -68,7 +68,6 @@
                                         'Last Week': [moment().subtract(7, 'days').startOf('isoWeek'), moment().subtract(7, 'days').endOf('isoWeek')],
                                     },
                                     "alwaysShowCalendars": true,
-                                    "showCustomRangeLabel": false,
                                     startDate: start,
                                     endDate: end
                                 }, displayDate);

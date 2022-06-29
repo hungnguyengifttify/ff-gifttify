@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [\App\Http\Controllers\DashboardController::class, 'index'])
     ->name('home');
 
-Route::get('/dashboard_test', [\App\Http\Controllers\DashboardTestController::class, 'index'])
+Route::get('/dashboard_test/{store}', [\App\Http\Controllers\DashboardTestController::class, 'report_detail'])
     ->name('dashboard_test');
 
 

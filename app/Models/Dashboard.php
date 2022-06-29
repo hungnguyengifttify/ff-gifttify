@@ -238,7 +238,7 @@ class Dashboard extends Model
         $toDate = $dateTimeRange['toDate'];
 
         $orders = DB::select("
-            select pt.product_type_name, MAX(pt.product_type_code) as product_type_code , MAX(pt.product_type_code) as product_type_code, sum(ol.price)/$radioCurrency as total_order_amount
+            select pt.product_type_name, MAX(pt.product_type_code) as product_type_code, sum(ol.price*ol.quantity)/$radioCurrency as total_order_amount
             from orders o
             left join order_line_items ol ON o.shopify_id = ol.order_id
             left join products p on ol.product_id = p.shopify_id and p.store = '$store'
@@ -252,8 +252,11 @@ class Dashboard extends Model
         $ordersResult = array();
         foreach ($orders as $o) {
             $o->product_type_code = $o->product_type_code ?? 'UNKNOWN';
-            $ordersResult[$o->product_type_code]['product_type_name'] = $o->product_type_name;
-            $ordersResult[$o->product_type_code]['total_order_amount'] = $o->total_order_amount;
+            if (!isset($ordersResult[$o->product_type_code])) {
+                $ordersResult[$o->product_type_code]['product_type_name'] = $o->product_type_name;
+                $ordersResult[$o->product_type_code]['total_order_amount'] = 0;
+            }
+            $ordersResult[$o->product_type_code]['total_order_amount'] += $o->total_order_amount;
         }
 
         $campaignProductTypeTable = DB::table('campaign_product_type')->get();
@@ -372,6 +375,94 @@ class Dashboard extends Model
             $adsType = 'Scale';
         }
         return $adsType;
+    }
+
+    public static function getDesignerReportByDate ($store = 'us', $rangeDate = 'today') {
+        $storeConfig = self::getStoreConfig($store);
+        if (!$storeConfig) return false;
+
+        $fbAccountIds = $storeConfig['fbAccountIds'];
+        $mysqlTimeZone = $storeConfig['mysqlTimeZone'];
+        $radioCurrency = $storeConfig['radioCurrency'];
+
+        $dateTimeRange = self::getDatesByRangeDateLabel($store, $rangeDate);
+        $fromDate = $dateTimeRange['fromDate'];
+        $toDate = $dateTimeRange['toDate'];
+
+        $fbAds = DB::table('fb_campaign_insights')
+            ->select(DB::raw('campaign_name, sum(spend) as totalSpend, sum(inline_link_clicks) as totalUniqueClicks'))
+            ->whereIn('account_id', $fbAccountIds)
+            ->where('date_record', '>=', $fromDate)
+            ->where('date_record', '<=', $toDate)
+            ->groupBy('campaign_name')->get();
+
+        foreach ($fbAds->all() as $v) {
+            $designerCode = self::getDesignerFromCampaignName ($v->campaign_name);
+            if (!isset($adsResult[$designerCode])) {
+                $adsResult[$designerCode]['designerCode'] = $designerCode;
+                $adsResult[$designerCode]['totalSpend'] = 0;
+                $adsResult[$designerCode]['totalUniqueClicks'] = 0;
+            }
+            $adsResult[$designerCode]['totalSpend'] += $v->totalSpend;
+            $adsResult[$designerCode]['totalUniqueClicks'] += $v->totalUniqueClicks;
+            $adsResult[$designerCode]['cpc'] = ($adsResult[$designerCode]['totalUniqueClicks'] != 0 ? $adsResult[$designerCode]['totalSpend'] / $adsResult[$designerCode]['totalUniqueClicks'] : 0);
+        }
+
+        $orders = DB::select("
+            select sku, sum(ol.price * ol.quantity)/$radioCurrency as total_order_amount
+            from orders o
+            left join order_line_items ol ON o.shopify_id = ol.order_id
+            where o.store = '$store' and ol.product_id > 0 and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate
+            group by ol.sku;
+            ;"
+            , ['fromDate' => $fromDate, 'toDate' => $toDate]
+        );
+
+        $ordersResult = array();
+        foreach ($orders as $o) {
+            $designerCode = self::getDesignerFromSku ($o->sku);
+            if (!isset($ordersResult[$designerCode])) {
+                $ordersResult[$designerCode]['designerCode'] = $designerCode;
+                $ordersResult[$designerCode]['total_order_amount'] = 0;
+            }
+            $ordersResult[$designerCode]['designerCode'] = $designerCode;
+            $ordersResult[$designerCode]['total_order_amount'] += $o->total_order_amount;
+        }
+
+        $designerReports = array_merge(array_keys($ordersResult) , array_keys($adsResult));
+        $designerReports = array_unique($designerReports);
+
+        $designerTable = DB::table('gifttify_code')->where('type', '=', 'designer')->get();
+        $designerData = $designerTable->keyBy('code')->all();
+
+        $result = array();
+        foreach ($designerReports as $v) {
+            $result[$v]['designer_code'] = $v ?: 'UNKNOWN';
+            $result[$v]['designer_name'] = isset($designerData[$v]) ? $designerData[$v]->name : '';
+
+            $result[$v]['total_order_amount'] = $ordersResult[$v]['total_order_amount'] ?? 0;
+            $result[$v]['totalSpend'] = $adsResult[$v]['totalSpend'] ?? 0;
+            $result[$v]['cpc'] = $adsResult[$v]['cpc'] ?? 0;
+            $result[$v]['mo'] = ($result[$v]['total_order_amount']) > 0 ? 100*($result[$v]['totalSpend'] / $result[$v]['total_order_amount']) : 0;
+        }
+
+        return $result;
+    }
+
+    public static function getDesignerFromCampaignName ($campaignName) {
+        $result = array();
+        preg_match('/\w{2}\d{4,5}\w{2,7}(D\w{1,2})/', $campaignName, $result);
+        $designer = isset($result[1]) ? strtoupper($result[1]) : '';
+
+        return $designer ?: 'UNKNOWN';
+    }
+
+    public static function getDesignerFromSku ($sku) {
+        $result = array();
+        preg_match('/\w{2}\d{4,5}\w{2,7}(D\w{1,2})/', $sku, $result);
+        $designer = isset($result[1]) ? strtoupper($result[1]) : '';
+
+        return $designer ?: 'UNKNOWN';
     }
 
 }

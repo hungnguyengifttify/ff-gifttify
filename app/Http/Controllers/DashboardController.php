@@ -71,7 +71,8 @@ class DashboardController extends Controller {
         $countriesAds = Dashboard::getCountryAdsReportByDate($store, $range_report);
         $productTypes = Dashboard::getProductTypesReportByDate($store, $range_report);
         $adsTypes = Dashboard::getAdsTypesReportByDate($store, $range_report);
+        $designerAds = Dashboard::getDesignerReportByDate($store, $range_report);
 
-        return view('report.dashboard_detail', compact('title', 'store', 'params', 'accountsAds', 'countriesAds', 'productTypes', 'adsTypes'));
+        return view('report.dashboard_detail', compact('title', 'store', 'params', 'accountsAds', 'countriesAds', 'productTypes', 'adsTypes', 'designerAds'));
     }
 }

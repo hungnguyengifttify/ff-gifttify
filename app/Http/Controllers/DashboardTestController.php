@@ -19,7 +19,7 @@ class DashboardTestController extends Controller {
         $reports = array();
         foreach ($rangeDates as $v) {
             foreach ($stores as $store) {
-                $value = Dashboard::getReportByDateTest($store, $v);
+                $value = Dashboard::getReportByDate($store, $v);
                 $reports[$store][] = $value;
 
                 if (!isset($reports['all'][$v])) {
@@ -43,7 +43,7 @@ class DashboardTestController extends Controller {
             }
         }
 
-        return view('report.dashboard_detail_test', array('reports' => $reports));
+        return view('report.dashboard_sum', array('reports' => $reports));
     }
 
     public function report_detail(Request $request, $store = 'us') {
@@ -72,7 +72,8 @@ class DashboardTestController extends Controller {
         $countriesAds = Dashboard::getCountryAdsReportByDate($store, $range_report);
         $productTypes = Dashboard::getProductTypesReportByDate($store, $range_report);
         $adsTypes = Dashboard::getAdsTypesReportByDate($store, $range_report);
+        $designerAds = Dashboard::getDesignerReportByDate($store, $range_report);
 
-        return view('report.dashboard_detail_test', compact('title', 'store', 'params', 'accountsAds', 'countriesAds', 'productTypes', 'adsTypes'));
+        return view('report.dashboard_detail_test', compact('title', 'store', 'params', 'accountsAds', 'countriesAds', 'productTypes', 'adsTypes', 'designerAds'));
     }
 }

@@ -272,11 +272,13 @@ class Dashboard extends Model
             if (!isset($adsResult[$v->product_type])) {
                 $adsResult[$v->product_type]['product_type'] = 'UNKNOWN';
                 $adsResult[$v->product_type]['totalSpend'] = 0;
+                $adsResult[$v->product_type]['totalUniqueClicks'] = 0;
                 $adsResult[$v->product_type]['cpc'] = 0;
             }
             $adsResult[$v->product_type]['product_type'] = $v->product_type;
             $adsResult[$v->product_type]['totalSpend'] += $v->totalSpend;
-            $adsResult[$v->product_type]['cpc'] += ($v->totalUniqueClicks != 0 ? $v->totalSpend / $v->totalUniqueClicks : 0);
+            $adsResult[$v->product_type]['totalUniqueClicks'] += $v->totalUniqueClicks;
+            $adsResult[$v->product_type]['cpc'] = ($adsResult[$v->product_type]['totalUniqueClicks'] != 0 ? $adsResult[$v->product_type]['totalSpend'] / $adsResult[$v->product_type]['totalUniqueClicks'] : 0);
         }
 
         $productTypeReports = array_merge(array_keys($ordersResult) , array_keys($adsResult));

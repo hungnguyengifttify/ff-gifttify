@@ -459,10 +459,118 @@ class Dashboard extends Model
 
     public static function getDesignerFromSku ($sku) {
         $result = array();
-        preg_match('/\w{2}\d{4,5}\w{2,7}(D\w{1,2})/', $sku, $result);
+        preg_match('/-(D[0-9PI]{1,2})-/', $sku, $result);
         $designer = isset($result[1]) ? strtoupper($result[1]) : '';
 
+        if (!$designer) {
+            preg_match('/\w{2}\d{4,5}\w{2,7}(D\w{1,2})/', $sku, $result);
+            $designer = isset($result[1]) ? strtoupper($result[1]) : '';
+        }
+
         return $designer ?: 'UNKNOWN';
+    }
+
+    public static function getIdeaReportByDate ($store = 'us', $rangeDate = 'today') {
+        $storeConfig = self::getStoreConfig($store);
+        if (!$storeConfig) return false;
+
+        $fbAccountIds = $storeConfig['fbAccountIds'];
+        $mysqlTimeZone = $storeConfig['mysqlTimeZone'];
+        $radioCurrency = $storeConfig['radioCurrency'];
+
+        $dateTimeRange = self::getDatesByRangeDateLabel($store, $rangeDate);
+        $fromDate = $dateTimeRange['fromDate'];
+        $toDate = $dateTimeRange['toDate'];
+
+        $fbAds = DB::table('fb_campaign_insights')
+            ->select(DB::raw('campaign_name, sum(spend) as totalSpend, sum(inline_link_clicks) as totalUniqueClicks'))
+            ->whereIn('account_id', $fbAccountIds)
+            ->where('date_record', '>=', $fromDate)
+            ->where('date_record', '<=', $toDate)
+            ->groupBy('campaign_name')->get();
+
+        foreach ($fbAds->all() as $v) {
+            $ideaCode = self::getIdeaFromCampaignName ($v->campaign_name);
+            if (!isset($adsResult[$ideaCode])) {
+                $adsResult[$ideaCode]['designerCode'] = $ideaCode;
+                $adsResult[$ideaCode]['totalSpend'] = 0;
+                $adsResult[$ideaCode]['totalUniqueClicks'] = 0;
+            }
+            $adsResult[$ideaCode]['totalSpend'] += $v->totalSpend;
+            $adsResult[$ideaCode]['totalUniqueClicks'] += $v->totalUniqueClicks;
+            $adsResult[$ideaCode]['cpc'] = ($adsResult[$ideaCode]['totalUniqueClicks'] != 0 ? $adsResult[$ideaCode]['totalSpend'] / $adsResult[$ideaCode]['totalUniqueClicks'] : 0);
+        }
+
+        $orders = DB::select("
+            select sku, sum(ol.price * ol.quantity)/$radioCurrency as total_order_amount
+            from orders o
+            left join order_line_items ol ON o.shopify_id = ol.order_id
+            where o.store = '$store' and ol.product_id > 0 and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate
+            group by ol.sku;
+            ;"
+            , ['fromDate' => $fromDate, 'toDate' => $toDate]
+        );
+
+        $ordersResult = array();
+        foreach ($orders as $o) {
+            $ideaCode = self::getIdeaFromSku ($o->sku);
+            if (!isset($ordersResult[$ideaCode])) {
+                $ordersResult[$ideaCode]['designerCode'] = $ideaCode;
+                $ordersResult[$ideaCode]['total_order_amount'] = 0;
+            }
+            $ordersResult[$ideaCode]['designerCode'] = $ideaCode;
+            $ordersResult[$ideaCode]['total_order_amount'] += $o->total_order_amount;
+        }
+
+        $ideaReports = array_merge(array_keys($ordersResult) , array_keys($adsResult));
+        $ideaReports = array_unique($ideaReports);
+
+        $ideaTable = DB::table('gifttify_code')->where('type', '=', 'idea')->get();
+        $ideaData = $ideaTable->keyBy('code')->all();
+
+        $result = array();
+        foreach ($ideaReports as $v) {
+            $result[$v]['idea_code'] = $v ?: 'UNKNOWN';
+            $result[$v]['idea_name'] = isset($ideaData[$v]) ? $ideaData[$v]->name : '';
+
+            $result[$v]['total_order_amount'] = $ordersResult[$v]['total_order_amount'] ?? 0;
+            $result[$v]['totalSpend'] = $adsResult[$v]['totalSpend'] ?? 0;
+            $result[$v]['cpc'] = $adsResult[$v]['cpc'] ?? 0;
+            $result[$v]['mo'] = ($result[$v]['total_order_amount']) > 0 ? 100*($result[$v]['totalSpend'] / $result[$v]['total_order_amount']) : 0;
+        }
+        return $result;
+    }
+
+    public static function getIdeaFromCampaignName ($campaignName) {
+        $result = array();
+        preg_match('/(\w{2})\d{4,5}\w{2,7}D\w{1,2}/', $campaignName, $result);
+        $idea = isset($result[1]) ? strtoupper($result[1]) : '';
+
+        return $idea ?: 'UNKNOWN';
+    }
+
+    public static function getIdeaFromSku ($sku) {
+        $result = array();
+        preg_match('/-(i[0-9]{2,3})-/', $sku, $result);
+        $idea = isset($result[1]) ? $result[1] : '';
+        if ($idea == 'i101') {
+            $idea = 'DU';
+        } elseif ($idea == 'i102') {
+            $idea = 'TR';
+        } elseif ($idea == 'i103') {
+            $idea = 'HU';
+        } elseif ($idea == 'i104') {
+            $idea = 'LE';
+        } elseif ($idea == 'i36') {
+            $idea = 'NG';
+        }
+
+        if (!$idea) {
+            preg_match('/^([A-Z]{2})\d{4,5}\w{2,7}D?\w{1,2}/', $sku, $result);
+            $idea = isset($result[1]) ? strtoupper($result[1]) : '';
+        }
+
+        return $idea ?: 'UNKNOWN';
     }
 
 }

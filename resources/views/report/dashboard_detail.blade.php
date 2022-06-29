@@ -236,6 +236,30 @@
                         </tbody>
                     </table>
 
+                    <table class="table table-responsive table-bordered" style="width: auto">
+                        <h1>By Idea</h1>
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>AdsCost</th>
+                            <th>Rev</th>
+                            <th>CPC</th>
+                            <th>MO</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($ideaAds as $v): ?>
+                        <tr>
+                            <td><?php echo $v['idea_name'] . "[{$v['idea_code']}]"; ?></td>
+                            <td><?php echo gifttify_price_format($v['totalSpend']); ?></td>
+                            <td><?php echo gifttify_price_format($v['total_order_amount']); ?></td>
+                            <td><?php echo number_format($v['cpc'], 2); ?></td>
+                            <td><?php echo round($v['mo']) . '%'; ?></td>
+                        </tr>
+                        <?php endforeach;?>
+                        </tbody>
+                    </table>
+
                 </div>
             </div>
         </div>

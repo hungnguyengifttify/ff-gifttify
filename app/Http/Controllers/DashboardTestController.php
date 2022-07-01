@@ -13,6 +13,7 @@ class DashboardTestController extends Controller {
     public function index(Request $request)
     {
         $rangeDates = Dashboard::$rangeDate;
+        unset($rangeDates['custom_range']);
         $rangeDates = array_keys($rangeDates);
 
         $stores = array('us', 'au');
@@ -76,7 +77,8 @@ class DashboardTestController extends Controller {
         $adsTypes = Dashboard::getAdsTypesReportByDate($store, $range_report, $fromDateReq, $toDateReq);
         $designerAds = Dashboard::getDesignerReportByDate($store, $range_report, $fromDateReq, $toDateReq);
         $ideaAds = Dashboard::getIdeaReportByDate($store, $range_report, $fromDateReq, $toDateReq);
+        $adsStaffs = Dashboard::getAdsStaffReportByDate($store, $range_report, $fromDateReq, $toDateReq);
 
-        return view('report.dashboard_detail_test', compact('title', 'store', 'params', 'accountsAds', 'countriesAds', 'productTypes', 'adsTypes', 'designerAds', 'ideaAds'));
+        return view('report.dashboard_detail_test', compact('title', 'store', 'params', 'accountsAds', 'countriesAds', 'productTypes', 'adsTypes', 'designerAds', 'ideaAds', 'adsStaffs'));
     }
 }

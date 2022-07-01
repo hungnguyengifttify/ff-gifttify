@@ -259,6 +259,24 @@
                         </tbody>
                     </table>
 
+                    <table class="table table-responsive table-bordered" style="width: auto">
+                        <h1>By Ads Staff</h1>
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>AdsCost</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($adsStaffs as $v): ?>
+                        <tr>
+                            <td><?php echo $v['adsStaff']; ?></td>
+                            <td><?php echo gifttify_price_format($v['totalSpend']); ?></td>
+                        </tr>
+                        <?php endforeach;?>
+                        </tbody>
+                    </table>
+
                 </div>
             </div>
         </div>

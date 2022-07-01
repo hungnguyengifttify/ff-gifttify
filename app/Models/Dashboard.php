@@ -406,6 +406,7 @@ class Dashboard extends Model
             ->where('date_record', '<=', $toDate)
             ->groupBy('campaign_name')->get();
 
+        $adsResult = array();
         foreach ($fbAds->all() as $v) {
             $designerCode = self::getDesignerFromCampaignName ($v->campaign_name);
             if (!isset($adsResult[$designerCode])) {
@@ -499,6 +500,7 @@ class Dashboard extends Model
             ->where('date_record', '<=', $toDate)
             ->groupBy('campaign_name')->get();
 
+        $adsResult = array();
         foreach ($fbAds->all() as $v) {
             $ideaCode = self::getIdeaFromCampaignName ($v->campaign_name);
             if (!isset($adsResult[$ideaCode])) {
@@ -581,6 +583,50 @@ class Dashboard extends Model
         }
 
         return $idea ?: 'UNKNOWN';
+    }
+
+    public static function getAdsStaffReportByDate ($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '') {
+        $storeConfig = self::getStoreConfig($store);
+        if (!$storeConfig) return false;
+
+        $fbAccountIds = $storeConfig['fbAccountIds'];
+
+        $dateTimeRange = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq);
+        $fromDate = $dateTimeRange['fromDate'];
+        $toDate = $dateTimeRange['toDate'];
+
+        $fbAds = DB::table('fb_campaign_insights')
+            ->select(DB::raw('campaign_name, sum(spend) as totalSpend, sum(inline_link_clicks) as totalUniqueClicks'))
+            ->whereIn('account_id', $fbAccountIds)
+            ->where('date_record', '>=', $fromDate)
+            ->where('date_record', '<=', $toDate)
+            ->groupBy('campaign_name')->get();
+
+        $adsResult = array();
+        foreach ($fbAds->all() as $v) {
+            $adsStaff = self::getAdsStaffFromCampaignName ($v->campaign_name);
+            if (!isset($adsResult[$adsStaff])) {
+                $adsResult[$adsStaff]['adsStaff'] = $adsStaff;
+                $adsResult[$adsStaff]['totalSpend'] = 0;
+            }
+            $adsResult[$adsStaff]['adsStaff'] = $adsStaff;
+            $adsResult[$adsStaff]['totalSpend'] += $v->totalSpend;
+        }
+
+        return $adsResult;
+    }
+
+    public static function getAdsStaffFromCampaignName ($campaignName) {
+        $result = array();
+        $adsType = "UNKNOWN";
+        if (preg_match('/.*phong.*/', strtolower($campaignName), $result)) {
+            $adsType = 'Phong';
+        } elseif (preg_match('/.*VA.*/', $campaignName, $result)) {
+            $adsType = 'Việt Anh';
+        } elseif (preg_match('/.*hoang.*/', strtolower($campaignName), $result)) {
+            $adsType = 'Hoàng';
+        }
+        return $adsType;
     }
 
 }

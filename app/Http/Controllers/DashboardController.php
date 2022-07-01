@@ -12,6 +12,7 @@ class DashboardController extends Controller {
     public function index(Request $request)
     {
         $rangeDates = Dashboard::$rangeDate;
+        unset($rangeDates['custom_range']);
         $rangeDates = array_keys($rangeDates);
 
         $stores = array('us', 'au');

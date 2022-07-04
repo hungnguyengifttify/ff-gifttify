@@ -253,14 +253,27 @@ class Dashboard extends Model
             left join order_line_items ol ON o.shopify_id = ol.order_id
             left join products p on ol.product_id = p.shopify_id and p.store = '$store'
             left join shopify_product_type pt on p.product_type = pt.product_type_name
-            where o.store = '$store' and ol.product_id > 0 and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate
+            where o.store = '$store' and p.shopify_id > 0 and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate
             group by p.product_type;
             ;"
             , ['fromDate' => $fromDate, 'toDate' => $toDate]
         );
 
+        $ordersTips = DB::select("
+            select 'TIP' as product_type_name, 'TIP' as product_type_code, sum(ol.price*ol.quantity)/$radioCurrency as total_order_amount
+            from orders o
+            left join order_line_items ol ON o.shopify_id = ol.order_id
+            where o.store = '$store' and ol.name like 'TIP %' and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate
+            ;"
+            , ['fromDate' => $fromDate, 'toDate' => $toDate]
+        );
+
+        $orders = array_merge($orders, $ordersTips);
+
         $ordersResult = array();
         foreach ($orders as $o) {
+            if ($o->total_order_amount == 0) continue;
+
             $o->product_type_code = $o->product_type_code ?? 'UNKNOWN';
             if (!isset($ordersResult[$o->product_type_code])) {
                 $ordersResult[$o->product_type_code]['product_type_name'] = $o->product_type_name;
@@ -304,6 +317,9 @@ class Dashboard extends Model
         foreach ($productTypeReports as $v) {
             $result[$v]['product_type_code'] = $v ?: 'UNKNOWN';
             $result[$v]['product_type_name'] = isset($productTypeData[$v]) ? $productTypeData[$v]->product_type_name : '';
+            if ($v == 'TIP') {
+                $result[$v]['product_type_name'] = 'TIP';
+            }
 
             $result[$v]['total_order_amount'] = $ordersResult[$v]['total_order_amount'] ?? 0;
             $result[$v]['totalSpend'] = $adsResult[$v]['totalSpend'] ?? 0;

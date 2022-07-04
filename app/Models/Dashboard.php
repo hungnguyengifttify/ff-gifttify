@@ -235,7 +235,7 @@ class Dashboard extends Model
 
     }
 
-    public static function getProductTypesReportByDate($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '') {
+    public static function getProductTypesReportByDate($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '',$debug = 0) {
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 
@@ -305,6 +305,10 @@ class Dashboard extends Model
             $adsResult[$v->product_type]['totalSpend'] += $v->totalSpend;
             $adsResult[$v->product_type]['totalUniqueClicks'] += $v->totalUniqueClicks;
             $adsResult[$v->product_type]['cpc'] = ($adsResult[$v->product_type]['totalUniqueClicks'] != 0 ? $adsResult[$v->product_type]['totalSpend'] / $adsResult[$v->product_type]['totalUniqueClicks'] : 0);
+
+            if ($debug == 1 && $adsResult[$v->product_type]['product_type'] == 'UNKNOWN') {
+                dump('product_type_UNKNOWN: '. $v->campaign_name);
+            }
         }
 
         $productTypeReports = array_merge(array_keys($ordersResult) , array_keys($adsResult));
@@ -337,18 +341,18 @@ class Dashboard extends Model
         }
 
         $result = array();
-        preg_match('/.*Type(\w+)/', $campaignName, $result);
+        preg_match('/.*Type(\w{0,2})/', $campaignName, $result);
 
         $productType = $result[1] ?? '';
         if (!$productType) {
             $result = array();
-            preg_match('/\w{2}\d{4,5}(\w{2,7})D\w{1,2}/', $campaignName, $result);
+            preg_match('/\w{2}\d{4,5}(\w{2,7})D?\w{0,2}/', $campaignName, $result);
             $productType = $result[1] ?? '';
         }
         return $productType ?: 'UNKNOWN';
     }
 
-    public static function getAdsTypesReportByDate ($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '') {
+    public static function getAdsTypesReportByDate ($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '', $debug = 0) {
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 
@@ -386,6 +390,10 @@ class Dashboard extends Model
             $ads_type = self::getAdsTypeFromCampaignName ($v->campaign_name);
             $adsResult[$ads_type]['ads_type'] = $ads_type;
             $adsResult[$ads_type]['totalSpend'] += $v->totalSpend;
+
+            if ($debug == 1 && $adsResult[$ads_type]['ads_type'] == 'UNKNOWN') {
+                dump('ads_type_UNKNOWN: '. $v->campaign_name);
+            }
         }
         $adsResult['Test']['percent'] = $totalSpend > 0 ? round(100 * $adsResult['Test']['totalSpend'] / $totalSpend, 2) : 0;
         $adsResult['Scale']['percent'] = $adsResult['Test']['percent'] > 0 ? (100 - $adsResult['Test']['percent']) : 0;
@@ -403,7 +411,7 @@ class Dashboard extends Model
         return $adsType;
     }
 
-    public static function getDesignerReportByDate ($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '') {
+    public static function getDesignerReportByDate ($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '', $debug = 0) {
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 
@@ -433,6 +441,10 @@ class Dashboard extends Model
             $adsResult[$designerCode]['totalSpend'] += $v->totalSpend;
             $adsResult[$designerCode]['totalUniqueClicks'] += $v->totalUniqueClicks;
             $adsResult[$designerCode]['cpc'] = ($adsResult[$designerCode]['totalUniqueClicks'] != 0 ? $adsResult[$designerCode]['totalSpend'] / $adsResult[$designerCode]['totalUniqueClicks'] : 0);
+
+            if ($debug == 1 && $adsResult[$designerCode]['designerCode'] == 'UNKNOWN') {
+                dump('designerCode_UNKNOWN: '. $v->campaign_name);
+            }
         }
 
         $orders = DB::select("
@@ -478,8 +490,11 @@ class Dashboard extends Model
 
     public static function getDesignerFromCampaignName ($campaignName) {
         $result = array();
-        preg_match('/\w{2}\d{4,5}\w{2,7}(D\w{1,2})/', $campaignName, $result);
+        preg_match('/\w{2}\d{4,5}[A-Z]{2,7}(D?\d{0,2})/', $campaignName, $result);
         $designer = isset($result[1]) ? strtoupper($result[1]) : '';
+        if ($designer != '' && strpos('D', $designer) === false) {
+            $designer = 'D' . $designer;
+        }
 
         return $designer ?: 'UNKNOWN';
     }
@@ -497,7 +512,7 @@ class Dashboard extends Model
         return $designer ?: 'UNKNOWN';
     }
 
-    public static function getIdeaReportByDate ($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '') {
+    public static function getIdeaReportByDate ($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '', $debug = 0) {
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 
@@ -520,13 +535,17 @@ class Dashboard extends Model
         foreach ($fbAds->all() as $v) {
             $ideaCode = self::getIdeaFromCampaignName ($v->campaign_name);
             if (!isset($adsResult[$ideaCode])) {
-                $adsResult[$ideaCode]['designerCode'] = $ideaCode;
+                $adsResult[$ideaCode]['idea_code'] = $ideaCode;
                 $adsResult[$ideaCode]['totalSpend'] = 0;
                 $adsResult[$ideaCode]['totalUniqueClicks'] = 0;
             }
             $adsResult[$ideaCode]['totalSpend'] += $v->totalSpend;
             $adsResult[$ideaCode]['totalUniqueClicks'] += $v->totalUniqueClicks;
             $adsResult[$ideaCode]['cpc'] = ($adsResult[$ideaCode]['totalUniqueClicks'] != 0 ? $adsResult[$ideaCode]['totalSpend'] / $adsResult[$ideaCode]['totalUniqueClicks'] : 0);
+
+            if ($debug == 1 && $adsResult[$ideaCode]['idea_code'] == 'UNKNOWN') {
+                dump('idea_code_UNKNOWN: '. $v->campaign_name);
+            }
         }
 
         $orders = DB::select("
@@ -543,10 +562,10 @@ class Dashboard extends Model
         foreach ($orders as $o) {
             $ideaCode = self::getIdeaFromSku ($o->sku);
             if (!isset($ordersResult[$ideaCode])) {
-                $ordersResult[$ideaCode]['designerCode'] = $ideaCode;
+                $ordersResult[$ideaCode]['idea_code'] = $ideaCode;
                 $ordersResult[$ideaCode]['total_order_amount'] = 0;
             }
-            $ordersResult[$ideaCode]['designerCode'] = $ideaCode;
+            $ordersResult[$ideaCode]['idea_code'] = $ideaCode;
             $ordersResult[$ideaCode]['total_order_amount'] += $o->total_order_amount;
         }
 
@@ -571,7 +590,7 @@ class Dashboard extends Model
 
     public static function getIdeaFromCampaignName ($campaignName) {
         $result = array();
-        preg_match('/(\w{2})\d{4,5}\w{2,7}D\w{1,2}/', $campaignName, $result);
+        preg_match('/(\w{2})\d{4,5}[A-Z]{2,7}D?\d{0,2}/', $campaignName, $result);
         $idea = isset($result[1]) ? strtoupper($result[1]) : '';
 
         return $idea ?: 'UNKNOWN';
@@ -591,17 +610,19 @@ class Dashboard extends Model
             $idea = 'LE';
         } elseif ($idea == 'i36') {
             $idea = 'NG';
+        } elseif ($idea == 'a101') {
+            $idea = 'VA';
         }
 
         if (!$idea) {
-            preg_match('/^([A-Z]{2})\d{4,5}\w{2,7}D?\w{1,2}/', $sku, $result);
+            preg_match('/^([A-Z]{2})\d{4,5}\w{2,7}D?\w{0,2}/', $sku, $result);
             $idea = isset($result[1]) ? strtoupper($result[1]) : '';
         }
 
         return $idea ?: 'UNKNOWN';
     }
 
-    public static function getAdsStaffReportByDate ($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '') {
+    public static function getAdsStaffReportByDate ($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '', $debug = 0) {
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 
@@ -627,6 +648,10 @@ class Dashboard extends Model
             }
             $adsResult[$adsStaff]['adsStaff'] = $adsStaff;
             $adsResult[$adsStaff]['totalSpend'] += $v->totalSpend;
+
+            if ($debug == 1 && $adsStaff == 'UNKNOWN') {
+                dump('adsStaff_UNKNOWN: '. $v->campaign_name);
+            }
         }
 
         return $adsResult;

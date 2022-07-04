@@ -27,6 +27,7 @@
                         <input type="hidden" name="fromDate" id="fromDate" />
                         <input type="hidden" name="toDate" id="toDate" />
                         <input type="hidden" name="labelDate" id="labelDate" />
+                        <input type="hidden" name="debug" id="debug" value="<?php echo $_REQUEST['debug'] ?? '0'; ?>" />
                         <span id="reportrangetext"><?php echo $params['fromDate']->format('d-m-Y') . ' => ' . $params['toDate']->format('d-m-Y');?></span>
 
                         <script type="text/javascript">

@@ -55,6 +55,7 @@ class DashboardController extends Controller {
             dd('Not Allowed');
         }
 
+        $debug = $request->input('debug') ?? 0;
         $labelDate = $request->input('labelDate') ?? 'Today';
         $fromDateReq = $request->input('fromDate') ?? '';
         $toDateReq = $request->input('toDate') ?? '';
@@ -72,12 +73,12 @@ class DashboardController extends Controller {
 
         $accountsAds = Dashboard::getAccountsAdsReportByDate($store, $range_report, $fromDateReq, $toDateReq);
         $countriesAds = Dashboard::getCountryAdsReportByDate($store, $range_report, $fromDateReq, $toDateReq);
-        $productTypes = Dashboard::getProductTypesReportByDate($store, $range_report, $fromDateReq, $toDateReq);
-        $adsTypes = Dashboard::getAdsTypesReportByDate($store, $range_report, $fromDateReq, $toDateReq);
-        $designerAds = Dashboard::getDesignerReportByDate($store, $range_report, $fromDateReq, $toDateReq);
-        $ideaAds = Dashboard::getIdeaReportByDate($store, $range_report, $fromDateReq, $toDateReq);
-        $adsStaffs = Dashboard::getAdsStaffReportByDate($store, $range_report, $fromDateReq, $toDateReq);
+        $productTypes = Dashboard::getProductTypesReportByDate($store, $range_report, $fromDateReq, $toDateReq, $debug);
+        $adsTypes = Dashboard::getAdsTypesReportByDate($store, $range_report, $fromDateReq, $toDateReq, $debug);
+        $designerAds = Dashboard::getDesignerReportByDate($store, $range_report, $fromDateReq, $toDateReq, $debug);
+        $ideaAds = Dashboard::getIdeaReportByDate($store, $range_report, $fromDateReq, $toDateReq, $debug);
+        $adsStaffs = Dashboard::getAdsStaffReportByDate($store, $range_report, $fromDateReq, $toDateReq, $debug);
 
-        return view('report.dashboard_detail_test', compact('title', 'store', 'params', 'accountsAds', 'countriesAds', 'productTypes', 'adsTypes', 'designerAds', 'ideaAds', 'adsStaffs'));
+        return view('report.dashboard_detail', compact('title', 'store', 'params', 'accountsAds', 'countriesAds', 'productTypes', 'adsTypes', 'designerAds', 'ideaAds', 'adsStaffs'));
     }
 }

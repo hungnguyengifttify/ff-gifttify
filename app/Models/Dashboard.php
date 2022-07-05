@@ -342,11 +342,17 @@ class Dashboard extends Model
 
         $result = array();
         preg_match('/.*Type(\w{0,2})/', $campaignName, $result);
-
         $productType = $result[1] ?? '';
+
         if (!$productType) {
             $result = array();
-            preg_match('/\w{2}\d{4,5}(\w{2,7})D?\w{0,2}/', $campaignName, $result);
+            preg_match('/\w{2}\d{4,5}([A-Z]{2,7})D\d{1,2}/', $campaignName, $result);
+            $productType = $result[1] ?? '';
+        }
+
+        if (!$productType) {
+            $result = array();
+            preg_match('/\w{2}\d{4,5}([A-Z]{2,7})D?\d{0,2}/', $campaignName, $result);
             $productType = $result[1] ?? '';
         }
         return $productType ?: 'UNKNOWN';
@@ -490,9 +496,15 @@ class Dashboard extends Model
 
     public static function getDesignerFromCampaignName ($campaignName) {
         $result = array();
-        preg_match('/\w{2}\d{4,5}[A-Z]{2,7}(D?\d{0,2})/', $campaignName, $result);
+        preg_match('/\w{2}\d{4,5}[A-Z]{2,7}(D\d{1,2})/', $campaignName, $result);
         $designer = isset($result[1]) ? strtoupper($result[1]) : '';
-        if ($designer != '' && strpos('D', $designer) === false) {
+
+        if (!$designer) {
+            preg_match('/\w{2}\d{4,5}[A-Z]{2,7}(D?\d{0,2})/', $campaignName, $result);
+            $designer = isset($result[1]) ? strtoupper($result[1]) : '';
+        }
+
+        if ($designer != '' && strpos($designer, 'D') === false) {
             $designer = 'D' . $designer;
         }
 
@@ -505,8 +517,17 @@ class Dashboard extends Model
         $designer = isset($result[1]) ? strtoupper($result[1]) : '';
 
         if (!$designer) {
-            preg_match('/\w{2}\d{4,5}\w{2,7}(D\w{1,2})/', $sku, $result);
+            preg_match('/\w{2}\d{4,5}[A-Z]{2,7}(D\d{1,2})/', $sku, $result);
             $designer = isset($result[1]) ? strtoupper($result[1]) : '';
+        }
+
+        if (!$designer) {
+            preg_match('/\w{2}\d{4,5}[A-Z]{2,7}(D?\d{0,2})/', $sku, $result);
+            $designer = isset($result[1]) ? strtoupper($result[1]) : '';
+        }
+
+        if ($designer != '' && strpos($designer, 'D') === false) {
+            $designer = 'D' . $designer;
         }
 
         return $designer ?: 'UNKNOWN';
@@ -590,8 +611,13 @@ class Dashboard extends Model
 
     public static function getIdeaFromCampaignName ($campaignName) {
         $result = array();
-        preg_match('/(\w{2})\d{4,5}[A-Z]{2,7}D?\d{0,2}/', $campaignName, $result);
+        preg_match('/(\w{2})\d{4,5}[A-Z]{2,7}D\d{1,2}/', $campaignName, $result);
         $idea = isset($result[1]) ? strtoupper($result[1]) : '';
+
+        if (!$idea) {
+            preg_match('/\w{2}\d{4,5}[A-Z]{2,7}(D?\d{0,2})/', $campaignName, $result);
+            $idea = isset($result[1]) ? strtoupper($result[1]) : '';
+        }
 
         return $idea ?: 'UNKNOWN';
     }
@@ -615,7 +641,12 @@ class Dashboard extends Model
         }
 
         if (!$idea) {
-            preg_match('/^([A-Z]{2})\d{4,5}\w{2,7}D?\w{0,2}/', $sku, $result);
+            preg_match('/^([A-Z]{2})\d{4,5}[A-Z]{2,7}D\d{1,2}/', $sku, $result);
+            $idea = isset($result[1]) ? strtoupper($result[1]) : '';
+        }
+
+        if (!$idea) {
+            preg_match('/\w{2}\d{4,5}[A-Z]{2,7}(D?\d{0,2})/', $sku, $result);
             $idea = isset($result[1]) ? strtoupper($result[1]) : '';
         }
 

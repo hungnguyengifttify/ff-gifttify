@@ -39,6 +39,22 @@ class Dashboard extends Model
         return false;
     }
 
+    public static function sort_result($a, $b)
+    {
+        if ($a['total_order_amount'] == $b['total_order_amount']) {
+            return 0;
+        }
+        return ($a['total_order_amount'] > $b['total_order_amount']) ? -1 : 1;
+    }
+
+    public static function sort_result_by_ads_cost($a, $b)
+    {
+        if ($a['totalSpend'] == $b['totalSpend']) {
+            return 0;
+        }
+        return ($a['totalSpend'] > $b['totalSpend']) ? -1 : 1;
+    }
+
     public static function getReportByDate($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '') {
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
@@ -174,6 +190,7 @@ class Dashboard extends Model
                 'cpc' => $acc->totalUniqueClicks != 0 ? $acc->totalSpend / $acc->totalUniqueClicks : 0,
             );
         }
+        usort($result, [self::class, 'sort_result_by_ads_cost']);
 
         return $result;
 
@@ -230,6 +247,7 @@ class Dashboard extends Model
             $result[$country]['mo'] = ($result[$country]['total_order_amount']) > 0 ? 100*($result[$country]['totalSpend'] / $result[$country]['total_order_amount']) : 0;
             $result[$country]['aov'] = $result[$country]['total_order'] != 0 ? $result[$country]['total_order_amount'] / $result[$country]['total_order'] : 0;
         }
+        usort($result, [self::class, 'sort_result']);
 
         return $result;
 
@@ -330,6 +348,7 @@ class Dashboard extends Model
             $result[$v]['cpc'] = $adsResult[$v]['cpc'] ?? 0;
             $result[$v]['mo'] = ($result[$v]['total_order_amount']) > 0 ? 100*($result[$v]['totalSpend'] / $result[$v]['total_order_amount']) : 0;
         }
+        usort($result, [self::class, 'sort_result']);
 
         return $result;
 
@@ -490,6 +509,7 @@ class Dashboard extends Model
             $result[$v]['cpc'] = $adsResult[$v]['cpc'] ?? 0;
             $result[$v]['mo'] = ($result[$v]['total_order_amount']) > 0 ? 100*($result[$v]['totalSpend'] / $result[$v]['total_order_amount']) : 0;
         }
+        usort($result, [self::class, 'sort_result']);
 
         return $result;
     }
@@ -606,16 +626,18 @@ class Dashboard extends Model
             $result[$v]['cpc'] = $adsResult[$v]['cpc'] ?? 0;
             $result[$v]['mo'] = ($result[$v]['total_order_amount']) > 0 ? 100*($result[$v]['totalSpend'] / $result[$v]['total_order_amount']) : 0;
         }
+        usort($result, [self::class, 'sort_result']);
+
         return $result;
     }
 
     public static function getIdeaFromCampaignName ($campaignName) {
         $result = array();
-        preg_match('/(\w{2})\d{4,5}[A-Z]{2,7}D\d{1,2}/', $campaignName, $result);
+        preg_match('/([A-Z]{2})\d{4,5}[A-Z]{2,7}D\d{1,2}/', $campaignName, $result);
         $idea = isset($result[1]) ? strtoupper($result[1]) : '';
 
         if (!$idea) {
-            preg_match('/\w{2}\d{4,5}[A-Z]{2,7}(D?\d{0,2})/', $campaignName, $result);
+            preg_match('/([A-Z]{2})\d{4,5}[A-Z]{2,7}D?\d{0,2}/', $campaignName, $result);
             $idea = isset($result[1]) ? strtoupper($result[1]) : '';
         }
 
@@ -646,7 +668,7 @@ class Dashboard extends Model
         }
 
         if (!$idea) {
-            preg_match('/\w{2}\d{4,5}[A-Z]{2,7}(D?\d{0,2})/', $sku, $result);
+            preg_match('/([A-Z]{2})\d{4,5}[A-Z]{2,7}D?\d{0,2}/', $sku, $result);
             $idea = isset($result[1]) ? strtoupper($result[1]) : '';
         }
 

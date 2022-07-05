@@ -2,6 +2,10 @@
     .table {
         text-align: right;
     }
+    .inline-block {
+        display: inline-block;
+        margin-right: 100px;
+    }
 </style>
 <x-app-layout>
     <x-slot name="header">
@@ -9,8 +13,8 @@
             Store Report Detail
 
             <select onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
-                <option <?php if (str_contains(url()->current(), '/report_detail/us') ) echo "selected"; ?> value="/report_detail/us">US</option>
-                <option <?php if (str_contains(url()->current(), '/report_detail/au') ) echo "selected"; ?> value="/report_detail/au">AU</option>
+                <option <?php if (str_contains(url()->current(), '/report_detail/us') ) echo "selected";  ?>  value="/report_detail/us">US</option>
+                <option <?php if (str_contains(url()->current(), '/report_detail/au') ) echo "selected";  ?>  value="/report_detail/au">AU</option>
             </select>
         </h2>
     </x-slot>
@@ -22,20 +26,20 @@
                     <div class="p-6 bg-white border-b border-gray-200">
                         <a id="reportrange" class="btn btn-primary" href="#">
                             <i class="fa fa-calendar"></i>&nbsp;
-                            <span><?php echo $params['labelDate'];?></span> <i class="fa fa-caret-down"></i>
+                            <span>{!! $params['labelDate']; !!} </span> <i class="fa fa-caret-down"></i>
                         </a>
                         <input type="hidden" name="fromDate" id="fromDate" />
                         <input type="hidden" name="toDate" id="toDate" />
                         <input type="hidden" name="labelDate" id="labelDate" />
-                        <input type="hidden" name="debug" id="debug" value="<?php echo $_REQUEST['debug'] ?? '0'; ?>" />
-                        <span id="reportrangetext"><?php echo $params['fromDate']->format('d-m-Y') . ' => ' . $params['toDate']->format('d-m-Y');?></span>
+                        <input type="hidden" name="debug" id="debug" value="{!! $_REQUEST['debug'] ?? '0';  !!} " />
+                        <span id="reportrangetext">{!! $params['fromDate']->format('d-m-Y') . ' => ' . $params['toDate']->format('d-m-Y'); !!} </span>
 
                         <script type="text/javascript">
-                            <?php if ($store == "us"):; ?>
+                            <?php if ($store == "us"):;  ?>
                             moment.tz.setDefault("America/Los_Angeles");
-                            <?php else: ?>
+                            <?php else:  ?>
                             moment.tz.setDefault("Australia/Sydney");
-                            <?php endif; ?>
+                            <?php endif;  ?>
 
                             moment().startOf('isoWeek');
 
@@ -103,70 +107,74 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white">
                 <div class="p-6 bg-white border-b border-gray-200">
-                    <table class="table table-responsive table-bordered" style="width: auto">
-                        <h1>By Account</h1>
-                        <thead>
-                        <tr>
-                            <th></th>
-                            <th>AdsCost</th>
-                            <th>CPC</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <?php foreach ($accountsAds as $acc): ?>
-                        <tr>
-                            <td><?php echo $acc['account_name'] ?></td>
-                            <td><?php echo gifttify_price_format($acc['totalSpend']); ?></td>
-                            <td><?php echo number_format($acc['cpc'], 2); ?></td>
-                        </tr>
-                        <?php endforeach;?>
-                        </tbody>
-                    </table>
+                    <div class="inline-block">
+                        <table class="table table-responsive table-bordered" style="width: auto">
+                            <h1>By Account</h1>
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>AdsCost</th>
+                                <th>CPC</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php foreach ($accountsAds as $acc):  ?>
+                            <tr>
+                                <td>{!! $acc['account_name']  !!} </td>
+                                <td>{!! gifttify_price_format($acc['totalSpend']);  !!} </td>
+                                <td>{!! number_format($acc['cpc'], 2);  !!} </td>
+                            </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
 
-                    <table class="table table-responsive table-bordered" style="width: auto">
-                        <h1>By Country</h1>
-                        <thead>
-                        <tr>
-                            <th></th>
-                            <th>AdsCost</th>
-                            <th>Rev</th>
-                            <th>MO</th>
-                            <th>TotalOrders</th>
-                            <th>CPC</th>
-                            <th>AOV</th>
-                        </tr>
-                        </thead>
-                        <tbody>
+                    <div class="inline-block">
+                        <table class="table table-responsive table-bordered" style="width: auto">
+                            <h1>By Country</h1>
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>AdsCost</th>
+                                <th>Rev</th>
+                                <th>MO</th>
+                                <th>TotalOrders</th>
+                                <th>CPC</th>
+                                <th>AOV</th>
+                            </tr>
+                            </thead>
+                            <tbody>
 
-                        <?php $sumTotalSpend = $sumTotalOrderAmount = $sumTotalOrders = 0; ?>
-                        <?php foreach ($countriesAds as $v): ?>
-                        <tr>
-                            <?php $sumTotalSpend += $v['totalSpend'];  ?>
-                            <?php $sumTotalOrderAmount += $v['total_order_amount'];  ?>
-                            <?php $sumTotalOrders += $v['total_order'];  ?>
-                            <td><?php echo $v['country_code']; ?></td>
-                            <td><?php echo gifttify_price_format($v['totalSpend']); ?></td>
-                            <td><?php echo gifttify_price_format($v['total_order_amount']); ?></td>
-                            <td><?php echo round($v['mo']) . '%'; ?></td>
-                            <td><?php echo round($v['total_order']); ?></td>
-                            <td><?php echo number_format($v['cpc'], 2); ?></td>
-                            <td><?php echo gifttify_price_format($v['aov']); ?></td>
-                        </tr>
-                        <?php endforeach;?>
-                        </tbody>
-                        <tfoot>
-                        <tr>
-                            <?php $sumMo = $sumTotalOrderAmount != 0 ? 100*($sumTotalSpend/$sumTotalOrderAmount) : 0;  ?>
+                            <?php $sumTotalSpend = $sumTotalOrderAmount = $sumTotalOrders = 0;  ?>
+                            <?php foreach ($countriesAds as $v):  ?>
+                            <tr {!! display_row_bg_dashboard($v['mo']);  !!}  >
+                                <?php $sumTotalSpend += $v['totalSpend'];  ?>
+                                <?php $sumTotalOrderAmount += $v['total_order_amount'];   ?>
+                                <?php $sumTotalOrders += $v['total_order'];   ?>
+                                <td>{!! $v['country_code'];  !!} </td>
+                                <td {!! display_zero_cell_dashboard($v['totalSpend'])!!} >{!! gifttify_price_format($v['totalSpend']);  !!} </td>
+                                <td {!! display_zero_cell_dashboard($v['total_order_amount'])!!} >{!! gifttify_price_format($v['total_order_amount']);  !!} </td>
+                                <td {!! display_zero_cell_dashboard($v['mo'])!!} >{!! round($v['mo']) . '%';  !!} </td>
+                                <td {!! display_zero_cell_dashboard($v['total_order'])!!} >{!! round($v['total_order']);  !!} </td>
+                                <td {!! display_zero_cell_dashboard($v['cpc'])!!} >{!! number_format($v['cpc'], 2);  !!} </td>
+                                <td {!! display_zero_cell_dashboard($v['aov'])!!} >{!! gifttify_price_format($v['aov']);  !!} </td>
+                            </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <?php $sumMo = $sumTotalOrderAmount != 0 ? 100*($sumTotalSpend/$sumTotalOrderAmount) : 0;  ?>
 
-                            <td>All-Country</td>
-                            <td><?php echo gifttify_price_format($sumTotalSpend); ?></td>
-                            <td><?php echo gifttify_price_format($sumTotalOrderAmount); ?></td>
-                            <td><?php echo round($sumMo) . '%'; ?></td>
-                            <td><?php echo round($sumTotalOrders) ; ?></td>
-                            <td colspan="3"></td>
-                        </tr>
-                        </tfoot>
-                    </table>
+                                <td>All-Country</td>
+                                <td>{!! gifttify_price_format($sumTotalSpend);  !!} </td>
+                                <td>{!! gifttify_price_format($sumTotalOrderAmount);  !!} </td>
+                                <td>{!! round($sumMo) . '%';  !!} </td>
+                                <td>{!! round($sumTotalOrders) ;  !!} </td>
+                                <td colspan="3"></td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
 
                     <table class="table table-responsive table-bordered" style="width: auto">
                         <h1>By Product Type</h1>
@@ -181,102 +189,111 @@
                         </thead>
                         <tbody>
                         <?php foreach ($productTypes as $v): ?>
-                        <tr>
-                            <td><?php echo $v['product_type_name'] . "[{$v['product_type_code']}]"; ?></td>
-                            <td><?php echo gifttify_price_format($v['totalSpend']); ?></td>
-                            <td><?php echo gifttify_price_format($v['total_order_amount']); ?></td>
-                            <td><?php echo number_format($v['cpc'], 2); ?></td>
-                            <td><?php echo round($v['mo']) . '%'; ?></td>
+                        <tr {!! display_row_bg_dashboard($v['mo']) !!} >
+                            <td>{!! $v['product_type_name'] . "[{$v['product_type_code']}]";  !!} </td>
+                            <td {!! display_zero_cell_dashboard($v['totalSpend'])!!} >{!! gifttify_price_format($v['totalSpend']);  !!} </td>
+                            <td {!! display_zero_cell_dashboard($v['total_order_amount'])!!} >{!! gifttify_price_format($v['total_order_amount']);  !!} </td>
+                            <td {!! display_zero_cell_dashboard($v['cpc'])!!} >{!! number_format($v['cpc'], 2);  !!} </td>
+                            <td {!! display_zero_cell_dashboard($v['mo'])!!} >{!! round($v['mo']) . '%';  !!} </td>
                         </tr>
-                        <?php endforeach;?>
+                        <?php endforeach; ?>
                         </tbody>
                     </table>
 
-                    <table class="table table-responsive table-bordered" style="width: auto">
-                        <h1>By Ads Type</h1>
-                        <thead>
-                        <tr>
-                            <th></th>
-                            <th>AdsCost</th>
-                            <th>Percent</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <?php foreach ($adsTypes as $v): ?>
-                        <tr>
-                            <td><?php echo $v['ads_type']; ?></td>
-                            <td><?php echo gifttify_price_format($v['totalSpend']); ?></td>
-                            <td><?php echo round($v['percent'],2) . '%'; ?></td>
-                        </tr>
-                        <?php endforeach;?>
-                        </tbody>
-                    </table>
+                    <div class="inline-block">
+                        <table class="table table-responsive table-bordered" style="width: auto">
+                            <h1>By Designer</h1>
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>AdsCost</th>
+                                <th>Rev</th>
+                                <th>CPC</th>
+                                <th>MO</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php foreach ($designerAds as $v): ?>
+                            <tr {!! display_row_bg_dashboard($v['mo']); !!}  >
+                                <td>{!! $v['designer_name'] . "[{$v['designer_code']}]";  !!} </td>
+                                <td {!! display_zero_cell_dashboard($v['totalSpend']);  !!}  >{!! gifttify_price_format($v['totalSpend']);  !!} </td>
+                                <td {!! display_zero_cell_dashboard($v['total_order_amount']);  !!}  >{!! gifttify_price_format($v['total_order_amount']);  !!} </td>
+                                <td {!! display_zero_cell_dashboard($v['cpc']);  !!}  >{!! number_format($v['cpc'], 2);  !!} </td>
+                                <td {!! display_zero_cell_dashboard($v['mo']);  !!}  >{!! round($v['mo']) . '%';  !!} </td>
+                            </tr>
+                            <?php endforeach;?>
+                            </tbody>
+                        </table>
+                    </div>
 
-                    <table class="table table-responsive table-bordered" style="width: auto">
-                        <h1>By Designer</h1>
-                        <thead>
-                        <tr>
-                            <th></th>
-                            <th>AdsCost</th>
-                            <th>Rev</th>
-                            <th>CPC</th>
-                            <th>MO</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <?php foreach ($designerAds as $v): ?>
-                        <tr>
-                            <td><?php echo $v['designer_name'] . "[{$v['designer_code']}]"; ?></td>
-                            <td><?php echo gifttify_price_format($v['totalSpend']); ?></td>
-                            <td><?php echo gifttify_price_format($v['total_order_amount']); ?></td>
-                            <td><?php echo number_format($v['cpc'], 2); ?></td>
-                            <td><?php echo round($v['mo']) . '%'; ?></td>
-                        </tr>
-                        <?php endforeach;?>
-                        </tbody>
-                    </table>
+                    <div class="inline-block">
+                        <table class="table table-responsive table-bordered" style="width: auto">
+                            <h1>By Idea</h1>
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>AdsCost</th>
+                                <th>Rev</th>
+                                <th>CPC</th>
+                                <th>MO</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php foreach ($ideaAds as $v): ?>
+                            <tr {!! display_row_bg_dashboard($v['mo']);  !!}  >
+                                <td>{!! $v['idea_name'] . "[{$v['idea_code']}]";  !!} </td>
+                                <td {!! display_zero_cell_dashboard($v['totalSpend']);  !!}  >{!! gifttify_price_format($v['totalSpend']);  !!} </td>
+                                <td {!! display_zero_cell_dashboard($v['total_order_amount']); !!}  >{!! gifttify_price_format($v['total_order_amount']);  !!} </td>
+                                <td {!! display_zero_cell_dashboard($v['cpc']);  !!}  >{!! number_format($v['cpc'], 2);  !!} </td>
+                                <td {!! display_zero_cell_dashboard($v['mo']);  !!}  >{!! round($v['mo']) . '%';  !!} </td>
+                            </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
 
-                    <table class="table table-responsive table-bordered" style="width: auto">
-                        <h1>By Idea</h1>
-                        <thead>
-                        <tr>
-                            <th></th>
-                            <th>AdsCost</th>
-                            <th>Rev</th>
-                            <th>CPC</th>
-                            <th>MO</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <?php foreach ($ideaAds as $v): ?>
-                        <tr>
-                            <td><?php echo $v['idea_name'] . "[{$v['idea_code']}]"; ?></td>
-                            <td><?php echo gifttify_price_format($v['totalSpend']); ?></td>
-                            <td><?php echo gifttify_price_format($v['total_order_amount']); ?></td>
-                            <td><?php echo number_format($v['cpc'], 2); ?></td>
-                            <td><?php echo round($v['mo']) . '%'; ?></td>
-                        </tr>
-                        <?php endforeach;?>
-                        </tbody>
-                    </table>
 
-                    <table class="table table-responsive table-bordered" style="width: auto">
-                        <h1>By Ads Staff</h1>
-                        <thead>
-                        <tr>
-                            <th></th>
-                            <th>AdsCost</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <?php foreach ($adsStaffs as $v): ?>
-                        <tr>
-                            <td><?php echo $v['adsStaff']; ?></td>
-                            <td><?php echo gifttify_price_format($v['totalSpend']); ?></td>
-                        </tr>
-                        <?php endforeach;?>
-                        </tbody>
-                    </table>
+                    <div class="inline-block">
+                        <table class="table table-responsive table-bordered" style="width: auto">
+                            <h1>By Ads Staff</h1>
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>AdsCost</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php foreach ($adsStaffs as $v):?>
+                            <tr>
+                                <td>{!! $v['adsStaff'];  !!} </td>
+                                <td>{!! gifttify_price_format($v['totalSpend']);  !!} </td>
+                            </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="inline-block">
+                        <table class="table table-responsive table-bordered" style="width: auto">
+                            <h1>By Ads Type</h1>
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>AdsCost</th>
+                                <th>Percent</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php foreach ($adsTypes as $v): ?>
+                            <tr>
+                                <td>{!! $v['ads_type'];  !!} </td>
+                                <td>{!! gifttify_price_format($v['totalSpend']);  !!} </td>
+                                <td>{!! round($v['percent'],2) . '%';  !!} </td>
+                            </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
 
                 </div>
             </div>

@@ -81,4 +81,36 @@ class DashboardController extends Controller {
 
         return view('report.dashboard_detail', compact('title', 'store', 'params', 'accountsAds', 'countriesAds', 'productTypes', 'adsTypes', 'designerAds', 'ideaAds', 'adsStaffs'));
     }
+
+    public function ads_creative(Request $request) {
+        $store = $request->input('store') ?? '';
+        $code = $request->input('code') ?? '';
+        $type = $request->input('type') ?? '';
+        $labelDate = $request->input('labelDate') ?? 'Today';
+        $fromDateReq = $request->input('fromDate') ?? '';
+        $toDateReq = $request->input('toDate') ?? '';
+
+        $range_report = array_search ($labelDate, Dashboard::$rangeDate);
+        $dateTimeRange = Dashboard::getDatesByRangeDateLabel($store, $range_report, $fromDateReq, $toDateReq);
+        $fromDate = $dateTimeRange['fromDate'];
+        $toDate = $dateTimeRange['toDate'];
+
+        $params = array(
+            'fromDate' => (new \DateTime($fromDate))->format('d-m-Y'),
+            'toDate' => (new \DateTime($toDate))->format('d-m-Y'),
+            'labelDate' => $labelDate,
+            'store' => $store,
+            'code' => $code,
+            'type' => $type,
+        );
+
+        if (!$store) {
+            die('Not Allowed');
+        }
+
+        $range_report = array_search ($labelDate, Dashboard::$rangeDate);
+        $creatives = Dashboard::getAdsCreativesReportByDate($store, $range_report, $fromDateReq, $toDateReq, $code, $type);
+
+        return view('report.dashboard_ads_creatives', compact('creatives', 'params'));
+    }
 }

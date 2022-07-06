@@ -164,8 +164,10 @@
                             <tfoot>
                             <tr>
                                 <?php $sumMo = $sumTotalOrderAmount != 0 ? 100*($sumTotalSpend/$sumTotalOrderAmount) : 0;  ?>
-
-                                <td>All-Country</td>
+                                @php
+                                    $creativeLink = route('ads_creative') . "?store=" . $store . "&" . app('request')->input('store') . "&fromDate=" . app('request')->input('fromDate') . "&toDate=" . app('request')->input('toDate') . "&labelDate=" . app('request')->input('labelDate');
+                                @endphp
+                                    <td><a href="{!! $creativeLink !!}" target="_blank">All-Country</a></td>
                                 <td>{!! gifttify_price_format($sumTotalSpend);  !!} </td>
                                 <td>{!! gifttify_price_format($sumTotalOrderAmount);  !!} </td>
                                 <td>{!! round($sumMo) . '%';  !!} </td>
@@ -190,7 +192,10 @@
                         <tbody>
                         <?php foreach ($productTypes as $v): ?>
                         <tr {!! display_row_bg_dashboard($v['mo']) !!} >
-                            <td>{!! $v['product_type_name'] . "[{$v['product_type_code']}]";  !!} </td>
+                            @php
+                                $creativeLink = route('ads_creative') . "?store=" . $store . "&" . app('request')->input('store') . "&fromDate=" . app('request')->input('fromDate') . "&toDate=" . app('request')->input('toDate') . "&labelDate=" . app('request')->input('labelDate') . "&code=" . $v['product_type_code'] . "&type=product_type";
+                            @endphp
+                            <td>{!! $v['product_type_name'] . "[<a href='$creativeLink' target='_blank'>{$v['product_type_code']}</a>]";  !!} </td>
                             <td {!! display_zero_cell_dashboard($v['totalSpend'])!!} >{!! gifttify_price_format($v['totalSpend']);  !!} </td>
                             <td {!! display_zero_cell_dashboard($v['total_order_amount'])!!} >{!! gifttify_price_format($v['total_order_amount']);  !!} </td>
                             <td {!! display_zero_cell_dashboard($v['cpc'])!!} >{!! number_format($v['cpc'], 2);  !!} </td>
@@ -215,7 +220,10 @@
                             <tbody>
                             <?php foreach ($designerAds as $v): ?>
                             <tr {!! display_row_bg_dashboard($v['mo']); !!}  >
-                                <td>{!! $v['designer_name'] . "[{$v['designer_code']}]";  !!} </td>
+                                @php
+                                    $creativeLink = route('ads_creative') . "?store=" . $store . "&" . app('request')->input('store') . "&fromDate=" . app('request')->input('fromDate') . "&toDate=" . app('request')->input('toDate') . "&labelDate=" . app('request')->input('labelDate') . "&code=" . $v['designer_code'] . "&type=designer";
+                                @endphp
+                                <td>{!! $v['designer_name'] . "[<a href='$creativeLink' target='_blank'>{$v['designer_code']}</a>]";  !!} </td>
                                 <td {!! display_zero_cell_dashboard($v['totalSpend']);  !!}  >{!! gifttify_price_format($v['totalSpend']);  !!} </td>
                                 <td {!! display_zero_cell_dashboard($v['total_order_amount']);  !!}  >{!! gifttify_price_format($v['total_order_amount']);  !!} </td>
                                 <td {!! display_zero_cell_dashboard($v['cpc']);  !!}  >{!! number_format($v['cpc'], 2);  !!} </td>
@@ -234,18 +242,21 @@
                                 <th></th>
                                 <th>AdsCost</th>
                                 <th>Rev</th>
-                                <th>CPC</th>
                                 <th>MO</th>
+                                <th>CPC</th>
                             </tr>
                             </thead>
                             <tbody>
                             <?php foreach ($ideaAds as $v): ?>
                             <tr {!! display_row_bg_dashboard($v['mo']);  !!}  >
-                                <td>{!! $v['idea_name'] . "[{$v['idea_code']}]";  !!} </td>
+                                @php
+                                    $creativeLink = route('ads_creative') . "?store=" . $store . "&" . app('request')->input('store') . "&fromDate=" . app('request')->input('fromDate') . "&toDate=" . app('request')->input('toDate') . "&labelDate=" . app('request')->input('labelDate') . "&code=" . $v['idea_code'] . "&type=idea";
+                                @endphp
+                                <td>{!! $v['idea_name'] . "[<a target='_blank' href='$creativeLink'>{$v['idea_code']}</a>]";  !!} </td>
                                 <td {!! display_zero_cell_dashboard($v['totalSpend']);  !!}  >{!! gifttify_price_format($v['totalSpend']);  !!} </td>
                                 <td {!! display_zero_cell_dashboard($v['total_order_amount']); !!}  >{!! gifttify_price_format($v['total_order_amount']);  !!} </td>
-                                <td {!! display_zero_cell_dashboard($v['cpc']);  !!}  >{!! number_format($v['cpc'], 2);  !!} </td>
                                 <td {!! display_zero_cell_dashboard($v['mo']);  !!}  >{!! round($v['mo']) . '%';  !!} </td>
+                                <td {!! display_zero_cell_dashboard($v['cpc']);  !!}  >{!! number_format($v['cpc'], 2);  !!} </td>
                             </tr>
                             <?php endforeach; ?>
                             </tbody>

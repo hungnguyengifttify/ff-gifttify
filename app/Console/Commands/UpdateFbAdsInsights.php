@@ -117,6 +117,7 @@ class UpdateFbAdsInsights extends Command
                 foreach ($data as $v) {
                     FbAdsInsights::updateOrCreate([
                         'ad_id' => $v['ad_id'] ?? 0,
+                        'adset_id' => $v['adset_id'] ?? '',
                         'campaign_id' => $v['campaign_id'] ?? 0,
                         'country' => $v['country'] ?? '',
                         'date_record' => $v['date_start'] ?? '',
@@ -125,7 +126,6 @@ class UpdateFbAdsInsights extends Command
                         'account_name' => $v['account_name'] ?? '',
                         'account_currency' => $v['account_currency'] ?? '',
                         'ad_name' => $v['ad_name'] ?? '',
-                        'adset_id' => $v['adset_id'] ?? '',
                         'adset_name' => $v['adset_name'] ?? '',
                         'campaign_name' => $v['campaign_name'],
                         'cpc' => $v['cpc'] ?? 0,
@@ -147,6 +147,7 @@ class UpdateFbAdsInsights extends Command
 
         }
 
+        $this->info("Cron Job end at ". now());
         $this->info('Success!');
     }
 }

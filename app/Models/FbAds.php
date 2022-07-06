@@ -32,4 +32,14 @@ class FbAds extends Model
     static $deAccountIds = array(
         '697732767946862'
     );
+
+    protected $fillable = [
+        'id', 'account_id', 'adset', 'adset_id', 'bid_type', 'campaign', 'campaign_id',
+        'configured_status', 'conversion_domain', 'conversion_specs', 'created_time',
+        'creative', 'creative_id', 'demolink_hash', 'display_sequence', 'effective_status', 'engagement_audience',
+        'last_updated_by_app_id', 'name', 'preview_shareable_link', 'source_ad',
+        'source_ad_id', 'status', 'targeting', 'tracking_and_conversion_with_defaults',
+        'tracking_specs', 'updated_time'
+    ];
+
 }

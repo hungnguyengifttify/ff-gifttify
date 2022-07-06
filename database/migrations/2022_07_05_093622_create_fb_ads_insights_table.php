@@ -43,7 +43,7 @@ return new class extends Migration
             $table->index('ad_id');
             $table->index('campaign_id');
             $table->index('date_record');
-            $table->unique(['ad_id', 'campaign_id', 'country', 'date_record']);
+            $table->unique(['ad_id', 'adset_id', 'campaign_id', 'country', 'date_record'], 'uni_key');
         });
     }
 

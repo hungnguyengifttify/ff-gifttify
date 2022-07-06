@@ -26,5 +26,8 @@ Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'ind
 Route::get('/report_detail/{store}', [\App\Http\Controllers\DashboardController::class, 'report_detail'])
     ->name('report_detail');
 
+Route::get('/ads_creative', [\App\Http\Controllers\DashboardController::class, 'ads_creative'])
+    ->name('ads_creative');
+
 
 require __DIR__.'/auth.php';

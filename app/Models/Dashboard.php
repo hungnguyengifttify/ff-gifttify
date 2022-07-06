@@ -723,4 +723,69 @@ class Dashboard extends Model
         return $adsType;
     }
 
+    public static function getAdsCreativesReportByDate ($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '', $code = '', $type = '') {
+        $storeConfig = self::getStoreConfig($store);
+        if (!$storeConfig) return false;
+
+        $fbAccountIds = $storeConfig['fbAccountIds'];
+
+        $dateTimeRange = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq);
+        $fromDate = $dateTimeRange['fromDate'];
+        $toDate = $dateTimeRange['toDate'];
+
+        $fbAds = DB::table('fb_ads_insights')
+            ->select(DB::raw('campaign_name, max(fb_ads_creatives.id) as creative_id, max(fb_ads_insights.campaign_id) as campaign_id, ad_id, SUM(spend) as totalSpend, sum(inline_link_clicks) as totalUniqueClicks, max(body) as body, max(effective_object_story_id) as effective_object_story_id, max(image_url) as image_url, max(fb_ads_creatives.title) as title, max(fb_ads_creatives.status) as status, max(title) as title, max(object_story_spec) as object_story_spec'))
+            ->leftJoin('fb_ads', 'fb_ads_insights.ad_id', '=', 'fb_ads.id')
+            ->leftJoin('fb_ads_creatives', 'fb_ads.creative_id', '=', 'fb_ads_creatives.id')
+            ->whereIn('fb_ads_insights.account_id', $fbAccountIds)
+            ->where('date_record', '>=', $fromDate)
+            ->where('date_record', '<=', $toDate)
+            ->groupBy(array('ad_id', 'campaign_name'))->get();
+
+        $adsResult = array();
+        foreach ($fbAds->all() as $v) {
+            $checkCode = '';
+            if ($type == 'idea') {
+                $checkCode = self::getIdeaFromCampaignName ($v->campaign_name);
+            } elseif ($type == 'designer') {
+                $checkCode = self::getDesignerFromCampaignName ($v->campaign_name);
+            } elseif ($type == 'product_type') {
+                $checkCode = self::getProductTypeFromCampaignName ($v->campaign_name);
+            }
+
+            if ($checkCode != $code) continue;
+
+            $campaignId = $v->campaign_id;
+            $linkId = $v->effective_object_story_id;
+
+            if (!isset($adsResult[$linkId]['campaigns'][$campaignId])) {
+                $adsResult[$linkId]['campaigns'][$campaignId]['campaignName'] = $v->campaign_name;
+                $adsResult[$linkId]['campaigns'][$campaignId]['idea_code'] = $code;
+                $adsResult[$linkId]['campaigns'][$campaignId]['totalSpend'] = 0;
+                $adsResult[$linkId]['campaigns'][$campaignId]['totalUniqueClicks'] = 0;
+            }
+            $adsResult[$linkId]['campaigns'][$campaignId]['totalSpend'] += $v->totalSpend;
+            $adsResult[$linkId]['campaigns'][$campaignId]['totalUniqueClicks'] += $v->totalUniqueClicks;
+            $adsResult[$linkId]['campaigns'][$campaignId]['cpc'] = ($adsResult[$linkId]['campaigns'][$campaignId]['totalUniqueClicks'] != 0 ? $adsResult[$linkId]['campaigns'][$campaignId]['totalSpend'] / $adsResult[$linkId]['campaigns'][$campaignId]['totalUniqueClicks'] : 0);
+
+            if (!isset($adsResult[$linkId]['body'])) {
+                $adsResult[$linkId]['body'] = $v->body;
+                $adsResult[$linkId]['ads_url'] = isset($linkId) ? 'https://facebook.com/' . $linkId : '';
+                $adsResult[$linkId]['image_url'] = $v->image_url ?: '';
+                $adsResult[$linkId]['title'] = $v->title ?: '';
+                $adsResult[$linkId]['status'] = $v->status ?: '';
+                $adsResult[$linkId]['object_story_spec'] = $v->object_story_spec ?: '';
+                $adsResult[$linkId]['countCampaign'] = 0;
+                $adsResult[$linkId]['totalSpendCampaign'] = 0;
+                $adsResult[$linkId]['totalUniqueClicksCampaign'] = 0;
+            }
+            $adsResult[$linkId]['countCampaign']++;
+            $adsResult[$linkId]['totalSpendCampaign'] += $v->totalSpend;
+            $adsResult[$linkId]['totalUniqueClicksCampaign'] += $v->totalUniqueClicks;
+            $adsResult[$linkId]['cpc'] = $adsResult[$linkId]['totalUniqueClicksCampaign'] != 0 ? $adsResult[$linkId]['totalSpendCampaign'] / $adsResult[$linkId]['totalUniqueClicksCampaign'] : 0;
+
+        }
+        return $adsResult;
+    }
+
 }

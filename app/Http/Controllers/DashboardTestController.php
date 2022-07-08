@@ -8,77 +8,38 @@ use Illuminate\Support\Facades\DB;
 use App\Models\FbAds;
 use App\Models\Dashboard;
 
+use App\Services\GoogleDrive;
+
 class DashboardTestController extends Controller {
 
     public function index(Request $request)
     {
-        $rangeDates = Dashboard::$rangeDate;
-        unset($rangeDates['custom_range']);
-        $rangeDates = array_keys($rangeDates);
+        $gDrive = new GoogleDrive();
 
-        $stores = array('us', 'au');
-        $reports = array();
-        foreach ($rangeDates as $v) {
-            foreach ($stores as $store) {
-                $value = Dashboard::getReportByDate($store, $v);
-                $reports[$store][] = $value;
+        $optParams = array(
+            //'corpora' => 'user',
+            //'driveId' => '1gsXWxbdw18LNz8G1_SrwxoKIpGpspCKc',
+            //'includeItemsFromAllDrives' => true,
+            //'supportsAllDrives' => true,
+            'pageSize' => 5,
+            'fields' => 'nextPageToken, files(id, createdTime, description, fileExtension, fullFileExtension, mimeType, modifiedTime, name, originalFilename, parents, permissionIds, quotaBytesUsed, shared, size, spaces, thumbnailLink, viewersCanCopyContent, webContentLink, webViewLink, writersCanShare, owners, permissions)',
+            'q' => "mimeType = 'application/vnd.google-apps.folder' or mimeType contains 'image/'"
+        );
+        $results = $gDrive->service->files->listFiles($optParams);
+        //$results = $service->drives->listDrives();
+        //dd($results);
 
-                if (!isset($reports['all'][$v])) {
-                    $reports['all'][$v]['title'] = $value['title'];
-                    $reports['all'][$v]['dateDisplay'] = $value['dateDisplay'];
-                    $reports['all'][$v]['fbAds']['totalSpend'] = 0;
-                    $reports['all'][$v]['fbAds']['totalUniqueClicks'] = 0;
-                    $reports['all'][$v]['orders']['total'] = 0;
-                    $reports['all'][$v]['orders']['totalAmount'] = 0;
-                    $reports['all'][$v]['productCost'] = 0;
-                    $reports['all'][$v]['profitLoss'] = 0;
-                    $reports['all'][$v]['mo'] = 0;
-                }
-                $reports['all'][$v]['fbAds']['totalSpend'] += $value['fbAds']['totalSpend'] ?? 0;
-                $reports['all'][$v]['fbAds']['totalUniqueClicks'] += $value['fbAds']['totalUniqueClicks'] ?? 0;
-                $reports['all'][$v]['orders']['total'] += $value['orders']['total'] ?? 0;
-                $reports['all'][$v]['orders']['totalAmount'] += $value['orders']['totalAmount'] ?? 0;
-                $reports['all'][$v]['productCost'] += $value['productCost'] ?? 0;
-                $reports['all'][$v]['profitLoss'] += $value['profitLoss'] ?? 0;
-                $reports['all'][$v]['mo'] += $value['mo'] ?? 0;
+        if (count($results->getFiles()) == 0) {
+            print "No files found.\n";
+        } else {
+            print "Files:\n";
+            dd($results->getFiles());
+
+            foreach ($results->getFiles() as $file) {
+                dd($file);
+                echo "<br/>";
             }
         }
 
-        return view('report.dashboard_sum', array('reports' => $reports));
-    }
-
-    public function report_detail(Request $request, $store = 'us') {
-        if ($store == 'us') {
-            $title = "US Report Detail";
-        } elseif ($store == 'au') {
-            $title = "AU Report Detail";
-        } else {
-            dd('Not Allowed');
-        }
-
-        $labelDate = $request->input('labelDate') ?? 'Today';
-        $fromDateReq = $request->input('fromDate') ?? '';
-        $toDateReq = $request->input('toDate') ?? '';
-        $range_report = array_search ($labelDate, Dashboard::$rangeDate);
-
-        $dateTimeRange = Dashboard::getDatesByRangeDateLabel($store, $range_report, $fromDateReq, $toDateReq);
-        $fromDate = $dateTimeRange['fromDate'];
-        $toDate = $dateTimeRange['toDate'];
-
-        $params = array(
-            'fromDate' => new \DateTime($fromDate),
-            'toDate' => new \DateTime($toDate),
-            'labelDate' => $labelDate,
-        );
-
-        $accountsAds = Dashboard::getAccountsAdsReportByDate($store, $range_report, $fromDateReq, $toDateReq);
-        $countriesAds = Dashboard::getCountryAdsReportByDate($store, $range_report, $fromDateReq, $toDateReq);
-        $productTypes = Dashboard::getProductTypesReportByDate($store, $range_report, $fromDateReq, $toDateReq);
-        $adsTypes = Dashboard::getAdsTypesReportByDate($store, $range_report, $fromDateReq, $toDateReq);
-        $designerAds = Dashboard::getDesignerReportByDate($store, $range_report, $fromDateReq, $toDateReq);
-        $ideaAds = Dashboard::getIdeaReportByDate($store, $range_report, $fromDateReq, $toDateReq);
-        $adsStaffs = Dashboard::getAdsStaffReportByDate($store, $range_report, $fromDateReq, $toDateReq);
-
-        return view('report.dashboard_detail_test', compact('title', 'store', 'params', 'accountsAds', 'countriesAds', 'productTypes', 'adsTypes', 'designerAds', 'ideaAds', 'adsStaffs'));
     }
 }

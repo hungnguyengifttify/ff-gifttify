@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('id');
             $table->dateTime('createdTime');
             $table->dateTime('modifiedTime');
-            $table->string('description', 512);
             $table->string('fullFileExtension');
             $table->string('mimeType');
             $table->string('name');
@@ -27,7 +26,7 @@ return new class extends Migration
             $table->string('webContentLink');
             $table->tinyInteger('viewersCanCopyContent');
             $table->tinyInteger('writersCanShare');
-            $table->integer('size');
+            $table->unsignedBigInteger('size');
             $table->json('parents');
             $table->json('owners');
             $table->json('spaces');

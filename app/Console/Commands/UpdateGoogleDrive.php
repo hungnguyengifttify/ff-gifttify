@@ -37,7 +37,7 @@ class UpdateGoogleDrive extends Command
         do {
             try {
                 $parameters = array(
-                    'pageSize' => 1000,
+                    'pageSize' => 100,
                     'fields' => 'nextPageToken, files(id, createdTime, description, fileExtension, fullFileExtension, mimeType, modifiedTime, name, originalFilename, parents, permissionIds, shared, size, spaces, thumbnailLink, viewersCanCopyContent, webContentLink, webViewLink, writersCanShare, owners)',
                     'q' => "mimeType = 'application/vnd.google-apps.folder' or mimeType contains 'image/'"
                 );
@@ -56,7 +56,6 @@ class UpdateGoogleDrive extends Command
                     ], [
                         'createdTime' => isset($v['createdTime']) ? Carbon::createFromFormat('Y-m-d\TH:i:s.v\Z', $v['createdTime'], 'UTC') : '1900-01-01',
                         'modifiedTime' => isset($v['modifiedTime']) ? Carbon::createFromFormat('Y-m-d\TH:i:s.v\Z', $v['modifiedTime'], 'UTC') : '1900-01-01',
-                        'description' => $v['description'] ?? '',
                         'fullFileExtension' => $v['fullFileExtension'] ?? '',
                         'mimeType' => $v['mimeType'] ?? '',
                         'name' => $v['name'] ?? '',

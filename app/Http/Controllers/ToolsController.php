@@ -25,7 +25,8 @@ class ToolsController extends Controller {
 
         $result = array();
         if ($id) {
-            $result = GoogleDriveFiles::flat_image_links_from_folder_id($id);
+            //$result = GoogleDriveFiles::flat_image_links_from_folder_id($id);
+            $result = GoogleDriveFiles::flat_image_links_from_folder_id_by_mysql_query($id);
         }
         if ($action == 'download_csv') {
             $this->export_image_links($result);

@@ -20,23 +20,36 @@ class GoogleDriveFiles extends Model
         if ($level > 5) {
             return $result;
         }
-        $data = DB::select("
+        if ($level == 1) {
+            $dataRoot = DB::selectOne("
+                select id, name, mimeType, webContentLink
+                from google_drive_files
+                where id = :id
+                ;", ['id' => $folderId]
+            );
+            $result['folders'][$dataRoot->name]['id'] = $dataRoot->id;
+            $result['folders'][$dataRoot->name]['name'] = $dataRoot->name;
+            self::get_children_from_folder_id($dataRoot->id, $result['folders'][$dataRoot->name], $level);
+        } else {
+            $data = DB::select("
             select id, name, mimeType, webContentLink
             from google_drive_files
             where parentId = :parentId
             ;", ['parentId' => $folderId]
-        );
-        foreach ($data as $k => $v) {
-            if ($v->mimeType == 'application/vnd.google-apps.folder') {
-                $result['folders'][$v->name]['id'] = $v->id;
-                $result['folders'][$v->name]['name'] = $v->name;
-                self::get_children_from_folder_id($v->id, $result['folders'][$v->name], $level);
-            } elseif ($v->mimeType !== 'image/x-photoshop' && strpos(strtoupper($v->name), 'MK') === 0 ) {
-                $result['images'][$v->name]['id'] = $v->id;
-                $result['images'][$v->name]['name'] = $v->name;
-                $result['images'][$v->name]['link'] = str_replace('&export=download', '', $v->webContentLink);
+            );
+            foreach ($data as $k => $v) {
+                if ($v->mimeType == 'application/vnd.google-apps.folder') {
+                    $result['folders'][$v->name]['id'] = $v->id;
+                    $result['folders'][$v->name]['name'] = $v->name;
+                    self::get_children_from_folder_id($v->id, $result['folders'][$v->name], $level);
+                } elseif ($v->mimeType !== 'image/x-photoshop' && strpos(strtoupper($v->name), 'MK') === 0 ) {
+                    $result['images'][$v->name]['id'] = $v->id;
+                    $result['images'][$v->name]['name'] = $v->name;
+                    $result['images'][$v->name]['link'] = str_replace('&export=download', '', $v->webContentLink);
+                }
             }
         }
+
         return $result;
     }
 

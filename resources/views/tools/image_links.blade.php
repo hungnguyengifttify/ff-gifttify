@@ -12,7 +12,10 @@
                     <input type="text" class="form-control" name="link" id="link" value="{{$link}}" placeholder="Link">
                 </div>
                 <div class="col-auto">
-                    <button type="submit" class="btn btn-primary mb-3">Get links</button>
+                    <button type="submit" class="btn btn-primary mb-3" name="action" value="get_links">Get links</button>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-info mb-3" name="action" value="download_csv">Download CSV</button>
                 </div>
             </form>
         </div>
@@ -20,12 +23,14 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            @foreach($result as $k1 => $v1)
-                @if($k1 == 'folders')
-                    @foreach($v1 as $k2 => $v2)
-
-                    @endforeach
-                @endphp
+            @foreach($result as $k => $v)
+                {!! str_repeat("&nbsp", ($v['level'] - 1)*5 ) !!}
+                @if($v['type'] == 'folder')
+                    {{ "[{$v['name']}]" }}
+                @else
+                    <a href="{{$v['link']}}" target="_blank">{{$v['name']}}</a>
+                @endif
+                <br/>
             @endforeach
         </div>
     </div>

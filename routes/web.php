@@ -31,5 +31,4 @@ Route::get('/ads_creative', [\App\Http\Controllers\DashboardController::class, '
 Route::get('/get_image_links', [\App\Http\Controllers\ToolsController::class, 'get_image_links'])
     ->name('get_image_links');
 
-
 require __DIR__.'/auth.php';

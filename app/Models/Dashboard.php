@@ -400,11 +400,13 @@ class Dashboard extends Model
             'Test' => array(
                 'ads_type' => 'Test',
                 'totalSpend' => 0,
+                'totalCamp' => 0,
                 'percent' => 0,
             ),
             'Scale' => array(
                 'ads_type' => 'Scale',
                 'totalSpend' => 0,
+                'totalCamp' => 0,
                 'percent' => 0,
             ),
         );
@@ -415,6 +417,7 @@ class Dashboard extends Model
             $ads_type = self::getAdsTypeFromCampaignName ($v->campaign_name);
             $adsResult[$ads_type]['ads_type'] = $ads_type;
             $adsResult[$ads_type]['totalSpend'] += $v->totalSpend;
+            $adsResult[$ads_type]['totalCamp']++;
 
             if ($debug == 1 && $adsResult[$ads_type]['ads_type'] == 'UNKNOWN') {
                 dump('ads_type_UNKNOWN: '. $v->campaign_name);
@@ -473,7 +476,7 @@ class Dashboard extends Model
         }
 
         $orders = DB::select("
-            select sku, sum(ol.price * ol.quantity)/$radioCurrency as total_order_amount
+            select sku, sum(ol.price * ol.quantity)/$radioCurrency as total_order_amount, SUM(ol.quantity) as total_quantity
             from orders o
             left join order_line_items ol ON o.shopify_id = ol.order_id
             where o.store = '$store' and ol.product_id > 0 and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate
@@ -488,9 +491,11 @@ class Dashboard extends Model
             if (!isset($ordersResult[$designerCode])) {
                 $ordersResult[$designerCode]['designerCode'] = $designerCode;
                 $ordersResult[$designerCode]['total_order_amount'] = 0;
+                $ordersResult[$designerCode]['total_quantity'] = 0;
             }
             $ordersResult[$designerCode]['designerCode'] = $designerCode;
             $ordersResult[$designerCode]['total_order_amount'] += $o->total_order_amount;
+            $ordersResult[$designerCode]['total_quantity'] += $o->total_quantity;
         }
 
         $designerReports = array_merge(array_keys($ordersResult) , array_keys($adsResult));
@@ -504,6 +509,7 @@ class Dashboard extends Model
             $result[$v]['designer_code'] = $v ?: 'UNKNOWN';
             $result[$v]['designer_name'] = isset($designerData[$v]) ? $designerData[$v]->name : '';
 
+            $result[$v]['total_quantity'] = $ordersResult[$v]['total_quantity'] ?? 0;
             $result[$v]['total_order_amount'] = $ordersResult[$v]['total_order_amount'] ?? 0;
             $result[$v]['totalSpend'] = $adsResult[$v]['totalSpend'] ?? 0;
             $result[$v]['cpc'] = $adsResult[$v]['cpc'] ?? 0;
@@ -590,7 +596,7 @@ class Dashboard extends Model
         }
 
         $orders = DB::select("
-            select sku, sum(ol.price * ol.quantity)/$radioCurrency as total_order_amount
+            select sku, sum(ol.price * ol.quantity)/$radioCurrency as total_order_amount, sum(ol.quantity) as total_quantity
             from orders o
             left join order_line_items ol ON o.shopify_id = ol.order_id
             where o.store = '$store' and ol.product_id > 0 and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate
@@ -605,9 +611,11 @@ class Dashboard extends Model
             if (!isset($ordersResult[$ideaCode])) {
                 $ordersResult[$ideaCode]['idea_code'] = $ideaCode;
                 $ordersResult[$ideaCode]['total_order_amount'] = 0;
+                $ordersResult[$ideaCode]['total_quantity'] = 0;
             }
             $ordersResult[$ideaCode]['idea_code'] = $ideaCode;
             $ordersResult[$ideaCode]['total_order_amount'] += $o->total_order_amount;
+            $ordersResult[$ideaCode]['total_quantity'] ++;
         }
 
         $ideaReports = array_merge(array_keys($ordersResult) , array_keys($adsResult));
@@ -622,6 +630,7 @@ class Dashboard extends Model
             $result[$v]['idea_name'] = isset($ideaData[$v]) ? $ideaData[$v]->name : '';
 
             $result[$v]['total_order_amount'] = $ordersResult[$v]['total_order_amount'] ?? 0;
+            $result[$v]['total_quantity'] = $ordersResult[$v]['total_quantity'] ?? 0;
             $result[$v]['totalSpend'] = $adsResult[$v]['totalSpend'] ?? 0;
             $result[$v]['cpc'] = $adsResult[$v]['cpc'] ?? 0;
             $result[$v]['mo'] = ($result[$v]['total_order_amount']) > 0 ? 100*($result[$v]['totalSpend'] / $result[$v]['total_order_amount']) : 0;
@@ -698,9 +707,11 @@ class Dashboard extends Model
             if (!isset($adsResult[$adsStaff])) {
                 $adsResult[$adsStaff]['adsStaff'] = $adsStaff;
                 $adsResult[$adsStaff]['totalSpend'] = 0;
+                $adsResult[$adsStaff]['totalCamp'] = 0;
             }
             $adsResult[$adsStaff]['adsStaff'] = $adsStaff;
             $adsResult[$adsStaff]['totalSpend'] += $v->totalSpend;
+            $adsResult[$adsStaff]['totalCamp']++;
 
             if ($debug == 1 && $adsStaff == 'UNKNOWN') {
                 dump('adsStaff_UNKNOWN: '. $v->campaign_name);

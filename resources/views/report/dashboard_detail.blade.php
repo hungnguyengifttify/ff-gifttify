@@ -4,7 +4,7 @@
     }
     .inline-block {
         display: inline-block;
-        margin-right: 100px;
+        margin-right: 30px;
     }
 </style>
 <x-app-layout>
@@ -215,6 +215,7 @@
                                 <th>Rev</th>
                                 <th>CPC</th>
                                 <th>MO</th>
+                                <th>OrdersQty</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -228,6 +229,7 @@
                                 <td {!! display_zero_cell_dashboard($v['total_order_amount']);  !!}  >{!! gifttify_price_format($v['total_order_amount']);  !!} </td>
                                 <td {!! display_zero_cell_dashboard($v['cpc']);  !!}  >{!! number_format($v['cpc'], 2);  !!} </td>
                                 <td {!! display_zero_cell_dashboard($v['mo']);  !!}  >{!! round($v['mo']) . '%';  !!} </td>
+                                <td {!! display_zero_cell_dashboard($v['total_quantity']) !!} >{!! round($v['total_quantity']) !!} </td>
                             </tr>
                             <?php endforeach;?>
                             </tbody>
@@ -244,6 +246,7 @@
                                 <th>Rev</th>
                                 <th>MO</th>
                                 <th>CPC</th>
+                                <th>OrdersQty</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -257,6 +260,7 @@
                                 <td {!! display_zero_cell_dashboard($v['total_order_amount']); !!}  >{!! gifttify_price_format($v['total_order_amount']);  !!} </td>
                                 <td {!! display_zero_cell_dashboard($v['mo']);  !!}  >{!! round($v['mo']) . '%';  !!} </td>
                                 <td {!! display_zero_cell_dashboard($v['cpc']);  !!}  >{!! number_format($v['cpc'], 2);  !!} </td>
+                                <td {!! display_zero_cell_dashboard($v['total_quantity']) !!} >{!! round($v['total_quantity']) !!} </td>
                             </tr>
                             <?php endforeach; ?>
                             </tbody>
@@ -271,6 +275,7 @@
                             <tr>
                                 <th></th>
                                 <th>AdsCost</th>
+                                <th>TotalCamp</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -278,6 +283,7 @@
                             <tr>
                                 <td>{!! $v['adsStaff'];  !!} </td>
                                 <td>{!! gifttify_price_format($v['totalSpend']);  !!} </td>
+                                <td>{!! $v['totalCamp'] !!} </td>
                             </tr>
                             <?php endforeach; ?>
                             </tbody>
@@ -292,6 +298,7 @@
                                 <th></th>
                                 <th>AdsCost</th>
                                 <th>Percent</th>
+                                <th>TotalCamp</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -300,6 +307,7 @@
                                 <td>{!! $v['ads_type'];  !!} </td>
                                 <td>{!! gifttify_price_format($v['totalSpend']);  !!} </td>
                                 <td>{!! round($v['percent'],2) . '%';  !!} </td>
+                                <td>{!! $v['totalCamp'] !!} </td>
                             </tr>
                             <?php endforeach; ?>
                             </tbody>

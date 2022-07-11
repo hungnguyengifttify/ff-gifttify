@@ -11,7 +11,7 @@ class GoogleDriveFiles extends Model
     use HasFactory;
 
     protected $fillable = [
-        'id', 'createdTime', 'fullFileExtension', 'mimeType', 'modifiedTime', 'name', 'parents', 'parentId', 'permissionIds', 'shared', 'size', 'spaces', 'thumbnailLink', 'viewersCanCopyContent', 'webContentLink', 'webViewLink', 'writersCanShare', 'owners'
+        'id', 'createdTime', 'fullFileExtension', 'mimeType', 'modifiedTime', 'name', 'parents', 'parentId', 'permissionIds', 'shared', 'size', 'spaces', 'thumbnailLink', 'viewersCanCopyContent', 'webContentLink', 'webViewLink', 'writersCanShare', 'owners', 'trashed', 'trashedTime'
     ];
 
     public static function get_children_from_folder_id($folderId, &$result, $level)

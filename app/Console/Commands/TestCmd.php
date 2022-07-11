@@ -7,14 +7,14 @@ use Illuminate\Console\Command;
 use App\Services\GoogleDrive;
 use App\Models\GoogleDriveFiles;
 
-class UpdateGoogleDrive extends Command
+class TestCmd extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'googledrive:get_files {time_report?}';
+    protected $signature = 'test:cmd {time_report?}';
 
     /**
      * The console command description.

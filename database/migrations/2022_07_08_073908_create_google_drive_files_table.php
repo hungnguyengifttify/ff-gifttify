@@ -27,6 +27,8 @@ return new class extends Migration
             $table->tinyInteger('viewersCanCopyContent');
             $table->tinyInteger('writersCanShare');
             $table->unsignedBigInteger('size');
+            $table->tinyInteger('trashed');
+            $table->dateTime('trashedTime');
             $table->json('parents');
             $table->json('owners');
             $table->json('spaces');

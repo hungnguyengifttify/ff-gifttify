@@ -14,9 +14,11 @@
                 <div class="col-auto">
                     <button type="submit" class="btn btn-primary mb-3" name="action" value="get_links">Get links</button>
                 </div>
+                @if($link != '')
                 <div class="col-auto">
                     <button type="submit" class="btn btn-info mb-3" name="action" value="download_csv">Download CSV</button>
                 </div>
+                @endif
             </form>
         </div>
     </div>

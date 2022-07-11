@@ -187,6 +187,7 @@
                             <th>Rev</th>
                             <th>CPC</th>
                             <th>MO</th>
+                            <th>OrdersQty</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -200,6 +201,7 @@
                             <td {!! display_zero_cell_dashboard($v['total_order_amount'])!!} >{!! gifttify_price_format($v['total_order_amount']);  !!} </td>
                             <td {!! display_zero_cell_dashboard($v['cpc'])!!} >{!! number_format($v['cpc'], 2);  !!} </td>
                             <td {!! display_zero_cell_dashboard($v['mo'])!!} >{!! round($v['mo']) . '%';  !!} </td>
+                            <td {!! display_zero_cell_dashboard($v['total_quantity'])!!} >{!! round($v['total_quantity']) !!} </td>
                         </tr>
                         <?php endforeach; ?>
                         </tbody>

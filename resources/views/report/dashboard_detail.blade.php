@@ -209,7 +209,11 @@
 
                     <div class="inline-block">
                         <table class="table table-responsive table-bordered" style="width: auto">
-                            <h1>By Designer</h1>
+                            @php $totalQty = 0; @endphp
+                            @foreach($designerAds as $v)
+                                @php $totalQty += $v['total_quantity']; @endphp
+                            @endforeach
+                            <h1>By Designer [{{ $totalQty }}]</h1>
                             <thead>
                             <tr>
                                 <th></th>
@@ -240,7 +244,11 @@
 
                     <div class="inline-block">
                         <table class="table table-responsive table-bordered" style="width: auto">
-                            <h1>By Idea</h1>
+                            @php $totalQty = 0; @endphp
+                            @foreach($designerAds as $v)
+                                @php $totalQty += $v['total_quantity']; @endphp
+                            @endforeach
+                            <h1>By Idea [{{ $totalQty }}]</h1>
                             <thead>
                             <tr>
                                 <th></th>

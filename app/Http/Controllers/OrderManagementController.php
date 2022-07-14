@@ -42,13 +42,24 @@ class OrderManagementController extends Controller {
         );
         foreach ($data as $v) {
             $address = json_decode($v->shipping_address);
+            $properties = json_decode($v->properties);
+            $pSize = '';
+            foreach ($properties as $p) {
+                if ($p->name != '_cl_options') {
+                    $pSize .= "{$p->name}:{$p->value}, ";
+                }
+            }
+            $pSize = trim($pSize, ', ');
+            $size = $pSize ?: $v->variant_title;
+
             $link = $v->link1 ?? $v->link2 ?? $v->link3 ?? $v->link4 ?? $v->link5 ?? $v->link6 ?? $v->link7 ?? '';
+            $note = $v->note1 ?? $v->note2 ?? $v->note3 ?? $v->note4 ?? $v->note5 ?? $v->note6 ?? $v->note7 ?? '';
 
             $line = array(
-                $v->name, $v->quantity, $v->product_type, $v->variant_title, $v->item_name, $v->sku,
+                $v->name, $v->quantity, $v->product_type, $size, $v->item_name, $v->sku,
                 $address->name ?? '', '', $address->address1 ?? '', $address->address2 ?? '',
                 $address->company ?? '', $address->city ?? '', $address->zip ?? '', $address->province ?? '',
-                $address->country ?? '', $address->phone ?? '', '', $link, ''
+                $address->country ?? '', $address->phone ?? '', $note, $link, ''
             );
             $excelData[] = $line;
         }

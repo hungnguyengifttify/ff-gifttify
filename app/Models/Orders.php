@@ -20,7 +20,7 @@ class Orders extends Model
         $toDate = Carbon::createFromFormat('Y-m-d', $toDate)->addDays(1)->format('Y-m-d');
 
         $orders = Orders::select(DB::raw("
-            orders.shipping_address, products.product_type , order_line_items.variant_title, order_line_items.name as item_name,
+            order_line_items.properties, orders.shipping_address, products.product_type , order_line_items.variant_title, order_line_items.name as item_name,
             CONVERT_TZ(orders.shopify_created_at,'UTC','Asia/Ho_Chi_Minh') as shopify_created_at,
             order_line_items.sku, order_line_items.quantity, order_line_items.price,
             orders.store, orders.name,
@@ -30,7 +30,16 @@ class Orders extends Model
             (select webViewLink from google_drive_files where name=SUBSTRING_INDEX(order_line_items.sku, '-', 5) and mimeType = 'application/vnd.google-apps.folder' limit 1) as link4,
             (select webViewLink from google_drive_files where name=SUBSTRING_INDEX(order_line_items.sku, '-', 4) and mimeType = 'application/vnd.google-apps.folder' limit 1) as link5,
             (select webViewLink from google_drive_files where name=SUBSTRING_INDEX(order_line_items.sku, '-', 3) and mimeType = 'application/vnd.google-apps.folder' limit 1) as link6,
-            (select webViewLink from google_drive_files where name=SUBSTRING_INDEX(order_line_items.sku, '-', 2) and mimeType = 'application/vnd.google-apps.folder' limit 1) as link7
+            (select webViewLink from google_drive_files where name=SUBSTRING_INDEX(order_line_items.sku, '-', 2) and mimeType = 'application/vnd.google-apps.folder' limit 1) as link7,
+
+            (select ref from ff_designer_links where ref=order_line_items.sku and ref != '' limit 1) as note1,
+            (select ref from ff_designer_links where ref=order_line_items.name and ref != '' limit 1) as note2,
+            (select name from google_drive_files where name=SUBSTRING_INDEX(order_line_items.sku, '-', 6) and mimeType = 'application/vnd.google-apps.folder' limit 1) as note3,
+            (select name from google_drive_files where name=SUBSTRING_INDEX(order_line_items.sku, '-', 5) and mimeType = 'application/vnd.google-apps.folder' limit 1) as note4,
+            (select name from google_drive_files where name=SUBSTRING_INDEX(order_line_items.sku, '-', 4) and mimeType = 'application/vnd.google-apps.folder' limit 1) as note5,
+            (select name from google_drive_files where name=SUBSTRING_INDEX(order_line_items.sku, '-', 3) and mimeType = 'application/vnd.google-apps.folder' limit 1) as note6,
+            (select name from google_drive_files where name=SUBSTRING_INDEX(order_line_items.sku, '-', 2) and mimeType = 'application/vnd.google-apps.folder' limit 1) as note7
+
         "))
             ->leftJoin('order_line_items','orders.shopify_id', '=', 'order_line_items.order_id')
             ->leftJoin('products','order_line_items.product_id', '=', 'products.shopify_id')

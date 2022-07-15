@@ -15,14 +15,21 @@ class Orders extends Model
         'store', 'shopify_id', 'admin_graphql_api_id', 'app_id', 'browser_ip', 'buyer_accepts_marketing', 'cancel_reason', 'cancelled_at', 'cart_token', 'checkout_id', 'checkout_token', 'client_details', 'closed_at', 'confirmed', 'contact_email', 'shopify_created_at', 'currency', 'current_subtotal_price', 'current_subtotal_price_set', 'current_total_discounts', 'current_total_discounts_set', 'current_total_duties_set', 'current_total_price', 'current_total_price_set', 'current_total_tax', 'current_total_tax_set', 'customer_locale', 'device_id', 'discount_codes', 'email', 'estimated_taxes', 'financial_status', 'fulfillment_status', 'gateway', 'landing_site', 'landing_site_ref', 'location_id', 'name', 'note', 'note_attributes', 'number', 'order_number', 'order_status_url', 'original_total_duties_set', 'payment_gateway_names', 'phone', 'presentment_currency', 'processed_at', 'processing_method', 'reference', 'source_identifier', 'source_name', 'source_url', 'subtotal_price', 'subtotal_price_set', 'tags', 'tax_lines', 'taxes_included', 'test', 'token', 'total_discounts', 'total_discounts_set', 'total_line_items_price', 'total_line_items_price_set', 'total_outstanding', 'total_price', 'total_price_set', 'total_price_usd', 'total_shipping_price_set', 'total_tax', 'total_tax_set', 'total_tip_received', 'total_weight', 'shopify_updated_at', 'user_id', 'customer', 'discount_applications', 'fulfillments', 'line_items', 'payment_terms', 'refunds', 'shipping_address', 'shipping_lines'
     ];
 
-    public static function getList ($fromDate, $toDate, $displayItemQty) {
-        $fromDate = Carbon::createFromFormat('Y-m-d', $fromDate)->format('Y-m-d');
-        $toDate = Carbon::createFromFormat('Y-m-d', $toDate)->addDays(1)->format('Y-m-d');
+    public static function getList ($store, $fromDate, $toDate, $displayItemQty) {
+        $storeConfig = Dashboard::getStoreConfig($store);
+        if (!$storeConfig) return false;
+
+        $phpTimeZone = $storeConfig['phpTimeZone'];
+        $mysqlTimeZone = $storeConfig['mysqlTimeZone'];
+        $radioCurrency = $storeConfig['radioCurrency'];
+
+        $fromDate = Carbon::createFromFormat('Y-m-d', $fromDate, $phpTimeZone)->format('Y-m-d');
+        $toDate = Carbon::createFromFormat('Y-m-d', $toDate, $phpTimeZone)->format('Y-m-d 23:59:59');
 
         $orders = Orders::select(DB::raw("
             order_line_items.properties, orders.shipping_address, products.product_type , order_line_items.variant_title, order_line_items.name as item_name,
-            CONVERT_TZ(orders.shopify_created_at,'UTC','Asia/Ho_Chi_Minh') as shopify_created_at,
-            order_line_items.sku, order_line_items.quantity, order_line_items.price,
+            CONVERT_TZ(orders.shopify_created_at,'UTC','$mysqlTimeZone') as shopify_created_at,
+            order_line_items.sku, order_line_items.quantity, order_line_items.price/$radioCurrency as price,
             orders.store, orders.name,
             (select link from ff_designer_links where ref=order_line_items.sku and ref != '' limit 1) as link1,
             (select link from ff_designer_links where ref=order_line_items.name and ref != '' limit 1) as link2,
@@ -43,9 +50,10 @@ class Orders extends Model
         "))
             ->leftJoin('order_line_items','orders.shopify_id', '=', 'order_line_items.order_id')
             ->leftJoin('products','order_line_items.product_id', '=', 'products.shopify_id')
+            ->where('orders.store', '=', "$store")
             ->where('product_id', '>', '0')
-            ->where(DB::raw("CONVERT_TZ(orders.shopify_created_at,'UTC','Asia/Ho_Chi_Minh')"), '>=', "$fromDate")
-            ->where(DB::raw("CONVERT_TZ(orders.shopify_created_at,'UTC','Asia/Ho_Chi_Minh')"), '<', "$toDate")
+            ->where(DB::raw("CONVERT_TZ(orders.shopify_created_at,'UTC','$mysqlTimeZone')"), '>=', "$fromDate")
+            ->where(DB::raw("CONVERT_TZ(orders.shopify_created_at,'UTC','$mysqlTimeZone')"), '<=', "$toDate")
             ->orderBy('orders.shopify_created_at', 'DESC')
             ->paginate($displayItemQty)->withQueryString();
 

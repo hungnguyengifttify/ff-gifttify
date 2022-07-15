@@ -10,7 +10,7 @@ use App\Models\Orders;
 
 class OrderManagementController extends Controller {
 
-    public function list(Request $request)
+    public function list(Request $request, $store = 'us')
     {
         $action = $request->input('action') ?? '';
 
@@ -24,7 +24,7 @@ class OrderManagementController extends Controller {
             'toDate' => $toDate,
         );
 
-        $orders = Orders::getList($fromDate, $toDate, $displayItemQty);
+        $orders = Orders::getList($store, $fromDate, $toDate, $displayItemQty);
 
         if ($action == 'export') {
             return $this->exportOrdersToSupplier($orders);
@@ -43,6 +43,12 @@ class OrderManagementController extends Controller {
         foreach ($data as $v) {
             $address = json_decode($v->shipping_address);
             $properties = json_decode($v->properties);
+
+            $variant_title = str_replace(
+                array('(Best For Single)', '(Best For Couple)', '(Best For Family)', '- Best Seller'),
+                array('', '', '', ''),
+                $v->variant_title
+            );
             $pSize = '';
             foreach ($properties as $p) {
                 if ($p->name != '_cl_options') {
@@ -50,7 +56,7 @@ class OrderManagementController extends Controller {
                 }
             }
             $pSize = trim($pSize, ', ');
-            $size = $pSize ?: $v->variant_title;
+            $size = $pSize ?: $variant_title;
 
             $link = $v->link1 ?? $v->link2 ?? $v->link3 ?? $v->link4 ?? $v->link5 ?? $v->link6 ?? $v->link7 ?? '';
             $note = $v->note1 ?? $v->note2 ?? $v->note3 ?? $v->note4 ?? $v->note5 ?? $v->note6 ?? $v->note7 ?? '';

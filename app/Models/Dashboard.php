@@ -412,6 +412,12 @@ class Dashboard extends Model
                 'totalCamp' => 0,
                 'percent' => 0,
             ),
+            'Maintain' => array(
+                'ads_type' => 'Maintain',
+                'totalSpend' => 0,
+                'totalCamp' => 0,
+                'percent' => 0,
+            ),
         );
         $totalSpend = 0;
         foreach ($fbAds->all() as $v) {
@@ -427,7 +433,8 @@ class Dashboard extends Model
             }
         }
         $adsResult['Test']['percent'] = $totalSpend > 0 ? round(100 * $adsResult['Test']['totalSpend'] / $totalSpend, 2) : 0;
-        $adsResult['Scale']['percent'] = $adsResult['Test']['percent'] > 0 ? (100 - $adsResult['Test']['percent']) : 0;
+        $adsResult['Maintain']['percent'] = $totalSpend > 0 ? round(100 * $adsResult['Maintain']['totalSpend'] / $totalSpend, 2) : 0;
+        $adsResult['Scale']['percent'] = ($adsResult['Test']['percent']+$adsResult['Maintain']['percent']) > 0 ? (100 - ($adsResult['Test']['percent']+$adsResult['Maintain']['percent'])) : 0;
 
         return $adsResult;
     }
@@ -436,6 +443,8 @@ class Dashboard extends Model
         $result = array();
         if (preg_match('/.*test.*/', strtolower($campaignName), $result)) {
             $adsType = 'Test';
+        } elseif (preg_match('/.*maintain.*/', strtolower($campaignName), $result)) {
+            $adsType = 'Maintain';
         } else {
             $adsType = 'Scale';
         }
@@ -733,6 +742,8 @@ class Dashboard extends Model
             $adsType = 'Việt Anh';
         } elseif (preg_match('/.*hoang.*/', strtolower($campaignName), $result)) {
             $adsType = 'Hoàng';
+        } elseif (preg_match('/^m.*/', strtolower($campaignName), $result)) {
+            $adsType = 'Minh';
         }
         return $adsType;
     }

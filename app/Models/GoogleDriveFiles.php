@@ -113,7 +113,7 @@ class GoogleDriveFiles extends Model
 
                   SELECT gdf.id, gdf.`name` , gdf.webContentLink, gdf.mimeType, gdf.parentId, `level`+1
                     , @rownum := @rownum + 1 as stt
-                    , (case gdf.mimeType when 'application/vnd.google-apps.folder' then CONCAT( CONVERT(gdff.stt_order, CHAR), CONVERT(@rownum, CHAR) ) else CONCAT( CONVERT(gdff.stt_order, CHAR) , LEFT(gdf.`name`,3) ) end )  as stt_order
+                    , (case gdf.mimeType when 'application/vnd.google-apps.folder' then CONCAT( CONVERT(gdff.stt_order, CHAR) , LEFT(gdf.`name`,3) ) else CONCAT( CONVERT(gdff.stt_order, CHAR) , LEFT(gdf.`name`,6) ) end )  as stt_order
                   FROM google_drive_files gdf
                   INNER JOIN google_drive_files_flat gdff ON gdff.id = gdf.parentId
                   WHERE `level` < $deepLevel

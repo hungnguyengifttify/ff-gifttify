@@ -17,6 +17,7 @@ class Dashboard extends Model
         'yesterday' => 'Yesterday',
         'this_week' => 'This Week',
         'last_week' => 'Last Week',
+        'this_month' => 'This Month',
         'custom_range' => 'Custom Range',
     );
 

@@ -69,7 +69,7 @@
                                     <td>{{ $order->quantity }}</td>
                                     <td>{!! gifttify_price_format($order->price) !!}</td>
                                     <td>
-                                        @php $link = $order->link1 ?? $order->link2 ?? $order->link3 ?? $order->link4 ?? $order->link5 ?? $order->link6 ?? $order->link7 ?? '';
+                                        @php $link = $order->link1 ?? $order->link2 ?? $order->link3 ?? $order->link4 ?? $order->link5 ?? $order->link6 ?? $order->link7 ?? $order->link8 ?? $order->link9 ?? $order->link10 ?? $order->link11 ?? $order->link12 ?? $order->link13 ?? $order->link14 ?? $order->link15 ?? $order->link16 ?? $order->link17 ?? $order->link18 ?? $order->link19 ?? $order->link20 ?? $order->link21 ?? $order->link22 ?? $order->link23 ?? $order->link24 ?? $order->link25 ?? $order->link26 ?? $order->link27 ?? $order->link28 ?? '';
                                         @endphp
                                         @if ($link)
                                             <a href="{{ $link }}" target="_blank">Link</a>

@@ -188,7 +188,7 @@
                             <th>Rev</th>
                             <th>CPC</th>
                             <th>MO</th>
-                            <th>OrdersQty</th>
+                            <th>Qty</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -222,7 +222,7 @@
                                 <th>Rev</th>
                                 <th>CPC</th>
                                 <th>MO</th>
-                                <th>OrdersQty</th>
+                                <th>Qty</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -257,7 +257,7 @@
                                 <th>Rev</th>
                                 <th>MO</th>
                                 <th>CPC</th>
-                                <th>OrdersQty</th>
+                                <th>Qty</th>
                             </tr>
                             </thead>
                             <tbody>

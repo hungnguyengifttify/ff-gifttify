@@ -110,4 +110,94 @@ class Orders extends Model
 
         return $orders;
     }
+
+    public static function getDesignLinkFromSkuAndColor ($store, $sku, $color) {
+        $storeConfig = Dashboard::getStoreConfig($store);
+        if (!$storeConfig) return false;
+
+        $phpTimeZone = $storeConfig['phpTimeZone'];
+        $mysqlTimeZone = $storeConfig['mysqlTimeZone'];
+        $radioCurrency = $storeConfig['radioCurrency'];
+
+        $orders = Orders::select(DB::raw("
+            order_line_items.properties, orders.shipping_address, products.product_type , order_line_items.variant_title, order_line_items.name as item_name,
+            CONVERT_TZ(orders.shopify_created_at,'UTC','$mysqlTimeZone') as shopify_created_at,
+            order_line_items.sku, order_line_items.quantity, order_line_items.price/$radioCurrency as price,
+            orders.store, orders.name,
+
+            (select link from ff_designer_links where ref=concat(orders.name, '-' ,order_line_items.sku, '-', '$color') and ref != '' limit 1) as link1,
+            (select link from ff_designer_links where ref=concat( SUBSTRING_INDEX(concat(orders.name, '-' ,order_line_items.sku), '-', 8) , '-', '$color') and ref != '' limit 1) as link2,
+            (select link from ff_designer_links where ref=concat( SUBSTRING_INDEX(concat(orders.name, '-' ,order_line_items.sku), '-', 7) , '-', '$color') and ref != '' limit 1) as link3,
+            (select link from ff_designer_links where ref=concat( SUBSTRING_INDEX(concat(orders.name, '-' ,order_line_items.sku), '-', 6) , '-', '$color') and ref != '' limit 1) as link4,
+            (select link from ff_designer_links where ref=concat( SUBSTRING_INDEX(concat(orders.name, '-' ,order_line_items.sku), '-', 5) , '-', '$color') and ref != '' limit 1) as link5,
+            (select link from ff_designer_links where ref=concat( SUBSTRING_INDEX(concat(orders.name, '-' ,order_line_items.sku), '-', 4) , '-', '$color') and ref != '' limit 1) as link6,
+            (select link from ff_designer_links where ref=concat( SUBSTRING_INDEX(concat(orders.name, '-' ,order_line_items.sku), '-', 3) , '-', '$color') and ref != '' limit 1) as link7,
+
+            (select webViewLink from google_drive_files where name=concat(orders.name, '-' ,order_line_items.sku, '-', '$color') and mimeType = 'application/vnd.google-apps.folder' limit 1) as link8,
+            (select webViewLink from google_drive_files where name=concat( SUBSTRING_INDEX(concat(orders.name, '-' ,order_line_items.sku), '-', 8), '-', '$color' ) and mimeType = 'application/vnd.google-apps.folder' limit 1) as link9,
+            (select webViewLink from google_drive_files where name=concat( SUBSTRING_INDEX(concat(orders.name, '-' ,order_line_items.sku), '-', 7), '-', '$color' ) and mimeType = 'application/vnd.google-apps.folder' limit 1) as link10,
+            (select webViewLink from google_drive_files where name=concat( SUBSTRING_INDEX(concat(orders.name, '-' ,order_line_items.sku), '-', 6), '-', '$color' ) and mimeType = 'application/vnd.google-apps.folder' limit 1) as link11,
+            (select webViewLink from google_drive_files where name=concat( SUBSTRING_INDEX(concat(orders.name, '-' ,order_line_items.sku), '-', 5), '-', '$color' ) and mimeType = 'application/vnd.google-apps.folder' limit 1) as link12,
+            (select webViewLink from google_drive_files where name=concat( SUBSTRING_INDEX(concat(orders.name, '-' ,order_line_items.sku), '-', 4), '-', '$color' ) and mimeType = 'application/vnd.google-apps.folder' limit 1) as link13,
+            (select webViewLink from google_drive_files where name=concat( SUBSTRING_INDEX(concat(orders.name, '-' ,order_line_items.sku), '-', 3), '-', '$color' ) and mimeType = 'application/vnd.google-apps.folder' limit 1) as link14,
+
+            (select link from ff_designer_links where ref=concat(order_line_items.sku,'-','$color') and ref != '' limit 1) as link15,
+            (select link from ff_designer_links where ref=concat( SUBSTRING_INDEX(order_line_items.sku, '-', 7), '-', '$color' ) and ref != '' limit 1) as link16,
+            (select link from ff_designer_links where ref=concat( SUBSTRING_INDEX(order_line_items.sku, '-', 6), '-', '$color' ) and ref != '' limit 1) as link17,
+            (select link from ff_designer_links where ref=concat( SUBSTRING_INDEX(order_line_items.sku, '-', 5), '-', '$color' ) and ref != '' limit 1) as link18,
+            (select link from ff_designer_links where ref=concat( SUBSTRING_INDEX(order_line_items.sku, '-', 4), '-', '$color' ) and ref != '' limit 1) as link19,
+            (select link from ff_designer_links where ref=concat( SUBSTRING_INDEX(order_line_items.sku, '-', 3), '-', '$color' ) and ref != '' limit 1) as link20,
+            (select link from ff_designer_links where ref=concat( SUBSTRING_INDEX(order_line_items.sku, '-', 2), '-', '$color' ) and ref != '' limit 1) as link21,
+
+            (select webViewLink from google_drive_files where name=concat(order_line_items.sku,'-','$color') and mimeType = 'application/vnd.google-apps.folder' limit 1) as link22,
+            (select webViewLink from google_drive_files where name=concat(SUBSTRING_INDEX(order_line_items.sku, '-', 7),'-','$color') and mimeType = 'application/vnd.google-apps.folder' limit 1) as link23,
+            (select webViewLink from google_drive_files where name=concat(SUBSTRING_INDEX(order_line_items.sku, '-', 6),'-','$color') and mimeType = 'application/vnd.google-apps.folder' limit 1) as link24,
+            (select webViewLink from google_drive_files where name=concat(SUBSTRING_INDEX(order_line_items.sku, '-', 5),'-','$color') and mimeType = 'application/vnd.google-apps.folder' limit 1) as link25,
+            (select webViewLink from google_drive_files where name=concat(SUBSTRING_INDEX(order_line_items.sku, '-', 4),'-','$color') and mimeType = 'application/vnd.google-apps.folder' limit 1) as link26,
+            (select webViewLink from google_drive_files where name=concat(SUBSTRING_INDEX(order_line_items.sku, '-', 3),'-','$color') and mimeType = 'application/vnd.google-apps.folder' limit 1) as link27,
+            (select webViewLink from google_drive_files where name=concat(SUBSTRING_INDEX(order_line_items.sku, '-', 2),'-','$color') and mimeType = 'application/vnd.google-apps.folder' limit 1) as link28,
+
+            (select ref from ff_designer_links where ref=concat(orders.name, '-' ,order_line_items.sku, '-', '$color') and ref != '' limit 1) as note1,
+            (select ref from ff_designer_links where ref=concat( SUBSTRING_INDEX(concat(orders.name, '-' ,order_line_items.sku), '-', 8) , '-', '$color') and ref != '' limit 1) as note2,
+            (select ref from ff_designer_links where ref=concat( SUBSTRING_INDEX(concat(orders.name, '-' ,order_line_items.sku), '-', 7) , '-', '$color') and ref != '' limit 1) as note3,
+            (select ref from ff_designer_links where ref=concat( SUBSTRING_INDEX(concat(orders.name, '-' ,order_line_items.sku), '-', 6) , '-', '$color') and ref != '' limit 1) as note4,
+            (select ref from ff_designer_links where ref=concat( SUBSTRING_INDEX(concat(orders.name, '-' ,order_line_items.sku), '-', 5) , '-', '$color') and ref != '' limit 1) as note5,
+            (select ref from ff_designer_links where ref=concat( SUBSTRING_INDEX(concat(orders.name, '-' ,order_line_items.sku), '-', 4) , '-', '$color') and ref != '' limit 1) as note6,
+            (select ref from ff_designer_links where ref=concat( SUBSTRING_INDEX(concat(orders.name, '-' ,order_line_items.sku), '-', 3) , '-', '$color') and ref != '' limit 1) as note7,
+
+            (select name from google_drive_files where name=concat(orders.name, '-' ,order_line_items.sku, '-', '$color') and mimeType = 'application/vnd.google-apps.folder' limit 1) as note8,
+            (select name from google_drive_files where name=concat( SUBSTRING_INDEX(concat(orders.name, '-' ,order_line_items.sku), '-', 8), '-', '$color' ) and mimeType = 'application/vnd.google-apps.folder' limit 1) as note9,
+            (select name from google_drive_files where name=concat( SUBSTRING_INDEX(concat(orders.name, '-' ,order_line_items.sku), '-', 7), '-', '$color' ) and mimeType = 'application/vnd.google-apps.folder' limit 1) as note10,
+            (select name from google_drive_files where name=concat( SUBSTRING_INDEX(concat(orders.name, '-' ,order_line_items.sku), '-', 6), '-', '$color' ) and mimeType = 'application/vnd.google-apps.folder' limit 1) as note11,
+            (select name from google_drive_files where name=concat( SUBSTRING_INDEX(concat(orders.name, '-' ,order_line_items.sku), '-', 5), '-', '$color' ) and mimeType = 'application/vnd.google-apps.folder' limit 1) as note12,
+            (select name from google_drive_files where name=concat( SUBSTRING_INDEX(concat(orders.name, '-' ,order_line_items.sku), '-', 4), '-', '$color' ) and mimeType = 'application/vnd.google-apps.folder' limit 1) as note13,
+            (select name from google_drive_files where name=concat( SUBSTRING_INDEX(concat(orders.name, '-' ,order_line_items.sku), '-', 3), '-', '$color' ) and mimeType = 'application/vnd.google-apps.folder' limit 1) as note14,
+
+            (select ref from ff_designer_links where ref=concat(order_line_items.sku,'-','$color') and ref != '' limit 1) as note15,
+            (select ref from ff_designer_links where ref=concat( SUBSTRING_INDEX(order_line_items.sku, '-', 7), '-', '$color' ) and ref != '' limit 1) as note16,
+            (select ref from ff_designer_links where ref=concat( SUBSTRING_INDEX(order_line_items.sku, '-', 6), '-', '$color' ) and ref != '' limit 1) as note17,
+            (select ref from ff_designer_links where ref=concat( SUBSTRING_INDEX(order_line_items.sku, '-', 5), '-', '$color' ) and ref != '' limit 1) as note18,
+            (select ref from ff_designer_links where ref=concat( SUBSTRING_INDEX(order_line_items.sku, '-', 4), '-', '$color' ) and ref != '' limit 1) as note19,
+            (select ref from ff_designer_links where ref=concat( SUBSTRING_INDEX(order_line_items.sku, '-', 3), '-', '$color' ) and ref != '' limit 1) as note20,
+            (select ref from ff_designer_links where ref=concat( SUBSTRING_INDEX(order_line_items.sku, '-', 2), '-', '$color' ) and ref != '' limit 1) as note21,
+
+            (select name from google_drive_files where name=concat(order_line_items.sku,'-','$color') and mimeType = 'application/vnd.google-apps.folder' limit 1) as note22,
+            (select name from google_drive_files where name=concat(SUBSTRING_INDEX(order_line_items.sku, '-', 7),'-','$color') and mimeType = 'application/vnd.google-apps.folder' limit 1) as note23,
+            (select name from google_drive_files where name=concat(SUBSTRING_INDEX(order_line_items.sku, '-', 6),'-','$color') and mimeType = 'application/vnd.google-apps.folder' limit 1) as note24,
+            (select name from google_drive_files where name=concat(SUBSTRING_INDEX(order_line_items.sku, '-', 5),'-','$color') and mimeType = 'application/vnd.google-apps.folder' limit 1) as note25,
+            (select name from google_drive_files where name=concat(SUBSTRING_INDEX(order_line_items.sku, '-', 4),'-','$color') and mimeType = 'application/vnd.google-apps.folder' limit 1) as note26,
+            (select name from google_drive_files where name=concat(SUBSTRING_INDEX(order_line_items.sku, '-', 3),'-','$color') and mimeType = 'application/vnd.google-apps.folder' limit 1) as note27,
+            (select name from google_drive_files where name=concat(SUBSTRING_INDEX(order_line_items.sku, '-', 2),'-','$color') and mimeType = 'application/vnd.google-apps.folder' limit 1) as note28
+
+        "))
+            ->leftJoin('order_line_items','orders.shopify_id', '=', 'order_line_items.order_id')
+            ->leftJoin('products','order_line_items.product_id', '=', 'products.shopify_id')
+            ->where('orders.store', '=', "$store")
+            ->where('product_id', '>', '0')
+            ->where('order_line_items.sku', '=', "$sku")
+            ->orderBy('orders.shopify_created_at', 'DESC')
+            ->first();
+
+        return $orders ?? array();
+    }
 }

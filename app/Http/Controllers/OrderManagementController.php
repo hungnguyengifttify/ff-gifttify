@@ -49,10 +49,16 @@ class OrderManagementController extends Controller {
                 array('', '', '', ''),
                 $v->variant_title
             );
+
+            $color = '';
             $pSize = '';
             foreach ($properties as $p) {
                 if ($p->name != '_cl_options') {
                     $pSize .= "{$p->name}:{$p->value}, ";
+                }
+
+                if (strtolower($p->name) == 'color') {
+                    $color = $p->value;
                 }
             }
             $pSize = trim($pSize, ', ');
@@ -64,8 +70,14 @@ class OrderManagementController extends Controller {
             $pc = $result[1] ?? 1;
             $quantity = $v->quantity * $pc;
 
-            $link = $v->link1 ?? $v->link2 ?? $v->link3 ?? $v->link4 ?? $v->link5 ?? $v->link6 ?? $v->link7 ?? $v->link8 ?? $v->link9 ?? $v->link10 ?? $v->link11 ?? $v->link12 ?? $v->link13 ?? $v->link14 ?? $v->link15 ?? $v->link16 ?? $v->link17 ?? $v->link18 ?? $v->link19 ?? $v->link20 ?? $v->link21 ?? $v->link22 ?? $v->link23 ?? $v->link24 ?? $v->link25 ?? $v->link26 ?? $v->link27 ?? $v->link28 ?? '';
-            $note = $v->note1 ?? $v->note2 ?? $v->note3 ?? $v->note4 ?? $v->note5 ?? $v->note6 ?? $v->note7 ?? $v->note8 ?? $v->note9 ?? $v->note10 ?? $v->note11 ?? $v->note12 ?? $v->note13 ?? $v->note14 ?? $v->note15 ?? $v->note16 ?? $v->note17 ?? $v->note18 ?? $v->note19 ?? $v->note20 ?? $v->note21 ?? $v->note22 ?? $v->note23 ?? $v->note24 ?? $v->note25 ?? $v->note26 ?? $v->note27 ?? $v->note28 ?? '';
+            if ($color != '') {
+                $t = Orders::getDesignLinkFromSkuAndColor($v->store, $v->sku, $color);
+                $link = $t->link1 ?? $t->link2 ?? $t->link3 ?? $t->link4 ?? $t->link5 ?? $t->link6 ?? $t->link7 ?? $t->link8 ?? $t->link9 ?? $t->link10 ?? $t->link11 ?? $t->link12 ?? $t->link13 ?? $t->link14 ?? $t->link15 ?? $t->link16 ?? $t->link17 ?? $t->link18 ?? $t->link19 ?? $t->link20 ?? $t->link21 ?? $t->link22 ?? $t->link23 ?? $t->link24 ?? $t->link25 ?? $t->link26 ?? $t->link27 ?? $t->link28 ?? '';
+                $note = $t->note1 ?? $t->note2 ?? $t->note3 ?? $t->note4 ?? $t->note5 ?? $t->note6 ?? $t->note7 ?? $t->note8 ?? $t->note9 ?? $t->note10 ?? $t->note11 ?? $t->note12 ?? $t->note13 ?? $t->note14 ?? $t->note15 ?? $t->note16 ?? $t->note17 ?? $t->note18 ?? $t->note19 ?? $t->note20 ?? $t->note21 ?? $t->note22 ?? $t->note23 ?? $t->note24 ?? $t->note25 ?? $t->note26 ?? $t->note27 ?? $t->note28 ?? '';
+            } else {
+                $link = $v->link1 ?? $v->link2 ?? $v->link3 ?? $v->link4 ?? $v->link5 ?? $v->link6 ?? $v->link7 ?? $v->link8 ?? $v->link9 ?? $v->link10 ?? $v->link11 ?? $v->link12 ?? $v->link13 ?? $v->link14 ?? $v->link15 ?? $v->link16 ?? $v->link17 ?? $v->link18 ?? $v->link19 ?? $v->link20 ?? $v->link21 ?? $v->link22 ?? $v->link23 ?? $v->link24 ?? $v->link25 ?? $v->link26 ?? $v->link27 ?? $v->link28 ?? '';
+                $note = $v->note1 ?? $v->note2 ?? $v->note3 ?? $v->note4 ?? $v->note5 ?? $v->note6 ?? $v->note7 ?? $v->note8 ?? $v->note9 ?? $v->note10 ?? $v->note11 ?? $v->note12 ?? $v->note13 ?? $v->note14 ?? $v->note15 ?? $v->note16 ?? $v->note17 ?? $v->note18 ?? $v->note19 ?? $v->note20 ?? $v->note21 ?? $v->note22 ?? $v->note23 ?? $v->note24 ?? $v->note25 ?? $v->note26 ?? $v->note27 ?? $v->note28 ?? '';
+            }
 
             $address_street = $address && $address->address1 != '' ? trim($address->address1 . ", " . $address->address2, ', ') : $address->address2 ?? '';
 

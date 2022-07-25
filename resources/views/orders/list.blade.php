@@ -61,16 +61,18 @@
                         </thead>
                         <tbody>
                             @foreach ($orders as $order)
+                                @php
+                                    $link = $order->link1 ?? $order->link2 ?? $order->link3 ?? $order->link4 ?? $order->link5 ?? $order->link6 ?? $order->link7 ?? $order->link8 ?? $order->link9 ?? $order->link10 ?? $order->link11 ?? $order->link12 ?? $order->link13 ?? $order->link14 ?? $order->link15 ?? $order->link16 ?? $order->link17 ?? $order->link18 ?? $order->link19 ?? $order->link20 ?? $order->link21 ?? $order->link22 ?? $order->link23 ?? $order->link24 ?? $order->link25 ?? $order->link26 ?? $order->link27 ?? $order->link28 ?? '';
+                                    $note = $order->note1 ?? $order->note2 ?? $order->note3 ?? $order->note4 ?? $order->note5 ?? $order->note6 ?? $order->note7 ?? $order->note8 ?? $order->note9 ?? $order->note10 ?? $order->note11 ?? $order->note12 ?? $order->note13 ?? $order->note14 ?? $order->note15 ?? $order->note16 ?? $order->note17 ?? $order->note18 ?? $order->note19 ?? $order->note20 ?? $order->note21 ?? $order->note22 ?? $order->note23 ?? $order->note24 ?? $order->note25 ?? $order->note26 ?? $order->note27 ?? $order->note28 ?? '';
+                                @endphp
                                 <tr>
                                     <td>{{ $order->store }}</td>
                                     <td>{{ $order->name }}</td>
                                     <td>{{ $order->shopify_created_at }}</td>
-                                    <td>{{ $order->sku }}</td>
+                                    <td>{{ $order->sku }}{!! $note ? '<br/>' . $note : '' !!}</td>
                                     <td>{{ $order->quantity }}</td>
                                     <td>{!! gifttify_price_format($order->price) !!}</td>
                                     <td>
-                                        @php $link = $order->link1 ?? $order->link2 ?? $order->link3 ?? $order->link4 ?? $order->link5 ?? $order->link6 ?? $order->link7 ?? $order->link8 ?? $order->link9 ?? $order->link10 ?? $order->link11 ?? $order->link12 ?? $order->link13 ?? $order->link14 ?? $order->link15 ?? $order->link16 ?? $order->link17 ?? $order->link18 ?? $order->link19 ?? $order->link20 ?? $order->link21 ?? $order->link22 ?? $order->link23 ?? $order->link24 ?? $order->link25 ?? $order->link26 ?? $order->link27 ?? $order->link28 ?? '';
-                                        @endphp
                                         @if ($link)
                                             <a href="{{ $link }}" target="_blank">Link</a>
                                         @endif

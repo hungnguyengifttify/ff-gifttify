@@ -31,6 +31,9 @@ Route::get('/ads_creative', [\App\Http\Controllers\DashboardController::class, '
 Route::get('/get_image_links', [\App\Http\Controllers\ToolsController::class, 'get_image_links'])
     ->name('get_image_links');
 
+Route::get('/create_shopify_csv', [\App\Http\Controllers\ToolsController::class, 'create_shopify_csv'])
+    ->name('create_shopify_csv');
+
 Route::get('/order_management/{store}', [\App\Http\Controllers\OrderManagementController::class, 'list'])
     ->name('order_management');
 

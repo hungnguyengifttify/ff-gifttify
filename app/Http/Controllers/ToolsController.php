@@ -52,4 +52,28 @@ class ToolsController extends Controller {
         $fileName = "image_links_" . time() . '.xls';
         return Spreadsheet::exportFromArray($excelData, $fileName);
     }
+
+    public function create_shopify_csv(Request $request)
+    {
+        $link = $request->input('link') ?? '';
+        $action = $request->input('action') ?? '';
+        $uriArr = parse_url($link);
+        $path = $uriArr['path'] ? explode('/', $uriArr['path']) : '';
+
+        $id = '';
+        if ($path) {
+            $id = isset($path[count($path)-1]) ? $path[count($path)-1] : '';
+        }
+
+        $result = array();
+        if ($id) {
+            //$result = GoogleDriveFiles::flat_image_links_from_folder_id($id);
+            $result = GoogleDriveFiles::flat_image_links_from_folder_id_by_mysql_query($id);
+        }
+        if ($action == 'download_csv') {
+            $this->export_image_links($result);
+            return true;
+        }
+        return view('tools.create_shopify_csv', compact('link', 'result') );
+    }
 }

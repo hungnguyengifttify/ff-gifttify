@@ -25,6 +25,7 @@ class OrderManagementController extends Controller {
         );
 
         $orders = Orders::getList($store, $fromDate, $toDate, $displayItemQty);
+        $orders = $this->getMoreData($orders);
 
         if ($action == 'export') {
             return $this->exportOrdersToSupplier($orders);
@@ -32,15 +33,11 @@ class OrderManagementController extends Controller {
         return view('orders.list', compact('orders', 'params'));
     }
 
-    protected function exportOrdersToSupplier ($data) {
-        $excelData = array(
-            array('Name', 'Lineitem quantity', 'Type', 'Size', 'Lineitem name', 'Lineitem sku',
-                'Shipping Name', 'Shipping Street', 'Shipping Address1', 'Shipping Address2',
-                'Shipping Company', 'Shipping City', 'Shipping Zip', 'Shipping Province',
-                'Shipping Country', 'Shipping Phone', 'Notes', 'Design', 'Price'
-            )
-        );
-        foreach ($data as $v) {
+    protected function getMoreData ($data) {
+        foreach ($data as $k => $v) {
+            $order_image = json_decode($v->image);
+            $order_image = $order_image->src ?? '';
+
             $address = json_decode($v->shipping_address);
             $properties = json_decode($v->properties);
 
@@ -81,11 +78,39 @@ class OrderManagementController extends Controller {
 
             $address_street = $address && $address->address1 != '' ? trim($address->address1 . ", " . $address->address2, ', ') : $address->address2 ?? '';
 
+            $data[$k]->link = $link;
+
+            if (preg_match("/[A-Z]{2}\d{4,5}[A-Z]{2,7}\d{2}/", $data[$k]->sku) && $link == '' ) {
+                $data[$k]->link = Orders::getLinkByNewFormat($data[$k]->sku);
+            }
+
+            $data[$k]->note = $note;
+            $data[$k]->size = $size;
+            $data[$k]->quantity = $quantity;
+            $data[$k]->address = $address;
+            $data[$k]->address_street = $address_street;
+            //$data[$k]->order_image = $order_image;
+            //$data[$k]->link_image = Orders::getFirstImageFromParentFolder($note);
+            $data[$k]->order_image = '';
+            $data[$k]->link_image = '';
+        }
+        return $data;
+    }
+
+    protected function exportOrdersToSupplier ($data) {
+        $excelData = array(
+            array('Name', 'Lineitem quantity', 'Type', 'Size', 'Lineitem name', 'Lineitem sku',
+                'Shipping Name', 'Shipping Street', 'Shipping Address1', 'Shipping Address2',
+                'Shipping Company', 'Shipping City', 'Shipping Zip', 'Shipping Province',
+                'Shipping Country', 'Shipping Phone', 'Notes', 'Design', 'Price'
+            )
+        );
+        foreach ($data as $v) {
             $line = array(
-                $v->name, $quantity, $v->product_type, $size, $v->item_name, $v->sku,
-                $address->name ?? '', $address_street, $address->address1 ?? '', $address->address2 ?? '',
-                $address->company ?? '', $address->city ?? '', $address->zip ?? '', $address->province ?? '',
-                $address->country ?? '', $address->phone ?? '', $note, $link, ''
+                $v->name, $v->quantity, $v->product_type, $v->size, $v->item_name, $v->sku,
+                $v->address->name ?? '', $v->address_street, $v->address->address1 ?? '', $v->address->address2 ?? '',
+                $v->address->company ?? '', $v->address->city ?? '', $v->address->zip ?? '', $v->address->province ?? '',
+                $v->address->country ?? '', $v->address->phone ?? '', $v->note, $v->link, ''
             );
             $excelData[] = $line;
         }

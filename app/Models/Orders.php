@@ -201,28 +201,4 @@ class Orders extends Model
         return $orders ?? array();
     }
 
-    public static function getFirstImageFromParentFolder($folderName) {
-        if (!$folderName) return '';
-
-        $link = GoogleDriveFiles::select("webContentLink")
-            ->where("parentId", "=", DB::raw("(select id from google_drive_files p where p.name = '$folderName' order by p.createdTime desc limit 1)") )
-            ->orderBy('createdTime', 'DESC')
-            ->first();
-
-        return $link->webContentLink ?? '';
-    }
-
-    public static function getLinkByNewFormat ($sku) {
-        $link = GoogleDriveFiles::select("webViewLink")
-            ->where("parentId", "=", DB::raw("(
-                select id from google_drive_files p2 where p2.name = 'File FF' and p2.parentId = (
-                    select id from google_drive_files p1 where p1.name = SUBSTRING_INDEX('$sku', '-', 1)
-                ) order by p2.createdTime desc limit 1
-            )") )
-            ->where("mimeType", "=", "application/vnd.google-apps.folder" )
-            ->where("name", "=", DB::raw("SUBSTRING_INDEX(SUBSTRING_INDEX('$sku', '-', 2), '-', -1)") )
-            ->orderBy('createdTime', 'DESC')
-            ->first();
-        return $link->webViewLink ?? '';
-    }
 }

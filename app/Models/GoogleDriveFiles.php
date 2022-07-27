@@ -10,6 +10,10 @@ class GoogleDriveFiles extends Model
 {
     use HasFactory;
 
+    public $incrementing = false;
+
+    protected $keyType = 'string';
+
     protected $fillable = [
         'id', 'createdTime', 'fullFileExtension', 'mimeType', 'modifiedTime', 'name', 'parents', 'parentId', 'permissionIds', 'shared', 'size', 'spaces', 'thumbnailLink', 'viewersCanCopyContent', 'webContentLink', 'webViewLink', 'writersCanShare', 'owners', 'trashed', 'trashedTime'
     ];
@@ -137,6 +141,29 @@ class GoogleDriveFiles extends Model
             ['folderId' => $folderId]
         );
         return collect($data)->map(function($x){ return (array) $x; })->toArray();
+    }
+
+    public static function getFirstImageFromParentFolder($folderName, $folderLink) {
+        if (!$folderName) return '';
+        $link = GoogleDriveFiles::select("id")
+            ->where("parentId", "=", DB::raw("(select id from google_drive_files p where p.name = '$folderName' and p.id = SUBSTRING_INDEX('$folderLink', '/', -1) order by p.createdTime desc limit 1)") )
+            ->orderBy('createdTime', 'DESC')
+            ->first();
+        return isset($link->id) ? "https://drive.google.com/thumbnail?authuser=0&sz=w100&id=" . $link->id : '';
+    }
+
+    public static function getLinkByNewFormat ($sku) {
+        $link = GoogleDriveFiles::select("webViewLink")
+            ->where("parentId", "=", DB::raw("(
+                select id from google_drive_files p2 where p2.name = 'File FF' and p2.parentId In (
+                    select id from google_drive_files p1 where p1.name = SUBSTRING_INDEX('$sku', '-', 1)
+                ) order by p2.createdTime desc limit 1
+            )") )
+            ->where("mimeType", "=", "application/vnd.google-apps.folder" )
+            ->where("name", "=", DB::raw("SUBSTRING_INDEX(SUBSTRING_INDEX('$sku', '-', 2), '-', -1)") )
+            ->orderBy('createdTime', 'DESC')
+            ->first();
+        return $link->webViewLink ?? '';
     }
 
 }

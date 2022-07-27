@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Services\Spreadsheet;
 use App\Models\Orders;
+use App\Models\GoogleDriveFiles;
 
 class OrderManagementController extends Controller {
 
@@ -36,7 +37,7 @@ class OrderManagementController extends Controller {
     protected function getMoreData ($data) {
         foreach ($data as $k => $v) {
             $order_image = json_decode($v->image);
-            $order_image = $order_image->src ?? '';
+            $order_image = $order_image->src ? str_replace('.jpg', '_180x.jpg', $order_image->src) : '';
 
             $address = json_decode($v->shipping_address);
             $properties = json_decode($v->properties);
@@ -67,6 +68,11 @@ class OrderManagementController extends Controller {
             $pc = $result[1] ?? 1;
             $quantity = $v->quantity * $pc;
 
+            $type = $v->product_type;
+            if (strtoupper($type) == 'DOORMAT' && str_contains(strtoupper($size), 'RUBBER') == false && str_contains(strtoupper($size), 'PVC') == false && str_contains(strtoupper($size), 'FLANNEL') == false ) {
+                $type = 'Rubber Doormat';
+            }
+
             if ($color != '') {
                 $t = Orders::getDesignLinkFromSkuAndColor($v->store, $v->sku, $color);
                 $link = $t->link1 ?? $t->link2 ?? $t->link3 ?? $t->link4 ?? $t->link5 ?? $t->link6 ?? $t->link7 ?? $t->link8 ?? $t->link9 ?? $t->link10 ?? $t->link11 ?? $t->link12 ?? $t->link13 ?? $t->link14 ?? $t->link15 ?? $t->link16 ?? $t->link17 ?? $t->link18 ?? $t->link19 ?? $t->link20 ?? $t->link21 ?? $t->link22 ?? $t->link23 ?? $t->link24 ?? $t->link25 ?? $t->link26 ?? $t->link27 ?? $t->link28 ?? '';
@@ -81,18 +87,17 @@ class OrderManagementController extends Controller {
             $data[$k]->link = $link;
 
             if (preg_match("/[A-Z]{2}\d{4,5}[A-Z]{2,7}\d{2}/", $data[$k]->sku) && $link == '' ) {
-                $data[$k]->link = Orders::getLinkByNewFormat($data[$k]->sku);
+                $data[$k]->link = GoogleDriveFiles::getLinkByNewFormat($data[$k]->sku);
             }
 
             $data[$k]->note = $note;
             $data[$k]->size = $size;
+            $data[$k]->type = $type;
             $data[$k]->quantity = $quantity;
             $data[$k]->address = $address;
             $data[$k]->address_street = $address_street;
-            //$data[$k]->order_image = $order_image;
-            //$data[$k]->link_image = Orders::getFirstImageFromParentFolder($note);
-            $data[$k]->order_image = '';
-            $data[$k]->link_image = '';
+            $data[$k]->order_image = $order_image;
+            $data[$k]->link_image = GoogleDriveFiles::getFirstImageFromParentFolder($note, $link);
         }
         return $data;
     }
@@ -107,7 +112,7 @@ class OrderManagementController extends Controller {
         );
         foreach ($data as $v) {
             $line = array(
-                $v->name, $v->quantity, $v->product_type, $v->size, $v->item_name, $v->sku,
+                $v->name, $v->quantity, $v->type, $v->size, $v->item_name, $v->sku,
                 $v->address->name ?? '', $v->address_street, $v->address->address1 ?? '', $v->address->address2 ?? '',
                 $v->address->company ?? '', $v->address->city ?? '', $v->address->zip ?? '', $v->address->province ?? '',
                 $v->address->country ?? '', $v->address->phone ?? '', $v->note, $v->link, ''

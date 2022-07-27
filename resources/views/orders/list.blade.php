@@ -50,24 +50,25 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>Store</th>
                                 <th>Order</th>
-                                <th>Created Time</th>
                                 <th>Sku</th>
-                                {{--<th>Order Image</th>
-                                <th>Link Image</th>--}}
+                                <th>Order Image</th>
+                                <th>Link Image</th>
                                 <th>Design Link</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($orders as $order)
                                 <tr>
-                                    <td>{{ $order->store }}</td>
-                                    <td>{{ $order->name }}</td>
-                                    <td>{{ $order->shopify_created_at }}</td>
+                                    <td style="max-width: 350px;">
+                                        {{ $order->store }} - {{ $order->name }}<br/>
+                                        {{ $order->shopify_created_at }}<br/>
+                                        {{ $order->type }}<br/>
+                                        {{ $order->size }}
+                                    </td>
                                     <td>{{ $order->sku }}{!! $order->note ? '<br/>' . $order->note : '' !!}</td>
-                                    {{--<td><img width="100px" src="{{ $order->order_image }}" /></td>
-                                    <td><img width="100px" src="{{ $order->link_image }}" /></td>--}}
+                                    <td><img width="100px" src="{{ $order->order_image }}" /></td>
+                                    <td><img width="100px" src="{{ $order->link_image }}" /></td>
                                     <td>
                                         @if ($order->link)
                                             <a href="{{ $order->link }}" target="_blank">Link</a>

@@ -67,13 +67,9 @@
                                         {{ $order->size }}
                                     </td>
                                     <td>{{ $order->sku }}{!! $order->note ? '<br/>' . $order->note : '' !!}</td>
-                                    <td><img width="100px" src="{{ $order->order_image }}" /></td>
-                                    <td><img width="100px" src="{{ $order->link_image }}" /></td>
-                                    <td>
-                                        @if ($order->link)
-                                            <a href="{{ $order->link }}" target="_blank">Link</a>
-                                        @endif
-                                    </td>
+                                    <td>@if ($order->link)<img width="100px" src="{{ $order->order_image }}" />@endif</td>
+                                    <td>@if ($order->link)<img width="100px" src="{{ $order->link_image }}" />@endif</td>
+                                    <td>@if ($order->link)<a href="{{ $order->link }}" target="_blank">Link</a>@endif</td>
                                 </tr>
                             @endforeach
                         </tbody>

@@ -55,6 +55,23 @@ class ToolsController extends Controller {
 
     public function create_shopify_csv(Request $request)
     {
+        $url = 'https://gtferp.gifttify.com';
+        $db = 'gtferp.gifttify.com';
+        $username = 'hungnq@gifttify.com';
+        $password = 'hunglan123';
+        $common = \ripcord::client("$url/xmlrpc/2/common");
+        $common->version();
+        $uid = $common->authenticate($db, $username, $password, array());
+
+        $models = \ripcord::client("$url/xmlrpc/2/object");
+        $records = $models->execute_kw($db, $uid, $password, 'res.partner', 'search_read', array(array(array('is_company', '=', true))), array('fields'=>array('name', 'country_id', 'comment'), 'limit'=>5));
+
+        dd($records);
+
+
+
+
+
         $link = $request->input('link') ?? '';
         $action = $request->input('action') ?? '';
         $uriArr = parse_url($link);

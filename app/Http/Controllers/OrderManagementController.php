@@ -48,6 +48,7 @@ class OrderManagementController extends Controller {
                 $v->variant_title
             );
 
+            $isCustom = false;
             $color = '';
             $pSize = '';
             foreach ($properties as $p) {
@@ -57,6 +58,10 @@ class OrderManagementController extends Controller {
 
                 if (strtolower($p->name) == 'color') {
                     $color = $p->value;
+                }
+
+                if ( str_contains(strtolower($p->name), 'custom') ) {
+                    $isCustom = true;
                 }
             }
             $pSize = trim($pSize, ', ');
@@ -73,7 +78,10 @@ class OrderManagementController extends Controller {
                 $type = 'Rubber Doormat';
             }
 
-            if ($color != '') {
+            if ($isCustom) {
+                $link = '';
+                $note = '';
+            } elseif ($color != '') {
                 $t = Orders::getDesignLinkFromSkuAndColor($v->store, $v->sku, $color);
                 $link = $t->link1 ?? $t->link2 ?? $t->link3 ?? $t->link4 ?? $t->link5 ?? $t->link6 ?? $t->link7 ?? $t->link8 ?? $t->link9 ?? $t->link10 ?? $t->link11 ?? $t->link12 ?? $t->link13 ?? $t->link14 ?? $t->link15 ?? $t->link16 ?? $t->link17 ?? $t->link18 ?? $t->link19 ?? $t->link20 ?? $t->link21 ?? $t->link22 ?? $t->link23 ?? $t->link24 ?? $t->link25 ?? $t->link26 ?? $t->link27 ?? $t->link28 ?? '';
                 $note = $t->note1 ?? $t->note2 ?? $t->note3 ?? $t->note4 ?? $t->note5 ?? $t->note6 ?? $t->note7 ?? $t->note8 ?? $t->note9 ?? $t->note10 ?? $t->note11 ?? $t->note12 ?? $t->note13 ?? $t->note14 ?? $t->note15 ?? $t->note16 ?? $t->note17 ?? $t->note18 ?? $t->note19 ?? $t->note20 ?? $t->note21 ?? $t->note22 ?? $t->note23 ?? $t->note24 ?? $t->note25 ?? $t->note26 ?? $t->note27 ?? $t->note28 ?? '';
@@ -86,7 +94,7 @@ class OrderManagementController extends Controller {
 
             $data[$k]->link = $link;
 
-            if (preg_match("/[A-Z]{2}\d{4,5}[A-Z]{2,7}\d{2}/", $data[$k]->sku) && $link == '' ) {
+            if (preg_match("/[A-Z]{2}\d{4,5}[A-Z]{2,7}\d{2}/", $data[$k]->sku) && $link == '' && !$isCustom) {
                 $data[$k]->link = GoogleDriveFiles::getLinkByNewFormat($data[$k]->sku);
             }
 

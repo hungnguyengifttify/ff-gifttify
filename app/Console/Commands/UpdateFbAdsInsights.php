@@ -117,7 +117,7 @@ class UpdateFbAdsInsights extends Command
                 foreach ($data as $v) {
                     FbAdsInsights::updateOrCreate([
                         'ad_id' => $v['ad_id'] ?? 0,
-                        'adset_id' => $v['adset_id'] ?? '',
+                        'adset_id' => $v['adset_id'] ?? 0,
                         'campaign_id' => $v['campaign_id'] ?? 0,
                         'country' => $v['country'] ?? '',
                         'date_record' => $v['date_start'] ?? '',

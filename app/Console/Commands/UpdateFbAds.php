@@ -43,7 +43,7 @@ class UpdateFbAds extends Command
 
         $api = Api::init($app_id, $app_secret, $access_token);
         $api->setDefaultGraphVersion('14.0');
-        $api->setLogger(new CurlLogger());
+        //$api->setLogger(new CurlLogger());
 
         $fields = array (
             "account_id",

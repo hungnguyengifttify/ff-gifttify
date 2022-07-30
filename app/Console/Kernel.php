@@ -19,11 +19,11 @@ class Kernel extends ConsoleKernel
         $schedule->command('orders:update')->everyMinute();
         $schedule->command('products:update')->everyTwoHours();
         $schedule->command('fbads:update_campaigns')->everyFourMinutes();
-        $schedule->command('fbads:update_adsets')->everyFiveMinutes();
+        $schedule->command('fbads:update_adsets')->everyTenMinutes();
         $schedule->command('fbads:update_ad_creative')->everyTwoMinutes();
         $schedule->command('fbads:update_ads_insights')->everyMinute();
         $schedule->command('fbads:update_ads')->everyFiveMinutes();
-        $schedule->command('googledrive:get_files')->everyFiveMinutes();
+        //$schedule->command('googledrive:get_files')->everyFiveMinutes();
     }
 
     /**

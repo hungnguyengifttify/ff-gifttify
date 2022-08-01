@@ -267,7 +267,7 @@ class Dashboard extends Model
         $toDate = $dateTimeRange['toDate'];
 
         $orders = DB::select("
-            select pt.product_type_name, MAX(pt.product_type_code) as product_type_code, sum(ol.price*ol.quantity)/$radioCurrency as total_order_amount, sum(ol.quantity) as total_quantity
+            select count(Distinct ol.order_id) as total_order, pt.product_type_name, MAX(pt.product_type_code) as product_type_code, sum(ol.price*ol.quantity)/$radioCurrency as total_order_amount, sum(ol.quantity) as total_quantity
             from orders o
             left join order_line_items ol ON o.shopify_id = ol.order_id
             left join products p on ol.product_id = p.shopify_id and p.store = '$store'
@@ -279,7 +279,7 @@ class Dashboard extends Model
         );
 
         $ordersTips = DB::select("
-            select 'TIP' as product_type_name, 'TIP' as product_type_code, sum(ol.price*ol.quantity)/$radioCurrency as total_order_amount, sum(ol.quantity) as total_quantity
+            select count(Distinct ol.order_id) as total_order, 'TIP' as product_type_name, 'TIP' as product_type_code, sum(ol.price*ol.quantity)/$radioCurrency as total_order_amount, sum(ol.quantity) as total_quantity
             from orders o
             left join order_line_items ol ON o.shopify_id = ol.order_id
             where o.store = '$store' and ol.name like 'TIP %' and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate
@@ -298,9 +298,11 @@ class Dashboard extends Model
                 $ordersResult[$o->product_type_code]['product_type_name'] = $o->product_type_name;
                 $ordersResult[$o->product_type_code]['total_order_amount'] = 0;
                 $ordersResult[$o->product_type_code]['total_quantity'] = 0;
+                $ordersResult[$o->product_type_code]['total_order'] = 0;
             }
             $ordersResult[$o->product_type_code]['total_order_amount'] += $o->total_order_amount;
             $ordersResult[$o->product_type_code]['total_quantity'] += $o->total_quantity;
+            $ordersResult[$o->product_type_code]['total_order'] += $o->total_order;
         }
 
         $campaignProductTypeTable = DB::table('campaign_product_type')->get();
@@ -347,6 +349,7 @@ class Dashboard extends Model
             }
 
             $result[$v]['total_quantity'] = $ordersResult[$v]['total_quantity'] ?? 0;
+            $result[$v]['total_order'] = $ordersResult[$v]['total_order'] ?? 0;
             $result[$v]['total_order_amount'] = $ordersResult[$v]['total_order_amount'] ?? 0;
             $result[$v]['totalSpend'] = $adsResult[$v]['totalSpend'] ?? 0;
             $result[$v]['cpc'] = $adsResult[$v]['cpc'] ?? 0;
@@ -489,7 +492,7 @@ class Dashboard extends Model
         }
 
         $orders = DB::select("
-            select sku, sum(ol.price * ol.quantity)/$radioCurrency as total_order_amount, SUM(ol.quantity) as total_quantity
+            select count(Distinct ol.order_id) as total_order, sku, sum(ol.price * ol.quantity)/$radioCurrency as total_order_amount, SUM(ol.quantity) as total_quantity
             from orders o
             left join order_line_items ol ON o.shopify_id = ol.order_id
             where o.store = '$store' and ol.product_id > 0 and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate
@@ -505,10 +508,12 @@ class Dashboard extends Model
                 $ordersResult[$designerCode]['designerCode'] = $designerCode;
                 $ordersResult[$designerCode]['total_order_amount'] = 0;
                 $ordersResult[$designerCode]['total_quantity'] = 0;
+                $ordersResult[$designerCode]['total_order'] = 0;
             }
             $ordersResult[$designerCode]['designerCode'] = $designerCode;
             $ordersResult[$designerCode]['total_order_amount'] += $o->total_order_amount;
             $ordersResult[$designerCode]['total_quantity'] += $o->total_quantity;
+            $ordersResult[$designerCode]['total_order'] += $o->total_order;
         }
 
         $designerReports = array_merge(array_keys($ordersResult) , array_keys($adsResult));
@@ -523,6 +528,7 @@ class Dashboard extends Model
             $result[$v]['designer_name'] = isset($designerData[$v]) ? $designerData[$v]->name : '';
 
             $result[$v]['total_quantity'] = $ordersResult[$v]['total_quantity'] ?? 0;
+            $result[$v]['total_order'] = $ordersResult[$v]['total_order'] ?? 0;
             $result[$v]['total_order_amount'] = $ordersResult[$v]['total_order_amount'] ?? 0;
             $result[$v]['totalSpend'] = $adsResult[$v]['totalSpend'] ?? 0;
             $result[$v]['cpc'] = $adsResult[$v]['cpc'] ?? 0;
@@ -609,7 +615,7 @@ class Dashboard extends Model
         }
 
         $orders = DB::select("
-            select sku, sum(ol.price * ol.quantity)/$radioCurrency as total_order_amount, sum(ol.quantity) as total_quantity
+            select count(Distinct ol.order_id) as total_order, sku, sum(ol.price * ol.quantity)/$radioCurrency as total_order_amount, sum(ol.quantity) as total_quantity
             from orders o
             left join order_line_items ol ON o.shopify_id = ol.order_id
             where o.store = '$store' and ol.product_id > 0 and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate
@@ -625,10 +631,12 @@ class Dashboard extends Model
                 $ordersResult[$ideaCode]['idea_code'] = $ideaCode;
                 $ordersResult[$ideaCode]['total_order_amount'] = 0;
                 $ordersResult[$ideaCode]['total_quantity'] = 0;
+                $ordersResult[$ideaCode]['total_order'] = 0;
             }
             $ordersResult[$ideaCode]['idea_code'] = $ideaCode;
             $ordersResult[$ideaCode]['total_order_amount'] += $o->total_order_amount;
-            $ordersResult[$ideaCode]['total_quantity'] ++;
+            $ordersResult[$ideaCode]['total_quantity'] += $o->total_quantity;
+            $ordersResult[$ideaCode]['total_order'] += $o->total_order;
         }
 
         $ideaReports = array_merge(array_keys($ordersResult) , array_keys($adsResult));
@@ -644,6 +652,7 @@ class Dashboard extends Model
 
             $result[$v]['total_order_amount'] = $ordersResult[$v]['total_order_amount'] ?? 0;
             $result[$v]['total_quantity'] = $ordersResult[$v]['total_quantity'] ?? 0;
+            $result[$v]['total_order'] = $ordersResult[$v]['total_order'] ?? 0;
             $result[$v]['totalSpend'] = $adsResult[$v]['totalSpend'] ?? 0;
             $result[$v]['cpc'] = $adsResult[$v]['cpc'] ?? 0;
             $result[$v]['mo'] = ($result[$v]['total_order_amount']) > 0 ? 100*($result[$v]['totalSpend'] / $result[$v]['total_order_amount']) : 0;

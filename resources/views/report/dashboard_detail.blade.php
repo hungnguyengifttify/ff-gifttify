@@ -188,7 +188,8 @@
                             <th>Rev</th>
                             <th>CPC</th>
                             <th>MO</th>
-                            <th>Qty</th>
+                            <th>ItemQty</th>
+                            <th>OrdersQty</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -203,6 +204,7 @@
                             <td {!! display_zero_cell_dashboard($v['cpc'])!!} >{!! number_format($v['cpc'], 2);  !!} </td>
                             <td {!! display_zero_cell_dashboard($v['mo'])!!} >{!! round($v['mo']) . '%';  !!} </td>
                             <td {!! display_zero_cell_dashboard($v['total_quantity'])!!} >{!! round($v['total_quantity']) !!} </td>
+                            <td {!! display_zero_cell_dashboard($v['total_order'])!!} >{!! round($v['total_order']) !!} </td>
                         </tr>
                         <?php endforeach; ?>
                         </tbody>
@@ -210,11 +212,17 @@
 
                     <div class="inline-block">
                         <table class="table table-responsive table-bordered" style="width: auto">
-                            @php $totalQty = 0; @endphp
+                            @php
+                                $totalQty = 0;
+                                $totalOrder = 0;
+                            @endphp
                             @foreach($designerAds as $v)
-                                @php $totalQty += $v['total_quantity']; @endphp
+                                @php
+                                    $totalQty += $v['total_quantity'];
+                                    $totalOrder += $v['total_order'];
+                                @endphp
                             @endforeach
-                            <h1>By Designer [{{ $totalQty }}]</h1>
+                            <h1>By Designer [{{ $totalQty . '/' . $totalOrder }}]</h1>
                             <thead>
                             <tr>
                                 <th></th>
@@ -222,7 +230,8 @@
                                 <th>Rev</th>
                                 <th>CPC</th>
                                 <th>MO</th>
-                                <th>Qty</th>
+                                <th>ItemQty</th>
+                                <th>OrdersQty</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -237,6 +246,7 @@
                                 <td {!! display_zero_cell_dashboard($v['cpc']);  !!}  >{!! number_format($v['cpc'], 2);  !!} </td>
                                 <td {!! display_zero_cell_dashboard($v['mo']);  !!}  >{!! round($v['mo']) . '%';  !!} </td>
                                 <td {!! display_zero_cell_dashboard($v['total_quantity']) !!} >{!! round($v['total_quantity']) !!} </td>
+                                <td {!! display_zero_cell_dashboard($v['total_order']) !!} >{!! round($v['total_order']) !!} </td>
                             </tr>
                             <?php endforeach;?>
                             </tbody>
@@ -245,11 +255,17 @@
 
                     <div class="inline-block">
                         <table class="table table-responsive table-bordered" style="width: auto">
-                            @php $totalQty = 0; @endphp
-                            @foreach($designerAds as $v)
-                                @php $totalQty += $v['total_quantity']; @endphp
+                            @php
+                                $totalQty = 0;
+                                $totalOrder = 0;
+                            @endphp
+                            @foreach($ideaAds as $v)
+                                @php
+                                    $totalQty += $v['total_quantity'];
+                                    $totalOrder += $v['total_order'];
+                                @endphp
                             @endforeach
-                            <h1>By Idea [{{ $totalQty }}]</h1>
+                            <h1>By Idea [{{ $totalQty . '/' . $totalOrder }}]</h1>
                             <thead>
                             <tr>
                                 <th></th>
@@ -257,7 +273,8 @@
                                 <th>Rev</th>
                                 <th>MO</th>
                                 <th>CPC</th>
-                                <th>Qty</th>
+                                <th>ItemQty</th>
+                                <th>OrdersQty</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -272,11 +289,14 @@
                                 <td {!! display_zero_cell_dashboard($v['mo']);  !!}  >{!! round($v['mo']) . '%';  !!} </td>
                                 <td {!! display_zero_cell_dashboard($v['cpc']);  !!}  >{!! number_format($v['cpc'], 2);  !!} </td>
                                 <td {!! display_zero_cell_dashboard($v['total_quantity']) !!} >{!! round($v['total_quantity']) !!} </td>
+                                <td {!! display_zero_cell_dashboard($v['total_order']) !!} >{!! round($v['total_order']) !!} </td>
                             </tr>
                             <?php endforeach; ?>
                             </tbody>
                         </table>
                     </div>
+
+                    <div style="clear: both"></div>
 
 
                     <div class="inline-block">

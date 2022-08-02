@@ -32,7 +32,7 @@ class Dashboard extends Model
         } elseif ($store == 'au-thecreattify') {
             return array (
                 'phpTimeZone' => 'Australia/Sydney',
-                'fbAccountIds' => FbAds::$auAccountIds,
+                'fbAccountIds' => FbAds::$auThecreattifyAccountIds,
                 'mysqlTimeZone' => 'Australia/Sydney',
                 'radioCurrency' => 1.4
             );

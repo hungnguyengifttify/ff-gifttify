@@ -25,7 +25,7 @@ class FbAds extends Model
         '1004611960231517'
     );
 
-    static $auAccountIds = array(
+    static $auThecreattifyAccountIds = array(
         '209267284523548',
         '4065060523598849',
         '199757128777881',
@@ -46,7 +46,7 @@ class FbAds extends Model
     public static function getAllRunningAccountIds() {
         return array_merge(
             FbAds::$usAccountIds,
-            FbAds::$auAccountIds,
+            FbAds::$auThecreattifyAccountIds,
             FbAds::$singlecloudyAccountIds
         );
     }
@@ -55,7 +55,7 @@ class FbAds extends Model
         $dateTimeZone = "";
         if (in_array($accountId, FbAds::$usAccountIds)) {
             $dateTimeZone = new \DateTimeZone('America/Los_Angeles');
-        } elseif (in_array($accountId, FbAds::$auAccountIds)) {
+        } elseif (in_array($accountId, FbAds::$auThecreattifyAccountIds)) {
             $dateTimeZone = new \DateTimeZone('Australia/Sydney');
         } elseif (in_array($accountId, FbAds::$singlecloudyAccountIds)) {
             $dateTimeZone = new \DateTimeZone('America/Los_Angeles');

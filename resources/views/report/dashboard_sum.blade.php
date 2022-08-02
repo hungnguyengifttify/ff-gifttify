@@ -41,7 +41,7 @@
                     </table>
 
                     <table class="table table-responsive table-bordered" style="width: auto">
-                        <h1>Store US Thecreattify <a href="/report_detail/thecreattify" style="font-size: x-large;">View Detail</a></h1>
+                        <h1>thecreattify.com <a href="/report_detail/thecreattify" style="font-size: x-large;">View Detail</a></h1>
                         <thead>
                         <tr>
                             <th></th>
@@ -75,7 +75,7 @@
                     </table>
 
                     <table class="table table-responsive table-bordered" style="width: auto">
-                        <h1>Store SingleCloudy <a href="/report_detail/singlecloudy" style="font-size: x-large;">View Detail</a></h1>
+                        <h1>singlecloudy.com <a href="/report_detail/singlecloudy" style="font-size: x-large;">View Detail</a></h1>
                         <thead>
                         <tr>
                             <th></th>
@@ -109,7 +109,7 @@
                     </table>
 
                     <table class="table table-responsive table-bordered" style="width: auto">
-                        <h1>Store AU Thecreattify <a href="/report_detail/au-thecreattify" style="font-size: x-large;">View Detail</a></h1>
+                        <h1>au.thecreattify.com <a href="/report_detail/au-thecreattify" style="font-size: x-large;">View Detail</a></h1>
                         <thead>
                         <tr>
                             <th></th>

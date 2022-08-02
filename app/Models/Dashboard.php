@@ -160,11 +160,10 @@ class Dashboard extends Model
     }
 
     public static function getDatesByRangeDateLabel ($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '') {
-        if ($store == 'us') {
-            $phpTimeZone = 'America/Los_Angeles';
-        } elseif ($store == 'au') {
-            $phpTimeZone = 'Australia/Sydney';
-        }
+        $storeConfig = self::getStoreConfig($store);
+        if (!$storeConfig) return false;
+
+        $phpTimeZone = $storeConfig['phpTimeZone'];
 
         Carbon::setWeekStartsAt(Carbon::MONDAY);
         Carbon::setWeekEndsAt(Carbon::SUNDAY);

@@ -35,10 +35,10 @@
                         <span id="reportrangetext">{!! $params['fromDate']->format('d-m-Y') . ' => ' . $params['toDate']->format('d-m-Y'); !!} </span>
 
                         <script type="text/javascript">
-                            <?php if ($store == "us"):;  ?>
-                            moment.tz.setDefault("America/Los_Angeles");
-                            <?php else:  ?>
+                            <?php if ($store == 'au-thecreattify'):;  ?>
                             moment.tz.setDefault("Australia/Sydney");
+                            <?php else:  ?>
+                            moment.tz.setDefault("America/Los_Angeles");
                             <?php endif;  ?>
 
                             moment().startOf('isoWeek');

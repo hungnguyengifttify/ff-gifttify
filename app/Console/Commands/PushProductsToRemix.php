@@ -41,7 +41,7 @@ class PushProductsToRemix extends Command
             $limit = 1000;
         }
 
-        $stores = array('us');
+        $stores = array('thecreattify');
         foreach ($stores as $store) {
             DB::table('products')->where('store', $store)->orderBy('id', 'asc')->chunk($limit, function ($products) {
                 foreach ($products as $p) {

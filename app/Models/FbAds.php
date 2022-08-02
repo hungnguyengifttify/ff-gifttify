@@ -9,7 +9,7 @@ class FbAds extends Model
 {
     use HasFactory;
 
-    static $usAccountIds = array(
+    static $thecreattifyAccountIds = array(
         '2978647975730170',
         '612291543439190',
         '309846854338542',
@@ -45,7 +45,7 @@ class FbAds extends Model
 
     public static function getAllRunningAccountIds() {
         return array_merge(
-            FbAds::$usAccountIds,
+            FbAds::$thecreattifyAccountIds,
             FbAds::$auThecreattifyAccountIds,
             FbAds::$singlecloudyAccountIds
         );
@@ -53,7 +53,7 @@ class FbAds extends Model
 
     public static function getPhpDateTimeZoneByAccountId($accountId) {
         $dateTimeZone = "";
-        if (in_array($accountId, FbAds::$usAccountIds)) {
+        if (in_array($accountId, FbAds::$thecreattifyAccountIds)) {
             $dateTimeZone = new \DateTimeZone('America/Los_Angeles');
         } elseif (in_array($accountId, FbAds::$auThecreattifyAccountIds)) {
             $dateTimeZone = new \DateTimeZone('Australia/Sydney');

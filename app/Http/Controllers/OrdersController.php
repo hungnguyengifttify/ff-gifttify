@@ -19,7 +19,7 @@ class OrdersController extends Controller {
 
     public function index(Request $request)
     {
-        $stores = array('us', 'au-thecreattify', 'singlecloudy');
+        $stores = array('thecreattify', 'au-thecreattify', 'singlecloudy');
 
         foreach ($stores as $store) {
             $shopifyConfig = Dashboard::getShopifyConfig($store);

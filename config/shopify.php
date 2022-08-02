@@ -7,22 +7,22 @@ return [
         /*
          * The API key from private app credentials.
          */
-        'api_key' => env('SHOPIFY_US_API_KEY', ''),
+        'api_key' => env('SHOPIFY_THECREATTIFY_API_KEY', ''),
 
         /*
          * The password from private app credentials.
          */
-        'password' => env('SHOPIFY_US_PASSWORD', ''),
+        'password' => env('SHOPIFY_THECREATTIFY_PASSWORD', ''),
 
         /*
          * The shopify domain for your shop.
          */
-        'domain' => env('SHOPIFY_US_DOMAIN', ''),
+        'domain' => env('SHOPIFY_THECREATTIFY_DOMAIN', ''),
 
         /*
          * The shopify api version.
          */
-        'api_version' => env('SHOPIFY_US_API_VERSION', '2021-01'),
+        'api_version' => env('SHOPIFY_THECREATTIFY_API_VERSION', '2021-01'),
 
     ],
 

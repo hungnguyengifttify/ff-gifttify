@@ -15,7 +15,7 @@ class DashboardController extends Controller {
         unset($rangeDates['custom_range']);
         $rangeDates = array_keys($rangeDates);
 
-        $stores = array('us', 'au-thecreattify', 'singlecloudy');
+        $stores = array('thecreattify', 'au-thecreattify', 'singlecloudy');
         $reports = array();
         foreach ($rangeDates as $v) {
             foreach ($stores as $store) {
@@ -46,8 +46,8 @@ class DashboardController extends Controller {
         return view('report.dashboard_sum', array('reports' => $reports));
     }
 
-    public function report_detail(Request $request, $store = 'us') {
-        if ($store == 'us') {
+    public function report_detail(Request $request, $store = 'thecreattify') {
+        if ($store == 'thecreattify') {
             $title = "Thecreattify Report Detail";
         } elseif ($store == 'au-thecreattify') {
             $title = "AU Thecreattify Report Detail";

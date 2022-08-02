@@ -11,7 +11,7 @@ use App\Models\GoogleDriveFiles;
 
 class OrderManagementController extends Controller {
 
-    public function list(Request $request, $store = 'us')
+    public function list(Request $request, $store = 'thecreattify')
     {
         $action = $request->input('action') ?? '';
 

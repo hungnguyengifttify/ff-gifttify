@@ -22,10 +22,10 @@ class Dashboard extends Model
     );
 
     public static function getStoreConfig ($store) {
-        if ($store == 'us') {
+        if ($store == 'thecreattify') {
             return array (
                 'phpTimeZone' => 'America/Los_Angeles',
-                'fbAccountIds' => FbAds::$usAccountIds,
+                'fbAccountIds' => FbAds::$thecreattifyAccountIds,
                 'mysqlTimeZone' => 'US/Pacific',
                 'radioCurrency' => 1
             );
@@ -48,11 +48,11 @@ class Dashboard extends Model
     }
 
     public static function getShopifyConfig ($store) {
-        if ($store == 'us') {
-            $apiKey = env('SHOPIFY_US_API_KEY', '');
-            $password = env('SHOPIFY_US_PASSWORD', '');
-            $domain = env('SHOPIFY_US_DOMAIN', '');
-            $apiVersion = env('SHOPIFY_US_API_VERSION', '');
+        if ($store == 'thecreattify') {
+            $apiKey = env('SHOPIFY_THECREATTIFY_API_KEY', '');
+            $password = env('SHOPIFY_THECREATTIFY_PASSWORD', '');
+            $domain = env('SHOPIFY_THECREATTIFY_DOMAIN', '');
+            $apiVersion = env('SHOPIFY_THECREATTIFY_API_VERSION', '');
 
             $dateTimeZone = new \DateTimeZone('America/Los_Angeles');
         } elseif ($store == 'au-thecreattify') {
@@ -98,7 +98,7 @@ class Dashboard extends Model
         return ($a['totalSpend'] > $b['totalSpend']) ? -1 : 1;
     }
 
-    public static function getReportByDate($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '') {
+    public static function getReportByDate($store = 'thecreattify', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '') {
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 
@@ -159,7 +159,7 @@ class Dashboard extends Model
             . Carbon::createFromFormat('Y-m-d H:i:s', $dateTimeEnd)->format('d/m');
     }
 
-    public static function getDatesByRangeDateLabel ($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '') {
+    public static function getDatesByRangeDateLabel ($store = 'thecreattify', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '') {
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 
@@ -207,7 +207,7 @@ class Dashboard extends Model
         );
     }
 
-    public static function getAccountsAdsReportByDate($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '') {
+    public static function getAccountsAdsReportByDate($store = 'thecreattify', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '') {
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 
@@ -238,7 +238,7 @@ class Dashboard extends Model
 
     }
 
-    public static function getCountryAdsReportByDate($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '') {
+    public static function getCountryAdsReportByDate($store = 'thecreattify', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '') {
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 
@@ -295,7 +295,7 @@ class Dashboard extends Model
 
     }
 
-    public static function getProductTypesReportByDate($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '',$debug = 0) {
+    public static function getProductTypesReportByDate($store = 'thecreattify', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '',$debug = 0) {
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 
@@ -425,7 +425,7 @@ class Dashboard extends Model
         return $productType ?: 'UNKNOWN';
     }
 
-    public static function getAdsTypesReportByDate ($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '', $debug = 0) {
+    public static function getAdsTypesReportByDate ($store = 'thecreattify', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '', $debug = 0) {
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 
@@ -496,7 +496,7 @@ class Dashboard extends Model
         return $adsType;
     }
 
-    public static function getDesignerReportByDate ($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '', $debug = 0) {
+    public static function getDesignerReportByDate ($store = 'thecreattify', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '', $debug = 0) {
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 
@@ -619,7 +619,7 @@ class Dashboard extends Model
         return $designer ?: 'UNKNOWN';
     }
 
-    public static function getIdeaReportByDate ($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '', $debug = 0) {
+    public static function getIdeaReportByDate ($store = 'thecreattify', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '', $debug = 0) {
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 
@@ -747,7 +747,7 @@ class Dashboard extends Model
         return $idea ?: 'UNKNOWN';
     }
 
-    public static function getAdsStaffReportByDate ($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '', $debug = 0) {
+    public static function getAdsStaffReportByDate ($store = 'thecreattify', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '', $debug = 0) {
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 
@@ -799,7 +799,7 @@ class Dashboard extends Model
         return $adsType;
     }
 
-    public static function getAdsCreativesReportByDate ($store = 'us', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '', $code = '', $type = '') {
+    public static function getAdsCreativesReportByDate ($store = 'thecreattify', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '', $code = '', $type = '') {
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 

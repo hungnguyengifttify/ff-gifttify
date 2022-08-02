@@ -30,7 +30,7 @@
                         <span id="reportrangetext"><?php echo $params['fromDate']->format('d-m-Y') . ' => ' . $params['toDate']->format('d-m-Y');?></span>
 
                         <script type="text/javascript">
-                            <?php if ($store == "us"):; ?>
+                            <?php if ($store == 'thecreattify'):; ?>
                             moment.tz.setDefault("America/Los_Angeles");
                             <?php else: ?>
                             moment.tz.setDefault("Australia/Sydney");

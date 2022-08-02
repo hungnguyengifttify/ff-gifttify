@@ -32,7 +32,7 @@ class UpdateOrders extends Command
     public function handle()
     {
         $this->info("Cron Job Update Orders running at ". now());
-        $stores = array('us', 'au-thecreattify', 'singlecloudy');
+        $stores = array('thecreattify', 'au-thecreattify', 'singlecloudy');
 
         foreach ($stores as $store) {
             $shopifyConfig = Dashboard::getShopifyConfig($store);

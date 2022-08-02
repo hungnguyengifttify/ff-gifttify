@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Signifly\Shopify\Shopify;
 use App\Models\Orders;
+use App\Models\Dashboard;
 
 class OrdersController extends Controller {
 
@@ -18,31 +19,16 @@ class OrdersController extends Controller {
 
     public function index(Request $request)
     {
-        $stores = array('us', 'au', 'singlecloudy');
+        $stores = array('us', 'au-thecreattify', 'singlecloudy');
 
         foreach ($stores as $store) {
-            if ($store == 'us') {
-                $apiKey = env('SHOPIFY_US_API_KEY', '');
-                $password = env('SHOPIFY_US_PASSWORD', '');
-                $domain = env('SHOPIFY_US_DOMAIN', '');
-                $apiVersion = env('SHOPIFY_US_API_VERSION', '');
+            $shopifyConfig = Dashboard::getShopifyConfig($store);
 
-                $dateTimeZone = new \DateTimeZone('America/Los_Angeles');
-            } elseif ($store == 'au') {
-                $apiKey = env('SHOPIFY_AU_API_KEY', '');
-                $password = env('SHOPIFY_AU_PASSWORD', '');
-                $domain = env('SHOPIFY_AU_DOMAIN', '');
-                $apiVersion = env('SHOPIFY_AU_API_VERSION', '');
-
-                $dateTimeZone = new \DateTimeZone('Australia/Sydney');
-            } elseif ($store == 'singlecloudy') {
-                $apiKey = env('SHOPIFY_SINGLECLOUDY_API_KEY', '');
-                $password = env('SHOPIFY_SINGLECLOUDY_PASSWORD', '');
-                $domain = env('SHOPIFY_SINGLECLOUDY_DOMAIN', '');
-                $apiVersion = env('SHOPIFY_SINGLECLOUDY_API_VERSION', '');
-
-                $dateTimeZone = new \DateTimeZone('America/Los_Angeles');
-            }
+            $apiKey = $shopifyConfig['apiKey'];
+            $password = $shopifyConfig['password'];
+            $domain = $shopifyConfig['domain'];
+            $apiVersion = $shopifyConfig['apiVersion'];
+            $dateTimeZone = $shopifyConfig['dateTimeZone'];
 
             $dateTime = new \DateTime("now", $dateTimeZone);
             $dateTime->modify('-10 day');

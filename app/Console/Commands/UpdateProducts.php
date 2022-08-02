@@ -33,7 +33,7 @@ class UpdateProducts extends Command
     {
         $this->info("Cron Job Update Products running at ". now());
 
-        $stores = array('us', 'au', 'singlecloudy');
+        $stores = array('us', 'au-thecreattify', 'singlecloudy');
 
         foreach ($stores as $store) {
             $shopifyConfig = Dashboard::getShopifyConfig($store);

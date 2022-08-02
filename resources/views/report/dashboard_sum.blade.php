@@ -41,7 +41,7 @@
                     </table>
 
                     <table class="table table-responsive table-bordered" style="width: auto">
-                        <h1>Store US <a href="/report_detail/us" style="font-size: x-large;">View Detail</a></h1>
+                        <h1>Store US Thecreattify <a href="/report_detail/us" style="font-size: x-large;">View Detail</a></h1>
                         <thead>
                         <tr>
                             <th></th>
@@ -75,7 +75,7 @@
                     </table>
 
                     <table class="table table-responsive table-bordered" style="width: auto">
-                        <h1>Store AU <a href="/report_detail/au" style="font-size: x-large;">View Detail</a></h1>
+                        <h1>Store AU Thecreattify <a href="/report_detail/au-thecreattify" style="font-size: x-large;">View Detail</a></h1>
                         <thead>
                         <tr>
                             <th></th>
@@ -91,7 +91,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <?php foreach ($reports['au'] as $v): ?>
+                        <?php foreach ($reports['au-thecreattify'] as $v): ?>
                         <tr>
                             <td><?php echo '<b>' . $v['title'] . '</b>' . '<br/>' . "<span class='small'>{$v['dateDisplay']}</span>"; ?></br></td>
                             <td><?php echo $v['orders']['total']; ?></td>

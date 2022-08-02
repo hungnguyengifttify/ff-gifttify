@@ -29,7 +29,7 @@ class Dashboard extends Model
                 'mysqlTimeZone' => 'US/Pacific',
                 'radioCurrency' => 1
             );
-        } elseif ($store == 'au') {
+        } elseif ($store == 'au-thecreattify') {
             return array (
                 'phpTimeZone' => 'Australia/Sydney',
                 'fbAccountIds' => FbAds::$auAccountIds,
@@ -55,11 +55,11 @@ class Dashboard extends Model
             $apiVersion = env('SHOPIFY_US_API_VERSION', '');
 
             $dateTimeZone = new \DateTimeZone('America/Los_Angeles');
-        } elseif ($store == 'au') {
-            $apiKey = env('SHOPIFY_AU_API_KEY', '');
-            $password = env('SHOPIFY_AU_PASSWORD', '');
-            $domain = env('SHOPIFY_AU_DOMAIN', '');
-            $apiVersion = env('SHOPIFY_AU_API_VERSION', '');
+        } elseif ($store == 'au-thecreattify') {
+            $apiKey = env('SHOPIFY_AU_THECREATTIFY_API_KEY', '');
+            $password = env('SHOPIFY_AU_THECREATTIFY_PASSWORD', '');
+            $domain = env('SHOPIFY_AU_THECREATTIFY_DOMAIN', '');
+            $apiVersion = env('SHOPIFY_AU_THECREATTIFY_API_VERSION', '');
 
             $dateTimeZone = new \DateTimeZone('Australia/Sydney');
         } elseif ($store == 'singlecloudy') {

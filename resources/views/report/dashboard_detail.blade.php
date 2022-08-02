@@ -13,7 +13,7 @@
             Store Report Detail
 
             <select onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
-                <option <?php if (str_contains(url()->current(), '/report_detail/us') ) echo "selected";  ?>  value="/report_detail/us">US</option>
+                <option <?php if (str_contains(url()->current(), '/report_detail/thecreattify') ) echo "selected";  ?>  value="/report_detail/thecreattify">thecreattify.com</option>
                 <option <?php if (str_contains(url()->current(), '/report_detail/au-thecreattify') ) echo "selected";  ?>  value="/report_detail/au-thecreattify">au.thecreattify.com</option>
             </select>
         </h2>

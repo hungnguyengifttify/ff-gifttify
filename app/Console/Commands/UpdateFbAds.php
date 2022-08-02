@@ -115,7 +115,7 @@ class UpdateFbAds extends Command
                         'campaign_id' => $v['campaign_id'] ?? 0,
                         'configured_status' => $v['configured_status'] ?? '',
                         'conversion_domain' => $v['conversion_domain'] ?? '',
-                        'conversion_specs' => $v['conversion_specs'] ? json_encode($v['conversion_specs']) : json_encode(''),
+                        'conversion_specs' => isset($v['conversion_specs']) ? json_encode($v['conversion_specs']) : json_encode(''),
                         'created_time' => Carbon::createFromFormat(\DateTime::ISO8601, $v['created_time'], 'UTC') ?? '1900-01-01',
                         'updated_time' => Carbon::createFromFormat(\DateTime::ISO8601, $v['updated_time'], 'UTC') ?? '1900-01-01',
                         'creative' => isset($v['creative']) ? json_encode($v['creative']) : json_encode(''),
@@ -131,7 +131,7 @@ class UpdateFbAds extends Command
                         'source_ad_id' => $v['source_ad_id'] ?? 0,
                         'status' => $v['status'] ?? '',
                         'targeting' => isset($v['targeting']) ? json_encode($v['targeting']) : json_encode(''),
-                        'tracking_and_conversion_with_defaults' => $v['tracking_and_conversion_with_defaults'] ? json_encode($v['tracking_and_conversion_with_defaults']) : json_encode(''),
+                        'tracking_and_conversion_with_defaults' => isset($v['tracking_and_conversion_with_defaults']) ? json_encode($v['tracking_and_conversion_with_defaults']) : json_encode(''),
                         'tracking_specs' => isset($v['tracking_specs']) ? json_encode($v['tracking_specs']) : json_encode(''),
 
                     ]);

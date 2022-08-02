@@ -128,7 +128,7 @@ class Dashboard extends Model
         );
 
         $orders = DB::selectOne("select count(*) as total from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
-        $totalAmount = DB::selectOne("select sum(total_price)/$radioCurrency as total from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
+        $totalAmount = DB::selectOne("select sum(total_line_items_price - total_discounts)/$radioCurrency as total from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
 
         return array(
             'title' => self::$rangeDate[$rangeDate] ?? '',
@@ -250,7 +250,7 @@ class Dashboard extends Model
         $fromDate = $dateTimeRange['fromDate'];
         $toDate = $dateTimeRange['toDate'];
 
-        $orders = DB::select("select shipping_address->>\"$.country_code\" as country_code,count(*) as total_order, sum(total_price)/$radioCurrency as total_order_amount from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate group by shipping_address->>\"$.country_code\";"
+        $orders = DB::select("select shipping_address->>\"$.country_code\" as country_code,count(*) as total_order, sum(total_line_items_price - total_discounts)/$radioCurrency as total_order_amount from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate group by shipping_address->>\"$.country_code\";"
             , ['fromDate' => $fromDate, 'toDate' => $toDate]
         );
         $ordersResult = array();
@@ -308,7 +308,7 @@ class Dashboard extends Model
         $toDate = $dateTimeRange['toDate'];
 
         $orders = DB::select("
-            select count(Distinct ol.order_id) as total_order, pt.product_type_name, MAX(pt.product_type_code) as product_type_code, sum(ol.price*ol.quantity)/$radioCurrency as total_order_amount, sum(ol.quantity) as total_quantity
+            select count(Distinct ol.order_id) as total_order, pt.product_type_name, MAX(pt.product_type_code) as product_type_code, sum((ol.price*ol.quantity) - ol.total_discount)/$radioCurrency as total_order_amount, sum(ol.quantity) as total_quantity
             from orders o
             left join order_line_items ol ON o.shopify_id = ol.order_id
             left join products p on ol.product_id = p.shopify_id and p.store = '$store'
@@ -320,7 +320,7 @@ class Dashboard extends Model
         );
 
         $ordersTips = DB::select("
-            select count(Distinct ol.order_id) as total_order, 'TIP' as product_type_name, 'TIP' as product_type_code, sum(ol.price*ol.quantity)/$radioCurrency as total_order_amount, sum(ol.quantity) as total_quantity
+            select count(Distinct ol.order_id) as total_order, 'TIP' as product_type_name, 'TIP' as product_type_code, sum((ol.price*ol.quantity) - ol.total_discount)/$radioCurrency as total_order_amount, sum(ol.quantity) as total_quantity
             from orders o
             left join order_line_items ol ON o.shopify_id = ol.order_id
             where o.store = '$store' and ol.name like 'TIP %' and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate
@@ -533,7 +533,7 @@ class Dashboard extends Model
         }
 
         $orders = DB::select("
-            select count(Distinct ol.order_id) as total_order, sku, sum(ol.price * ol.quantity)/$radioCurrency as total_order_amount, SUM(ol.quantity) as total_quantity
+            select count(Distinct ol.order_id) as total_order, sku, sum((ol.price*ol.quantity) - ol.total_discount)/$radioCurrency as total_order_amount, SUM(ol.quantity) as total_quantity
             from orders o
             left join order_line_items ol ON o.shopify_id = ol.order_id
             where o.store = '$store' and ol.product_id > 0 and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate
@@ -656,7 +656,7 @@ class Dashboard extends Model
         }
 
         $orders = DB::select("
-            select count(Distinct ol.order_id) as total_order, sku, sum(ol.price * ol.quantity)/$radioCurrency as total_order_amount, sum(ol.quantity) as total_quantity
+            select count(Distinct ol.order_id) as total_order, sku, sum((ol.price*ol.quantity) - ol.total_discount)/$radioCurrency as total_order_amount, sum(ol.quantity) as total_quantity
             from orders o
             left join order_line_items ol ON o.shopify_id = ol.order_id
             where o.store = '$store' and ol.product_id > 0 and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(o.shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate

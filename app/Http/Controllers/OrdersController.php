@@ -18,7 +18,7 @@ class OrdersController extends Controller {
 
     public function index(Request $request)
     {
-        $stores = array('us', 'au');
+        $stores = array('us', 'au', 'singlecloudy');
 
         foreach ($stores as $store) {
             if ($store == 'us') {
@@ -35,6 +35,13 @@ class OrdersController extends Controller {
                 $apiVersion = env('SHOPIFY_AU_API_VERSION', '');
 
                 $dateTimeZone = new \DateTimeZone('Australia/Sydney');
+            } elseif ($store == 'singlecloudy') {
+                $apiKey = env('SHOPIFY_SINGLECLOUDY_API_KEY', '');
+                $password = env('SHOPIFY_SINGLECLOUDY_PASSWORD', '');
+                $domain = env('SHOPIFY_SINGLECLOUDY_DOMAIN', '');
+                $apiVersion = env('SHOPIFY_SINGLECLOUDY_API_VERSION', '');
+
+                $dateTimeZone = new \DateTimeZone('America/Los_Angeles');
             }
 
             $dateTime = new \DateTime("now", $dateTimeZone);

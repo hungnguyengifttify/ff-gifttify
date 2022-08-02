@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use App\Models\Dashboard;
 use App\Models\Orders;
 use App\Models\OrderLineItems;
 use Signifly\Shopify\Shopify;
@@ -31,24 +32,16 @@ class UpdateOrders extends Command
     public function handle()
     {
         $this->info("Cron Job Update Orders running at ". now());
-        $stores = array('us', 'au');
+        $stores = array('us', 'au', 'singlecloudy');
 
         foreach ($stores as $store) {
-            if ($store == 'us') {
-                $apiKey = env('SHOPIFY_US_API_KEY', '');
-                $password = env('SHOPIFY_US_PASSWORD', '');
-                $domain = env('SHOPIFY_US_DOMAIN', '');
-                $apiVersion = env('SHOPIFY_US_API_VERSION', '');
+            $shopifyConfig = Dashboard::getShopifyConfig($store);
 
-                $dateTimeZone = new \DateTimeZone('America/Los_Angeles');
-            } elseif ($store == 'au') {
-                $apiKey = env('SHOPIFY_AU_API_KEY', '');
-                $password = env('SHOPIFY_AU_PASSWORD', '');
-                $domain = env('SHOPIFY_AU_DOMAIN', '');
-                $apiVersion = env('SHOPIFY_AU_API_VERSION', '');
-
-                $dateTimeZone = new \DateTimeZone('Australia/Sydney');
-            }
+            $apiKey = $shopifyConfig['apiKey'];
+            $password = $shopifyConfig['password'];
+            $domain = $shopifyConfig['domain'];
+            $apiVersion = $shopifyConfig['apiVersion'];
+            $dateTimeZone = $shopifyConfig['dateTimeZone'];
 
             $dateTime = new \DateTime("now", $dateTimeZone);
             $dateTime->modify( '-1 day' );

@@ -33,7 +33,7 @@ class UpdateFbCampaignInsights extends Command
     public function handle()
     {
         $this->info("Cron Job running at ". now());
-        $fbAccountIds = array_merge(FbAds::$usAccountIds, FbAds::$auAccountIds, FbAds::$deAccountIds);
+        $fbAccountIds = FbAds::getAllRunningAccountIds();
 
         $access_token = env('FB_ADS_ACCESS_TOKEN', '');
         $app_secret = env('FB_ADS_APP_SECRET', '');
@@ -79,14 +79,7 @@ class UpdateFbCampaignInsights extends Command
         );
 
         foreach ($fbAccountIds as $accountId) {
-            $dateTimeZone = "";
-            if (in_array($accountId, FbAds::$usAccountIds)) {
-                $dateTimeZone = new \DateTimeZone('America/Los_Angeles');
-            } elseif (in_array($accountId, FbAds::$auAccountIds)) {
-                $dateTimeZone = new \DateTimeZone('Australia/Sydney');
-            } elseif (in_array($accountId, FbAds::$deAccountIds)) {
-                $dateTimeZone = new \DateTimeZone('Europe/Berlin');
-            }
+            $dateTimeZone = FbAds::getPhpDateTimeZoneByAccountId($accountId);
             $timeReport = $this->argument('time_report');
 
             $begin = new \DateTime("now", $dateTimeZone);

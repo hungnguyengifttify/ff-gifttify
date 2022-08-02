@@ -36,8 +36,50 @@ class Dashboard extends Model
                 'mysqlTimeZone' => 'Australia/Sydney',
                 'radioCurrency' => 1.4
             );
+        } elseif ($store == 'singlecloudy') {
+            return array (
+                'phpTimeZone' => 'America/Los_Angeles',
+                'fbAccountIds' => FbAds::$singlecloudyAccountIds,
+                'mysqlTimeZone' => 'US/Pacific',
+                'radioCurrency' => 1
+            );
         }
         return false;
+    }
+
+    public static function getShopifyConfig ($store) {
+        if ($store == 'us') {
+            $apiKey = env('SHOPIFY_US_API_KEY', '');
+            $password = env('SHOPIFY_US_PASSWORD', '');
+            $domain = env('SHOPIFY_US_DOMAIN', '');
+            $apiVersion = env('SHOPIFY_US_API_VERSION', '');
+
+            $dateTimeZone = new \DateTimeZone('America/Los_Angeles');
+        } elseif ($store == 'au') {
+            $apiKey = env('SHOPIFY_AU_API_KEY', '');
+            $password = env('SHOPIFY_AU_PASSWORD', '');
+            $domain = env('SHOPIFY_AU_DOMAIN', '');
+            $apiVersion = env('SHOPIFY_AU_API_VERSION', '');
+
+            $dateTimeZone = new \DateTimeZone('Australia/Sydney');
+        } elseif ($store == 'singlecloudy') {
+            $apiKey = env('SHOPIFY_SINGLECLOUDY_API_KEY', '');
+            $password = env('SHOPIFY_SINGLECLOUDY_PASSWORD', '');
+            $domain = env('SHOPIFY_SINGLECLOUDY_DOMAIN', '');
+            $apiVersion = env('SHOPIFY_SINGLECLOUDY_API_VERSION', '');
+
+            $dateTimeZone = new \DateTimeZone('America/Los_Angeles');
+        } else {
+            return false;
+        }
+
+        return array(
+            'apiKey' => $apiKey,
+            'password' => $password,
+            'domain' => $domain,
+            'apiVersion' => $apiVersion,
+            'dateTimeZone' => $dateTimeZone,
+        );
     }
 
     public static function sort_result($a, $b)

@@ -34,7 +34,7 @@ class UpdateFbAdSets extends Command
     public function handle()
     {
         $this->info("Cron Job running at ". now());
-        $fbAccountIds = array_merge(FbAds::$usAccountIds, FbAds::$auAccountIds, FbAds::$deAccountIds);
+        $fbAccountIds = FbAds::getAllRunningAccountIds();
 
         $access_token = env('FB_ADS_ACCESS_TOKEN', '');
         $app_secret = env('FB_ADS_APP_SECRET', '');

@@ -18,7 +18,11 @@ class FbAds extends Model
         '748598509494241',
         '1038512286982822',
         '300489508749827',
-        '977262739875449'
+        '977262739875449',
+        '737747440975590',
+        '1056823075169563',
+        '786388902366696',
+        '1004611960231517'
     );
 
     static $auAccountIds = array(
@@ -29,9 +33,35 @@ class FbAds extends Model
         '333511255213931',
     );
 
-    static $deAccountIds = array(
-        '697732767946862'
+    static $singlecloudyAccountIds = array(
+        '777279280077834',
+        '1082447066006031',
+        '598338885251308',
+        '5136799149773518',
+        '1197633801022302',
+        '615804839944246',
+        '2913344045636158'
     );
+
+    public static function getAllRunningAccountIds() {
+        return array_merge(
+            FbAds::$usAccountIds,
+            FbAds::$auAccountIds,
+            FbAds::$singlecloudyAccountIds
+        );
+    }
+
+    public static function getPhpDateTimeZoneByAccountId($accountId) {
+        $dateTimeZone = "";
+        if (in_array($accountId, FbAds::$usAccountIds)) {
+            $dateTimeZone = new \DateTimeZone('America/Los_Angeles');
+        } elseif (in_array($accountId, FbAds::$auAccountIds)) {
+            $dateTimeZone = new \DateTimeZone('Australia/Sydney');
+        } elseif (in_array($accountId, FbAds::$singlecloudyAccountIds)) {
+            $dateTimeZone = new \DateTimeZone('America/Los_Angeles');
+        }
+        return $dateTimeZone;
+    }
 
     protected $fillable = [
         'id', 'account_id', 'adset', 'adset_id', 'bid_type', 'campaign', 'campaign_id',

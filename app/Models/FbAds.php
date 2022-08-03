@@ -43,9 +43,9 @@ class FbAds extends Model
         '2913344045636158'
     );
 
-    static $gifttifyusAccountIds = array();
+    static $gifttifyusAccountIds = array('0');
 
-    static $owllifyAccountIds = array();
+    static $owllifyAccountIds = array('0');
 
     public static function getAllRunningAccountIds() {
         return array_merge(

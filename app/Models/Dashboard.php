@@ -421,13 +421,13 @@ class Dashboard extends Model
 
         if (!$productType) {
             $result = array();
-            preg_match('/\w{2}\d{4,5}([A-Z]{2,7})D\d{1,2}/', $campaignName, $result);
+            preg_match('/[A-Z]{2,3}\d{3,5}([A-Z]{2,7})D\d{1,2}/', $campaignName, $result);
             $productType = $result[1] ?? '';
         }
 
         if (!$productType) {
             $result = array();
-            preg_match('/\w{2}\d{4,5}([A-Z]{2,7})D?\d{0,2}/', $campaignName, $result);
+            preg_match('/[A-Z]{2,3}\d{3,5}([A-Z]{2,7})D?\d{0,2}/', $campaignName, $result);
             $productType = $result[1] ?? '';
         }
         return $productType ?: 'UNKNOWN';
@@ -590,11 +590,11 @@ class Dashboard extends Model
 
     public static function getDesignerFromCampaignName ($campaignName) {
         $result = array();
-        preg_match('/\w{2}\d{4,5}[A-Z]{2,7}(D\d{1,2})/', $campaignName, $result);
+        preg_match('/[A-Z]{2,3}\d{3,5}[A-Z]{2,7}(D\d{1,2})/', $campaignName, $result);
         $designer = isset($result[1]) ? strtoupper($result[1]) : '';
 
         if (!$designer) {
-            preg_match('/\w{2}\d{4,5}[A-Z]{2,7}(D?\d{0,2})/', $campaignName, $result);
+            preg_match('/[A-Z]{2,3}\d{3,5}[A-Z]{2,7}(D?\d{0,2})/', $campaignName, $result);
             $designer = isset($result[1]) ? strtoupper($result[1]) : '';
         }
 
@@ -611,12 +611,12 @@ class Dashboard extends Model
         $designer = isset($result[1]) ? strtoupper($result[1]) : '';
 
         if (!$designer) {
-            preg_match('/\w{2}\d{4,5}[A-Z]{2,7}(D\d{1,2})/', $sku, $result);
+            preg_match('/[A-Z]{2,3}\d{3,5}[A-Z]{2,7}(D\d{1,2})/', $sku, $result);
             $designer = isset($result[1]) ? strtoupper($result[1]) : '';
         }
 
         if (!$designer) {
-            preg_match('/\w{2}\d{4,5}[A-Z]{2,7}(D?\d{0,2})/', $sku, $result);
+            preg_match('/[A-Z]{2,3}\d{3,5}[A-Z]{2,7}(D?\d{0,2})/', $sku, $result);
             $designer = isset($result[1]) ? strtoupper($result[1]) : '';
         }
 
@@ -713,11 +713,11 @@ class Dashboard extends Model
 
     public static function getIdeaFromCampaignName ($campaignName) {
         $result = array();
-        preg_match('/([A-Z]{2})\d{4,5}[A-Z]{2,7}D\d{1,2}/', $campaignName, $result);
+        preg_match('/([A-Z]{2,3})\d{3,5}[A-Z]{2,7}D\d{1,2}/', $campaignName, $result);
         $idea = isset($result[1]) ? strtoupper($result[1]) : '';
 
         if (!$idea) {
-            preg_match('/([A-Z]{2})\d{4,5}[A-Z]{2,7}D?\d{0,2}/', $campaignName, $result);
+            preg_match('/([A-Z]{2,3})\d{3,5}[A-Z]{2,7}D?\d{0,2}/', $campaignName, $result);
             $idea = isset($result[1]) ? strtoupper($result[1]) : '';
         }
 
@@ -743,12 +743,12 @@ class Dashboard extends Model
         }
 
         if (!$idea) {
-            preg_match('/^([A-Z]{2})\d{4,5}[A-Z]{2,7}D\d{1,2}/', $sku, $result);
+            preg_match('/^([A-Z]{2,3})\d{3,5}[A-Z]{2,7}D\d{1,2}/', $sku, $result);
             $idea = isset($result[1]) ? strtoupper($result[1]) : '';
         }
 
         if (!$idea) {
-            preg_match('/([A-Z]{2})\d{4,5}[A-Z]{2,7}D?\d{0,2}/', $sku, $result);
+            preg_match('/([A-Z]{2,3})\d{3,5}[A-Z]{2,7}D?\d{0,2}/', $sku, $result);
             $idea = isset($result[1]) ? strtoupper($result[1]) : '';
         }
 
@@ -765,6 +765,9 @@ class Dashboard extends Model
         $fromDate = $dateTimeRange['fromDate'];
         $toDate = $dateTimeRange['toDate'];
 
+        $adsStaffTable = DB::table('gifttify_code')->where('type', '=', 'ads_staff')->get();
+        $adsStaffData = $adsStaffTable->keyBy('code')->all();
+
         $fbAds = DB::table('fb_campaign_insights')
             ->select(DB::raw('campaign_name, sum(spend) as totalSpend, sum(inline_link_clicks) as totalUniqueClicks'))
             ->whereIn('account_id', $fbAccountIds)
@@ -776,11 +779,11 @@ class Dashboard extends Model
         foreach ($fbAds->all() as $v) {
             $adsStaff = self::getAdsStaffFromCampaignName ($v->campaign_name);
             if (!isset($adsResult[$adsStaff])) {
-                $adsResult[$adsStaff]['adsStaff'] = $adsStaff;
+                $adsResult[$adsStaff]['adsStaff'] = isset($adsStaffData[$adsStaff]) ? $adsStaffData[$adsStaff]->name : ($adsStaff != 'UNKNOWN' ? $adsStaff : 'UNKNOWN');
+
                 $adsResult[$adsStaff]['totalSpend'] = 0;
                 $adsResult[$adsStaff]['totalCamp'] = 0;
             }
-            $adsResult[$adsStaff]['adsStaff'] = $adsStaff;
             $adsResult[$adsStaff]['totalSpend'] += $v->totalSpend;
             $adsResult[$adsStaff]['totalCamp']++;
 
@@ -794,17 +797,19 @@ class Dashboard extends Model
 
     public static function getAdsStaffFromCampaignName ($campaignName) {
         $result = array();
-        $adsType = "UNKNOWN";
+        $adsStaff = "UNKNOWN";
         if (preg_match('/.*phong.*/', strtolower($campaignName), $result)) {
-            $adsType = 'Phong';
+            $adsStaff = 'Phong';
         } elseif (preg_match('/.*VA.*/', $campaignName, $result)) {
-            $adsType = 'Việt Anh';
+            $adsStaff = 'Việt Anh';
         } elseif (preg_match('/.*hoang.*/', strtolower($campaignName), $result)) {
-            $adsType = 'Hoàng';
+            $adsStaff = 'Hoàng';
         } elseif (preg_match('/^m.*/', strtolower($campaignName), $result)) {
-            $adsType = 'Minh';
+            $adsStaff = 'Minh';
+        } elseif (preg_match('/^([A-Z]{3})\s.*/', $campaignName, $result)) {
+            $adsStaff = isset($result[1]) ? $result[1] : '';
         }
-        return $adsType;
+        return $adsStaff;
     }
 
     public static function getAdsCreativesReportByDate ($store = 'thecreattify', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '', $code = '', $type = '') {

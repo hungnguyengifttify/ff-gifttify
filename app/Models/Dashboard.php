@@ -24,7 +24,7 @@ class Dashboard extends Model
     public static function getAllStoreConfig () {
         return array(
             'thecreattify' => array (
-                'url' => 'https://thecreattify.com/',
+                'domain' => 'thecreattify.com',
                 'common' => array (
                     'phpTimeZone' => 'America/Los_Angeles',
                     'fbAccountIds' => FbAds::$thecreattifyAccountIds,
@@ -41,7 +41,7 @@ class Dashboard extends Model
             ),
 
             'au-thecreattify' => array (
-                'url' => 'https://au.thecreattify.com/',
+                'domain' => 'au.thecreattify.com',
                 'common' => array (
                     'phpTimeZone' => 'Australia/Sydney',
                     'fbAccountIds' => FbAds::$auThecreattifyAccountIds,
@@ -58,7 +58,7 @@ class Dashboard extends Model
             ),
 
             'singlecloudy' => array (
-                'url' => 'https://singlecloudy.com/',
+                'domain' => 'singlecloudy.com',
                 'common' => array (
                     'phpTimeZone' => 'America/Los_Angeles',
                     'fbAccountIds' => FbAds::$singlecloudyAccountIds,
@@ -75,7 +75,7 @@ class Dashboard extends Model
             ),
 
             'gifttifyus' => array (
-                'url' => 'https://www.gifttifyus.com/',
+                'domain' => 'gifttifyus.com',
                 'common' => array (
                     'phpTimeZone' => 'America/Los_Angeles',
                     'fbAccountIds' => FbAds::$gifttifyusAccountIds,
@@ -92,7 +92,7 @@ class Dashboard extends Model
             ),
 
             'owllify' => array (
-                'url' => 'https://owllify.com/',
+                'domain' => 'owllify.com',
                 'common' => array (
                     'phpTimeZone' => 'America/Los_Angeles',
                     'fbAccountIds' => FbAds::$owllifyAccountIds,

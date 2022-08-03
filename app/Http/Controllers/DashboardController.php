@@ -47,15 +47,12 @@ class DashboardController extends Controller {
     }
 
     public function report_detail(Request $request, $store = 'thecreattify') {
-        if ($store == 'thecreattify') {
-            $title = "Thecreattify Report Detail";
-        } elseif ($store == 'au-thecreattify') {
-            $title = "AU Thecreattify Report Detail";
-        } elseif ($store == 'singlecloudy') {
-            $title = "SingleCloudy Report Detail";
-        } else {
+        $allStore = Dashboard::getAllStoreConfig();
+        if (!isset($allStore[$store])) {
             dd('Not Allowed');
         }
+
+        $title = ucfirst($store) . " Report Detail";
 
         $debug = $request->input('debug') ?? 0;
         $labelDate = $request->input('labelDate') ?? 'Today';

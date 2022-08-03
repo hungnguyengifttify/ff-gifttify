@@ -141,6 +141,76 @@
                         <?php endforeach;?>
                         </tbody>
                     </table>
+
+
+                    <table class="table table-responsive table-bordered" style="width: auto">
+                        <h1>gifttifyus.com <a href="/report_detail/gifttifyus" style="font-size: x-large;">View Detail</a></h1>
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>Orders</th>
+                            <th>Rev</th>
+                            <th>AdCost</th>
+                            <th>OtherCost</th>
+                            <th>Profit/Loss</th>
+                            <th>MO</th>
+                            <th>CPC</th>
+                            <th>AOV</th>
+                            <th>Budget</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($reports['gifttifyus'] as $v): ?>
+                        <tr>
+                            <td><?php echo '<b>' . $v['title'] . '</b>' . '<br/>' . "<span class='small'>{$v['dateDisplay']}</span>"; ?></br></td>
+                            <td><?php echo $v['orders']['total']; ?></td>
+                            <td><?php echo gifttify_price_format($v['orders']['totalAmount']); ?></td>
+                            <td><?php echo gifttify_price_format($v['fbAds']['totalSpend']); ?></td>
+                            <td><?php echo gifttify_price_format($v['productCost']); ?></td>
+                            <td><?php echo gifttify_price_format($v['profitLoss']); ?></td>
+                            <td><?php echo round($v['mo']) . '%'; ?></td>
+                            <td><?php echo in_array($v['title'], array('Today', 'Yesterday')) ? number_format($v['cpc'], 2) : ''; ?></td>
+                            <td><?php echo gifttify_price_format($v['aov']); ?></td>
+                            <td><?php echo gifttify_price_format($v['fbAds']['dailyBudget'], 0); ?></td>
+                        </tr>
+                        <?php endforeach;?>
+                        </tbody>
+                    </table>
+
+
+                    <table class="table table-responsive table-bordered" style="width: auto">
+                        <h1>owllify.com <a href="/report_detail/owllify" style="font-size: x-large;">View Detail</a></h1>
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>Orders</th>
+                            <th>Rev</th>
+                            <th>AdCost</th>
+                            <th>OtherCost</th>
+                            <th>Profit/Loss</th>
+                            <th>MO</th>
+                            <th>CPC</th>
+                            <th>AOV</th>
+                            <th>Budget</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($reports['owllify'] as $v): ?>
+                        <tr>
+                            <td><?php echo '<b>' . $v['title'] . '</b>' . '<br/>' . "<span class='small'>{$v['dateDisplay']}</span>"; ?></br></td>
+                            <td><?php echo $v['orders']['total']; ?></td>
+                            <td><?php echo gifttify_price_format($v['orders']['totalAmount']); ?></td>
+                            <td><?php echo gifttify_price_format($v['fbAds']['totalSpend']); ?></td>
+                            <td><?php echo gifttify_price_format($v['productCost']); ?></td>
+                            <td><?php echo gifttify_price_format($v['profitLoss']); ?></td>
+                            <td><?php echo round($v['mo']) . '%'; ?></td>
+                            <td><?php echo in_array($v['title'], array('Today', 'Yesterday')) ? number_format($v['cpc'], 2) : ''; ?></td>
+                            <td><?php echo gifttify_price_format($v['aov']); ?></td>
+                            <td><?php echo gifttify_price_format($v['fbAds']['dailyBudget'], 0); ?></td>
+                        </tr>
+                        <?php endforeach;?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

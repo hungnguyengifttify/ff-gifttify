@@ -16,6 +16,8 @@
                 <option <?php if (str_contains(url()->current(), '/report_detail/thecreattify') ) echo "selected";  ?>  value="/report_detail/thecreattify">thecreattify.com</option>
                 <option <?php if (str_contains(url()->current(), '/report_detail/au-thecreattify') ) echo "selected";  ?>  value="/report_detail/au-thecreattify">au.thecreattify.com</option>
                 <option <?php if (str_contains(url()->current(), '/report_detail/singlecloudy') ) echo "selected";  ?>  value="/report_detail/singlecloudy">singlecloudy.com</option>
+                <option <?php if (str_contains(url()->current(), '/report_detail/gifttifyus') ) echo "selected";  ?>  value="/report_detail/gifttifyus">gifttifyus.com</option>
+                <option <?php if (str_contains(url()->current(), '/report_detail/owllify') ) echo "selected";  ?>  value="/report_detail/owllify">owllify.com</option>
             </select>
         </h2>
     </x-slot>

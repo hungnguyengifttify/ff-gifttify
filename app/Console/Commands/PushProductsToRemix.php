@@ -36,7 +36,7 @@ class PushProductsToRemix extends Command
         $this->info("Cron Job Push Remix Products running at ". now());
 
         $timeReport = $this->argument('time_report') ?? '';
-        $limit = 1000;
+        $limit = 3;
         if ($timeReport == 'all') {
             $limit = 1000;
         }
@@ -48,7 +48,25 @@ class PushProductsToRemix extends Command
                     $images = json_decode($p->images);
                     $image = json_decode($p->image);
 
+                    $imagesArr = array();
+                    foreach ($images as $img) {
+                        $imagesArr[] = array(
+                            'src' => $img->src,
+                            'alt' => $img->alt,
+                        );
+                    }
+
                     $options = json_decode($p->options);
+
+                    $optionsArr = array();
+                    foreach ($options as $opt) {
+                        $optionsArr[] = array(
+                            'name' => $opt->name,
+                            'type' => '',
+                            'values' => $opt->values,
+                        );
+                    }
+
                     $variants = json_decode($p->variants);
 
                     $var_arr = array();
@@ -71,11 +89,16 @@ class PushProductsToRemix extends Command
                             'sku' => $var->sku,
                             'quantity' => 9999,
                             'price' => $var->price,
+                            'compareAtPrice' => $var->compare_at_price,
+                            'option1' => $var->option1,
+                            'option2' => $var->option2,
+                            'option3' => $var->option3,
                             'image' => array(
                                 'src' => $src,
                                 'alt' => $alt,
                                 'position' => $position
                             ),
+                            'fulfilment' => $var->fulfillment_service
                         );
                     }
 
@@ -85,23 +108,8 @@ class PushProductsToRemix extends Command
                         'productType' => $p->product_type,
                         'status' => $p->status,
                         'tags' => $p->tags,
-                        'options' => array(
-                            'option1' => array(
-                                'name' => $options[0]->name ?? '',
-                                'type' => '',
-                                'value' => $options[0]->values ?? array(),
-                            ),
-                            'option2' => array(
-                                'name' => $options[1]->name ?? '',
-                                'type' => '',
-                                'value' => $options[1]->values ?? array(),
-                            ),
-                            'option3' => array(
-                                'name' => $options[2]->name ?? '',
-                                'type' => '',
-                                'value' => $options[2]->values ?? array(),
-                            ),
-                        ),
+                        'images' => $imagesArr,
+                        'options' => $optionsArr,
                         'variants' => $var_arr,
                         'seo' => array(
                             'title' => $p->title,

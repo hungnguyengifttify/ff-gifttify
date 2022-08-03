@@ -15,7 +15,7 @@ class DashboardController extends Controller {
         unset($rangeDates['custom_range']);
         $rangeDates = array_keys($rangeDates);
 
-        $stores = array('thecreattify', 'au-thecreattify', 'singlecloudy');
+        $stores = Dashboard::getStoresList();
         $reports = array();
         foreach ($rangeDates as $v) {
             foreach ($stores as $store) {

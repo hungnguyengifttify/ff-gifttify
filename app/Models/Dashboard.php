@@ -21,65 +21,110 @@ class Dashboard extends Model
         'custom_range' => 'Custom Range',
     );
 
+    public static function getAllStoreConfig () {
+        return array(
+            'thecreattify' => array (
+                'url' => 'https://thecreattify.com/',
+                'common' => array (
+                    'phpTimeZone' => 'America/Los_Angeles',
+                    'fbAccountIds' => FbAds::$thecreattifyAccountIds,
+                    'mysqlTimeZone' => 'US/Pacific',
+                    'radioCurrency' => 1
+                ),
+                'shopify' => array (
+                    'apiKey' => env('SHOPIFY_THECREATTIFY_API_KEY', ''),
+                    'password' => env('SHOPIFY_THECREATTIFY_PASSWORD', ''),
+                    'domain' => env('SHOPIFY_THECREATTIFY_DOMAIN', ''),
+                    'apiVersion' => env('SHOPIFY_THECREATTIFY_API_VERSION', ''),
+                    'dateTimeZone' => new \DateTimeZone('America/Los_Angeles'),
+                )
+            ),
+
+            'au-thecreattify' => array (
+                'url' => 'https://au.thecreattify.com/',
+                'common' => array (
+                    'phpTimeZone' => 'Australia/Sydney',
+                    'fbAccountIds' => FbAds::$auThecreattifyAccountIds,
+                    'mysqlTimeZone' => 'Australia/Sydney',
+                    'radioCurrency' => 1.4
+                ),
+                'shopify' => array (
+                    'apiKey' => env('SHOPIFY_AU_THECREATTIFY_API_KEY', ''),
+                    'password' => env('SHOPIFY_AU_THECREATTIFY_PASSWORD', ''),
+                    'domain' => env('SHOPIFY_AU_THECREATTIFY_DOMAIN', ''),
+                    'apiVersion' => env('SHOPIFY_AU_THECREATTIFY_API_VERSION', ''),
+                    'dateTimeZone' => new \DateTimeZone('Australia/Sydney'),
+                )
+            ),
+
+            'singlecloudy' => array (
+                'url' => 'https://singlecloudy.com/',
+                'common' => array (
+                    'phpTimeZone' => 'America/Los_Angeles',
+                    'fbAccountIds' => FbAds::$singlecloudyAccountIds,
+                    'mysqlTimeZone' => 'US/Pacific',
+                    'radioCurrency' => 1
+                ),
+                'shopify' => array (
+                    'apiKey' => env('SHOPIFY_SINGLECLOUDY_API_KEY', ''),
+                    'password' => env('SHOPIFY_SINGLECLOUDY_PASSWORD', ''),
+                    'domain' => env('SHOPIFY_SINGLECLOUDY_DOMAIN', ''),
+                    'apiVersion' => env('SHOPIFY_SINGLECLOUDY_API_VERSION', ''),
+                    'dateTimeZone' => new \DateTimeZone('America/Los_Angeles'),
+                )
+            ),
+
+            'gifttifyus' => array (
+                'url' => 'https://www.gifttifyus.com/',
+                'common' => array (
+                    'phpTimeZone' => 'America/Los_Angeles',
+                    'fbAccountIds' => FbAds::$gifttifyusAccountIds,
+                    'mysqlTimeZone' => 'US/Pacific',
+                    'radioCurrency' => 1
+                ),
+                'shopify' => array (
+                    'apiKey' => env('SHOPIFY_GIFTTIFYUS_API_KEY', ''),
+                    'password' => env('SHOPIFY_GIFTTIFYUS_PASSWORD', ''),
+                    'domain' => env('SHOPIFY_GIFTTIFYUS_DOMAIN', ''),
+                    'apiVersion' => env('SHOPIFY_GIFTTIFYUS_API_VERSION', ''),
+                    'dateTimeZone' => new \DateTimeZone('America/Los_Angeles'),
+                )
+            ),
+
+            'owllify' => array (
+                'url' => 'https://owllify.com/',
+                'common' => array (
+                    'phpTimeZone' => 'America/Los_Angeles',
+                    'fbAccountIds' => FbAds::$owllifyAccountIds,
+                    'mysqlTimeZone' => 'US/Pacific',
+                    'radioCurrency' => 1
+                ),
+                'shopify' => array (
+                    'apiKey' => env('SHOPIFY_OWLLIFY_API_KEY', ''),
+                    'password' => env('SHOPIFY_OWLLIFY_PASSWORD', ''),
+                    'domain' => env('SHOPIFY_OWLLIFY_DOMAIN', ''),
+                    'apiVersion' => env('SHOPIFY_OWLLIFY_API_VERSION', ''),
+                    'dateTimeZone' => new \DateTimeZone('America/Los_Angeles'),
+                )
+            ),
+        );
+
+    }
+
+    public static function getStoresList () {
+        $allStore = Dashboard::getAllStoreConfig();
+        return array_keys($allStore);
+    }
+
     public static function getStoreConfig ($store) {
-        if ($store == 'thecreattify') {
-            return array (
-                'phpTimeZone' => 'America/Los_Angeles',
-                'fbAccountIds' => FbAds::$thecreattifyAccountIds,
-                'mysqlTimeZone' => 'US/Pacific',
-                'radioCurrency' => 1
-            );
-        } elseif ($store == 'au-thecreattify') {
-            return array (
-                'phpTimeZone' => 'Australia/Sydney',
-                'fbAccountIds' => FbAds::$auThecreattifyAccountIds,
-                'mysqlTimeZone' => 'Australia/Sydney',
-                'radioCurrency' => 1.4
-            );
-        } elseif ($store == 'singlecloudy') {
-            return array (
-                'phpTimeZone' => 'America/Los_Angeles',
-                'fbAccountIds' => FbAds::$singlecloudyAccountIds,
-                'mysqlTimeZone' => 'US/Pacific',
-                'radioCurrency' => 1
-            );
-        }
-        return false;
+        $allStore = Dashboard::getAllStoreConfig();
+        return isset($allStore[$store]['common']) ? $allStore[$store]['common'] : false;
+
     }
 
     public static function getShopifyConfig ($store) {
-        if ($store == 'thecreattify') {
-            $apiKey = env('SHOPIFY_THECREATTIFY_API_KEY', '');
-            $password = env('SHOPIFY_THECREATTIFY_PASSWORD', '');
-            $domain = env('SHOPIFY_THECREATTIFY_DOMAIN', '');
-            $apiVersion = env('SHOPIFY_THECREATTIFY_API_VERSION', '');
-
-            $dateTimeZone = new \DateTimeZone('America/Los_Angeles');
-        } elseif ($store == 'au-thecreattify') {
-            $apiKey = env('SHOPIFY_AU_THECREATTIFY_API_KEY', '');
-            $password = env('SHOPIFY_AU_THECREATTIFY_PASSWORD', '');
-            $domain = env('SHOPIFY_AU_THECREATTIFY_DOMAIN', '');
-            $apiVersion = env('SHOPIFY_AU_THECREATTIFY_API_VERSION', '');
-
-            $dateTimeZone = new \DateTimeZone('Australia/Sydney');
-        } elseif ($store == 'singlecloudy') {
-            $apiKey = env('SHOPIFY_SINGLECLOUDY_API_KEY', '');
-            $password = env('SHOPIFY_SINGLECLOUDY_PASSWORD', '');
-            $domain = env('SHOPIFY_SINGLECLOUDY_DOMAIN', '');
-            $apiVersion = env('SHOPIFY_SINGLECLOUDY_API_VERSION', '');
-
-            $dateTimeZone = new \DateTimeZone('America/Los_Angeles');
-        } else {
-            return false;
-        }
-
-        return array(
-            'apiKey' => $apiKey,
-            'password' => $password,
-            'domain' => $domain,
-            'apiVersion' => $apiVersion,
-            'dateTimeZone' => $dateTimeZone,
-        );
+        $allStore = Dashboard::getAllStoreConfig();
+        return isset($allStore[$store]['shopify']) ? $allStore[$store]['shopify'] : false;
     }
 
     public static function sort_result($a, $b)

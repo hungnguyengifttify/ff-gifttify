@@ -1005,10 +1005,12 @@ class Dashboard extends Model
             $result[$v]['cpc'] = $adsResult[$v]['cpc'] ?? 0;
             $result[$v]['cpm'] = $adsResult[$v]['cpm'] ?? 0;
             $result[$v]['budget'] = $adsResult[$v]['budget'] ?? 0;
+            $result[$v]['totalUniqueClicks'] = $adsResult[$v]['totalUniqueClicks'] ?? 0;
+            $result[$v]['impressions'] = $adsResult[$v]['impressions'] ?? 0;
             $result[$v]['mo'] = ($result[$v]['total_order_amount']) > 0 ? 100*($result[$v]['totalSpend'] / $result[$v]['total_order_amount']) : 0;
             $result[$v]['account_name'] = $adsResult[$v]['account_name'] ?? '';
         }
-        usort($result, [self::class, 'sort_result']);
+        usort($result, [self::class, 'sort_result_by_ads_cost']);
 
         return $result;
 

@@ -15,24 +15,28 @@
                         <thead>
                         <tr>
                             <th>CampaignName</th>
+                            <th>AccountName</th>
                             <th>AdsCost</th>
                             <th>Rev</th>
                             <th>CPC</th>
                             <th>CPM</th>
                             <th>MO</th>
                             <th>OrdersQty</th>
+                            <th>Budget</th>
                         </tr>
                         </thead>
                         <tbody>
                         <?php foreach ($campaigns as $v): ?>
                         <tr {!! display_row_bg_dashboard($v['mo']) !!} >
                             <td>{!! $v['campaign_name'] !!} </td>
+                            <td>{!! $v['account_name'] !!} </td>
                             <td {!! display_zero_cell_dashboard($v['totalSpend'])!!} >{!! gifttify_price_format($v['totalSpend']);  !!} </td>
                             <td {!! display_zero_cell_dashboard($v['total_order_amount'])!!} >{!! gifttify_price_format($v['total_order_amount']);  !!} </td>
                             <td {!! display_zero_cell_dashboard($v['cpc'])!!} >{!! number_format($v['cpc'], 2);  !!} </td>
                             <td {!! display_zero_cell_dashboard($v['cpm'])!!} >{!! number_format($v['cpm'], 2);  !!} </td>
                             <td {!! display_zero_cell_dashboard($v['mo'])!!} >{!! round($v['mo']) . '%';  !!} </td>
                             <td {!! display_zero_cell_dashboard($v['total_order'])!!} >{!! round($v['total_order']) !!} </td>
+                            <td {!! display_zero_cell_dashboard($v['budget'])!!} >{!! round($v['budget']) !!} </td>
                         </tr>
                         <?php endforeach; ?>
                         </tbody>

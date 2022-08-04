@@ -935,23 +935,34 @@ class Dashboard extends Model
         $toDate = $dateTimeRange['toDate'];
 
         $fbAds = DB::table('fb_ads_insights')
-            ->select(DB::raw('campaign_name, SUM(impressions) as impressions, SUM(spend) as totalSpend, sum(inline_link_clicks) as totalUniqueClicks'))
+            ->select(DB::raw('
+                MAX(fb_ads_insights.account_name) as account_name ,fb_ads_insights.campaign_name, SUM(fb_ads_insights.impressions) as impressions,
+                SUM(spend) as totalSpend, sum(inline_link_clicks) as totalUniqueClicks,
+                CASE
+                    WHEN (select SUM(daily_budget/100) from fb_ad_sets where campaign_id=fb_ads_insights.campaign_id ) > 0
+                        THEN (select SUM(daily_budget/100) from fb_ad_sets where campaign_id=fb_ads_insights.campaign_id )
+                    ELSE (select SUM(daily_budget/100) from fb_campaigns where fb_campaign_id=fb_ads_insights.campaign_id)
+                END as budget
+            '))
             ->whereIn('fb_ads_insights.account_id', $fbAccountIds)
             ->where('date_record', '>=', $fromDate)
             ->where('date_record', '<=', $toDate)
-            ->groupBy(array('campaign_name'))->get();
+            ->groupBy(array('campaign_name', 'campaign_id'))->get();
 
         $adsResult = array();
         foreach ($fbAds->all() as $v) {
             if (!isset($adsResult[$v->campaign_name])) {
+                $adsResult[$v->campaign_name]['account_name'] = $v->account_name;
                 $adsResult[$v->campaign_name]['campaign_name'] = $v->campaign_name;
                 $adsResult[$v->campaign_name]['totalSpend'] = 0;
                 $adsResult[$v->campaign_name]['totalUniqueClicks'] = 0;
                 $adsResult[$v->campaign_name]['impressions'] = 0;
+                $adsResult[$v->campaign_name]['budget'] = 0;
             }
             $adsResult[$v->campaign_name]['totalSpend'] += $v->totalSpend;
             $adsResult[$v->campaign_name]['totalUniqueClicks'] += $v->totalUniqueClicks;
             $adsResult[$v->campaign_name]['impressions'] += $v->impressions;
+            $adsResult[$v->campaign_name]['budget'] += $v->budget;
             $adsResult[$v->campaign_name]['cpc'] = ($adsResult[$v->campaign_name]['totalUniqueClicks'] != 0 ? $adsResult[$v->campaign_name]['totalSpend'] / $adsResult[$v->campaign_name]['totalUniqueClicks'] : 0);
             $adsResult[$v->campaign_name]['cpm'] = ($adsResult[$v->campaign_name]['impressions'] != 0 ? 1000 * $adsResult[$v->campaign_name]['totalSpend'] / $adsResult[$v->campaign_name]['impressions'] : 0);
         }
@@ -988,13 +999,14 @@ class Dashboard extends Model
         $result = array();
         foreach ($campaignReports as $v) {
             $result[$v]['campaign_name'] = $v ?: 'UNKNOWN';
-
             $result[$v]['total_order_amount'] = $ordersResult[$v]['total_order_amount'] ?? 0;
             $result[$v]['total_order'] = $ordersResult[$v]['total_order'] ?? 0;
             $result[$v]['totalSpend'] = $adsResult[$v]['totalSpend'] ?? 0;
             $result[$v]['cpc'] = $adsResult[$v]['cpc'] ?? 0;
             $result[$v]['cpm'] = $adsResult[$v]['cpm'] ?? 0;
+            $result[$v]['budget'] = $adsResult[$v]['budget'] ?? 0;
             $result[$v]['mo'] = ($result[$v]['total_order_amount']) > 0 ? 100*($result[$v]['totalSpend'] / $result[$v]['total_order_amount']) : 0;
+            $result[$v]['account_name'] = $adsResult[$v]['account_name'] ?? '';
         }
         usort($result, [self::class, 'sort_result']);
 

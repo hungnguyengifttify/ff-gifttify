@@ -106,11 +106,19 @@
                 </div>
 
             </form>
+
         </div>
 
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white">
                 <div class="p-6 bg-white border-b border-gray-200">
+                    <div>
+                        @php
+                            $campaignLink = route('campaign_info') . "?store=" . $store . "&fromDate=" . app('request')->input('fromDate') . "&toDate=" . app('request')->input('toDate') . "&labelDate=" . app('request')->input('labelDate');
+                        @endphp
+                        <a href="{{$campaignLink}}" target="_blank">Campaign Info</a>
+                    </div>
+
                     <div class="inline-block">
                         <table class="table table-responsive table-bordered" style="width: auto">
                             <h1>By Account</h1>

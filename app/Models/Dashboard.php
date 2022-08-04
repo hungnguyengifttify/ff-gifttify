@@ -922,4 +922,84 @@ class Dashboard extends Model
         return $adsResult;
     }
 
+    public static function getCanpaignInfoByDate ($store = 'thecreattify', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '',$debug = 0) {
+        $storeConfig = self::getStoreConfig($store);
+        if (!$storeConfig) return false;
+
+        $fbAccountIds = $storeConfig['fbAccountIds'];
+        $mysqlTimeZone = $storeConfig['mysqlTimeZone'];
+        $radioCurrency = $storeConfig['radioCurrency'];
+
+        $dateTimeRange = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq);
+        $fromDate = $dateTimeRange['fromDate'];
+        $toDate = $dateTimeRange['toDate'];
+
+        $fbAds = DB::table('fb_ads_insights')
+            ->select(DB::raw('campaign_name, SUM(impressions) as impressions, SUM(spend) as totalSpend, sum(inline_link_clicks) as totalUniqueClicks'))
+            ->whereIn('fb_ads_insights.account_id', $fbAccountIds)
+            ->where('date_record', '>=', $fromDate)
+            ->where('date_record', '<=', $toDate)
+            ->groupBy(array('campaign_name'))->get();
+
+        $adsResult = array();
+        foreach ($fbAds->all() as $v) {
+            if (!isset($adsResult[$v->campaign_name])) {
+                $adsResult[$v->campaign_name]['campaign_name'] = $v->campaign_name;
+                $adsResult[$v->campaign_name]['totalSpend'] = 0;
+                $adsResult[$v->campaign_name]['totalUniqueClicks'] = 0;
+                $adsResult[$v->campaign_name]['impressions'] = 0;
+            }
+            $adsResult[$v->campaign_name]['totalSpend'] += $v->totalSpend;
+            $adsResult[$v->campaign_name]['totalUniqueClicks'] += $v->totalUniqueClicks;
+            $adsResult[$v->campaign_name]['impressions'] += $v->impressions;
+            $adsResult[$v->campaign_name]['cpc'] = ($adsResult[$v->campaign_name]['totalUniqueClicks'] != 0 ? $adsResult[$v->campaign_name]['totalSpend'] / $adsResult[$v->campaign_name]['totalUniqueClicks'] : 0);
+            $adsResult[$v->campaign_name]['cpm'] = ($adsResult[$v->campaign_name]['impressions'] != 0 ? 1000 * $adsResult[$v->campaign_name]['totalSpend'] / $adsResult[$v->campaign_name]['impressions'] : 0);
+        }
+
+        $orders = DB::select("select name, note_attributes,1 as total_order, (total_price)/$radioCurrency as total_order_amount from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate;"
+            , ['fromDate' => $fromDate, 'toDate' => $toDate]
+        );
+        $ordersResult = array();
+        foreach ($orders as $o) {
+            $note_attributes = json_decode($o->note_attributes);
+            $campaign_name = 'UNKNOWN';
+            foreach ($note_attributes as $note) {
+                if ($note->name == 'utm_campaign') {
+                    $campaign_name = $note->value;
+                    break;
+                }
+            }
+            if ($debug == 1 && $campaign_name == 'UNKNOWN') {
+                dump($o->name);
+            }
+
+            if (!isset($ordersResult[$campaign_name])) {
+                $ordersResult[$campaign_name]['campaign_name'] = $campaign_name ?? 'UNKNOWN';
+                $ordersResult[$campaign_name]['total_order'] = 0;
+                $ordersResult[$campaign_name]['total_order_amount'] = 0;
+            }
+            $ordersResult[$campaign_name]['total_order'] += $o->total_order;
+            $ordersResult[$campaign_name]['total_order_amount'] += $o->total_order_amount;
+        }
+
+        $campaignReports = array_merge(array_keys($ordersResult) , array_keys($adsResult));
+        $campaignReports = array_unique($campaignReports);
+
+        $result = array();
+        foreach ($campaignReports as $v) {
+            $result[$v]['campaign_name'] = $v ?: 'UNKNOWN';
+
+            $result[$v]['total_order_amount'] = $ordersResult[$v]['total_order_amount'] ?? 0;
+            $result[$v]['total_order'] = $ordersResult[$v]['total_order'] ?? 0;
+            $result[$v]['totalSpend'] = $adsResult[$v]['totalSpend'] ?? 0;
+            $result[$v]['cpc'] = $adsResult[$v]['cpc'] ?? 0;
+            $result[$v]['cpm'] = $adsResult[$v]['cpm'] ?? 0;
+            $result[$v]['mo'] = ($result[$v]['total_order_amount']) > 0 ? 100*($result[$v]['totalSpend'] / $result[$v]['total_order_amount']) : 0;
+        }
+        usort($result, [self::class, 'sort_result']);
+
+        return $result;
+
+    }
+
 }

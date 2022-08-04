@@ -112,4 +112,32 @@ class DashboardController extends Controller {
 
         return view('report.dashboard_ads_creatives', compact('creatives', 'params'));
     }
+
+    public function campaign_info (Request $request) {
+        $store = $request->input('store') ?? '';
+        $labelDate = $request->input('labelDate') ?? 'Today';
+        $fromDateReq = $request->input('fromDate') ?? '';
+        $toDateReq = $request->input('toDate') ?? '';
+        $debug = $request->input('debug') ?? 0;
+
+        $range_report = array_search ($labelDate, Dashboard::$rangeDate);
+        $dateTimeRange = Dashboard::getDatesByRangeDateLabel($store, $range_report, $fromDateReq, $toDateReq);
+        $fromDate = $dateTimeRange['fromDate'];
+        $toDate = $dateTimeRange['toDate'];
+
+        $params = array(
+            'fromDate' => (new \DateTime($fromDate))->format('d-m-Y'),
+            'toDate' => (new \DateTime($toDate))->format('d-m-Y'),
+            'labelDate' => $labelDate,
+            'store' => $store,
+        );
+
+        if (!$store) {
+            die('Not Allowed');
+        }
+
+        $range_report = array_search ($labelDate, Dashboard::$rangeDate);
+        $campaigns = Dashboard::getCanpaignInfoByDate($store, $range_report, $fromDateReq, $toDateReq, $debug);
+        return view('report.dashboard_campaign_info', compact('campaigns', 'params'));
+    }
 }

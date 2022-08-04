@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Config;
 use Signifly\Shopify\Shopify;
 use Illuminate\Support\Facades\DB;
 use App\Services\RemixApi;
+use App\Models\Dashboard;
 
 class PushProductsToRemix extends Command
 {
@@ -26,6 +27,58 @@ class PushProductsToRemix extends Command
      */
     protected $description = 'Update Remix Products';
 
+    /*public function handle()
+    {
+        $this->info("Cron Job Update Products running at ". now());
+
+        $stores = array('thecreattify');
+
+        foreach ($stores as $store) {
+            $shopifyConfig = Dashboard::getShopifyConfig($store);
+
+            $apiKey = $shopifyConfig['apiKey'];
+            $password = $shopifyConfig['password'];
+            $domain = $shopifyConfig['domain'];
+            $apiVersion = $shopifyConfig['apiVersion'];
+            $dateTimeZone = $shopifyConfig['dateTimeZone'];
+
+            $dateTime = new \DateTime("now", $dateTimeZone);
+            $dateTime->modify('-1 day');
+            $updatedAtMin = $dateTime->format('Y-m-d');
+
+            $timeReport = $this->argument('time_report') ?? '';
+            if ($timeReport == 'all') {
+                $updatedAtMin = '1900-01-01';
+            }
+
+            $shopify = new Shopify($apiKey, $password, $domain, $apiVersion);
+            $products = $shopify->paginateProducts([
+                'updated_at_min' => $updatedAtMin,
+                'limit' => 3
+            ]);
+
+            foreach ($products as $p) {
+                $values = $p->toArray();
+                foreach ($values as $v) {
+                    $body['body'] = $v;
+
+                    $remixApi = new RemixApi();
+                    $response = $remixApi->request('POST', 'products/variable', null, $body);
+                    if ($response->getStatusCode() == '201') {
+                        $res = $response->getBody()->getContents();
+                        $res = json_decode($res);
+
+                        $this->info($res->message);
+                    } else {
+                        $this->error('Can not created');
+                    }
+
+                }
+            }
+        }
+        $this->info("Cron Job Update Products DONE at ". now());
+    }*/
+
     /**
      * Execute the console command.
      *
@@ -36,7 +89,7 @@ class PushProductsToRemix extends Command
         $this->info("Cron Job Push Remix Products running at ". now());
 
         $timeReport = $this->argument('time_report') ?? '';
-        $limit = 3;
+        $limit = 100;
         if ($timeReport == 'all') {
             $limit = 1000;
         }
@@ -103,8 +156,8 @@ class PushProductsToRemix extends Command
                     }
 
                     $body = array(
-                        'title' => $p->title,
                         'slug' => $p->handle,
+                        'title' => $p->title,
                         'productType' => $p->product_type,
                         'status' => $p->status,
                         'tags' => $p->tags,

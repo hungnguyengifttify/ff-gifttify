@@ -942,7 +942,8 @@ class Dashboard extends Model
                     WHEN (select SUM(daily_budget/100) from fb_ad_sets where campaign_id=fb_ads_insights.campaign_id ) > 0
                         THEN (select SUM(daily_budget/100) from fb_ad_sets where campaign_id=fb_ads_insights.campaign_id )
                     ELSE (select SUM(daily_budget/100) from fb_campaigns where fb_campaign_id=fb_ads_insights.campaign_id)
-                END as budget
+                END as budget,
+                (select status from fb_campaigns where fb_campaign_id=fb_ads_insights.campaign_id) as status
             '))
             ->whereIn('fb_ads_insights.account_id', $fbAccountIds)
             ->where('date_record', '>=', $fromDate)
@@ -954,6 +955,7 @@ class Dashboard extends Model
             if (!isset($adsResult[$v->campaign_name])) {
                 $adsResult[$v->campaign_name]['account_name'] = $v->account_name;
                 $adsResult[$v->campaign_name]['campaign_name'] = $v->campaign_name;
+                $adsResult[$v->campaign_name]['status'] = $v->status;
                 $adsResult[$v->campaign_name]['totalSpend'] = 0;
                 $adsResult[$v->campaign_name]['totalUniqueClicks'] = 0;
                 $adsResult[$v->campaign_name]['impressions'] = 0;
@@ -1009,6 +1011,7 @@ class Dashboard extends Model
             $result[$v]['impressions'] = $adsResult[$v]['impressions'] ?? 0;
             $result[$v]['mo'] = ($result[$v]['total_order_amount']) > 0 ? 100*($result[$v]['totalSpend'] / $result[$v]['total_order_amount']) : 0;
             $result[$v]['account_name'] = $adsResult[$v]['account_name'] ?? '';
+            $result[$v]['status'] = $adsResult[$v]['status'] ?? '';
         }
         usort($result, [self::class, 'sort_result_by_ads_cost']);
 

@@ -126,8 +126,8 @@ class DashboardController extends Controller {
         $toDate = $dateTimeRange['toDate'];
 
         $params = array(
-            'fromDate' => (new \DateTime($fromDate))->format('d-m-Y'),
-            'toDate' => (new \DateTime($toDate))->format('d-m-Y'),
+            'fromDate' => (new \DateTime($fromDate)),
+            'toDate' => (new \DateTime($toDate)),
             'labelDate' => $labelDate,
             'store' => $store,
         );
@@ -138,6 +138,6 @@ class DashboardController extends Controller {
 
         $range_report = array_search ($labelDate, Dashboard::$rangeDate);
         $campaigns = Dashboard::getCanpaignInfoByDate($store, $range_report, $fromDateReq, $toDateReq, $debug);
-        return view('report.dashboard_campaign_info', compact('campaigns', 'params'));
+        return view('report.dashboard_campaign_info', compact('campaigns', 'params', 'store'));
     }
 }

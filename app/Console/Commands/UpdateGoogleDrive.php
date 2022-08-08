@@ -44,7 +44,7 @@ class UpdateGoogleDrive extends Command
                     $parameters = array(
                         'pageSize' => 1000,
                         'fields' => 'nextPageToken, files(id, createdTime, fileExtension, fullFileExtension, mimeType, modifiedTime, name, originalFilename, parents, permissionIds, shared, size, spaces, thumbnailLink, viewersCanCopyContent, webContentLink, webViewLink, writersCanShare, owners, trashed, trashedTime)',
-                        'q' => "mimeType = 'application/vnd.google-apps.folder' or mimeType contains 'image/'"
+                        'q' => "trashed=false and (mimeType = 'application/vnd.google-apps.folder' or mimeType contains 'image/')"
                     );
                     if ($orderBy != 'default') {
                         $parameters['orderBy'] = $orderBy;

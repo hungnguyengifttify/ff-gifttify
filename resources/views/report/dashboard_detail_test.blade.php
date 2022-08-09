@@ -2,16 +2,27 @@
     .table {
         text-align: right;
     }
+    table, th, td {
+        border: 1px solid black;
+    }
+    th {
+        cursor: pointer;
+        white-space: nowrap;
+    }
+    th svg {
+        display: none;
+    }
+    th.sort_asc svg.svg_down {
+        display: inline;
+    }
+    th.sort_desc svg.svg_up {
+        display: inline;
+    }
 </style>
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Store Report Detail
-
-            <select onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
-                <option <?php if (str_contains(url()->current(), '/report_detail/us') ) echo "selected"; ?> value="/report_detail/us">US</option>
-                <option <?php if (str_contains(url()->current(), '/report_detail/au') ) echo "selected"; ?> value="/report_detail/au">AU</option>
-            </select>
+            Campaign Info - Store {{strtoupper($params['store'])}}
         </h2>
     </x-slot>
 
@@ -22,19 +33,21 @@
                     <div class="p-6 bg-white border-b border-gray-200">
                         <a id="reportrange" class="btn btn-primary" href="#">
                             <i class="fa fa-calendar"></i>&nbsp;
-                            <span><?php echo $params['labelDate'];?></span> <i class="fa fa-caret-down"></i>
+                            <span>{!! $params['labelDate']; !!} </span> <i class="fa fa-caret-down"></i>
                         </a>
+                        <input type="hidden" name="store" id="store" value="{{$store}}" />
                         <input type="hidden" name="fromDate" id="fromDate" />
                         <input type="hidden" name="toDate" id="toDate" />
                         <input type="hidden" name="labelDate" id="labelDate" />
-                        <span id="reportrangetext"><?php echo $params['fromDate']->format('d-m-Y') . ' => ' . $params['toDate']->format('d-m-Y');?></span>
+                        <input type="hidden" name="debug" id="debug" value="{!! $_REQUEST['debug'] ?? '0';  !!} " />
+                        <span id="reportrangetext">{!! $params['fromDate']->format('d-m-Y') . ' => ' . $params['toDate']->format('d-m-Y'); !!} </span>
 
                         <script type="text/javascript">
-                            <?php if ($store == 'thecreattify'):; ?>
-                            moment.tz.setDefault("America/Los_Angeles");
-                            <?php else: ?>
+                            <?php if ($store == 'au-thecreattify'):;  ?>
                             moment.tz.setDefault("Australia/Sydney");
-                            <?php endif; ?>
+                            <?php else:  ?>
+                            moment.tz.setDefault("America/Los_Angeles");
+                            <?php endif;  ?>
 
                             moment().startOf('isoWeek');
 
@@ -66,6 +79,7 @@
                                         'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
                                         'This Week': [moment().startOf('isoWeek'), moment().endOf('isoWeek')],
                                         'Last Week': [moment().subtract(7, 'days').startOf('isoWeek'), moment().subtract(7, 'days').endOf('isoWeek')],
+                                        'This Month': [moment().startOf('month'), moment().endOf('month')],
                                     },
                                     "alwaysShowCalendars": true,
                                     startDate: start,
@@ -97,189 +111,220 @@
                 </div>
 
             </form>
+
         </div>
 
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white">
                 <div class="p-6 bg-white border-b border-gray-200">
-                    <table class="table table-responsive table-bordered" style="width: auto">
-                        <h1>By Account</h1>
+                    <table id="campaign_info" class="table table-responsive table-bordered" style="width: auto">
                         <thead>
                         <tr>
-                            <th></th>
-                            <th>AdsCost</th>
-                            <th>CPC</th>
+                            <th>
+                                CampaignName
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_down" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_up" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </th>
+                            <th>
+                                AccountName
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_down" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_up" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </th>
+                            <th>
+                                AdsCost
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_down" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_up" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </th>
+                            <th>
+                                Rev
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_down" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_up" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </th>
+                            <th>
+                                CPC
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_down" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_up" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </th>
+                            <th>
+                                CPM
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_down" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_up" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </th>
+                            <th>
+                                MO
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_down" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_up" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </th>
+                            <th>
+                                OrdersQty
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_down" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_up" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </th>
+                            <th>
+                                Budget
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_down" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_up" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </th>
+                            <th>
+                                Status
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_down" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_up" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </th>
                         </tr>
                         </thead>
-                        <tbody>
-                        <?php foreach ($accountsAds as $acc): ?>
-                        <tr>
-                            <td><?php echo $acc['account_name'] ?></td>
-                            <td><?php echo gifttify_price_format($acc['totalSpend']); ?></td>
-                            <td><?php echo number_format($acc['cpc'], 2); ?></td>
-                        </tr>
-                        <?php endforeach;?>
-                        </tbody>
-                    </table>
 
-                    <table class="table table-responsive table-bordered" style="width: auto">
-                        <h1>By Country</h1>
-                        <thead>
-                        <tr>
-                            <th></th>
-                            <th>AdsCost</th>
-                            <th>Rev</th>
-                            <th>MO</th>
-                            <th>TotalOrders</th>
-                            <th>CPC</th>
-                            <th>AOV</th>
-                        </tr>
-                        </thead>
                         <tbody>
 
-                        <?php $sumTotalSpend = $sumTotalOrderAmount = $sumTotalOrders = 0; ?>
-                        <?php foreach ($countriesAds as $v): ?>
-                        <tr>
-                            <?php $sumTotalSpend += $v['totalSpend'];  ?>
-                            <?php $sumTotalOrderAmount += $v['total_order_amount'];  ?>
-                            <?php $sumTotalOrders += $v['total_order'];  ?>
-                            <td><?php echo $v['country_code']; ?></td>
-                            <td><?php echo gifttify_price_format($v['totalSpend']); ?></td>
-                            <td><?php echo gifttify_price_format($v['total_order_amount']); ?></td>
-                            <td><?php echo round($v['mo']) . '%'; ?></td>
-                            <td><?php echo round($v['total_order']); ?></td>
-                            <td><?php echo number_format($v['cpc'], 2); ?></td>
-                            <td><?php echo gifttify_price_format($v['aov']); ?></td>
-                        </tr>
-                        <?php endforeach;?>
-                        </tbody>
-                        <tfoot>
-                        <tr>
-                            <?php $sumMo = $sumTotalOrderAmount != 0 ? 100*($sumTotalSpend/$sumTotalOrderAmount) : 0;  ?>
+                        @php
+                            $sum_totalSpend = array_sum(array_column($campaigns,'totalSpend'));
+                            $sum_total_order_amount = array_sum(array_column($campaigns,'total_order_amount'));
 
-                            <td>All-Country</td>
-                            <td><?php echo gifttify_price_format($sumTotalSpend); ?></td>
-                            <td><?php echo gifttify_price_format($sumTotalOrderAmount); ?></td>
-                            <td><?php echo round($sumMo) . '%'; ?></td>
-                            <td><?php echo round($sumTotalOrders) ; ?></td>
-                            <td colspan="3"></td>
-                        </tr>
-                        </tfoot>
-                    </table>
+                            $sum_cpc = array_sum(array_column($campaigns,'totalUniqueClicks')) != 0 ? array_sum(array_column($campaigns,'totalSpend')) / array_sum(array_column($campaigns,'totalUniqueClicks')) : 0;
+                            $sum_cpm = array_sum(array_column($campaigns,'impressions')) != 0 ? 1000 * array_sum(array_column($campaigns,'totalSpend')) / array_sum(array_column($campaigns,'impressions')) : 0;
+                            $sum_mo = $sum_total_order_amount > 0 ? 100 * ($sum_totalSpend / $sum_total_order_amount) : 0;
 
-                    <table class="table table-responsive table-bordered" style="width: auto">
-                        <h1>By Product Type</h1>
-                        <thead>
-                        <tr>
-                            <th></th>
-                            <th>AdsCost</th>
-                            <th>Rev</th>
-                            <th>CPC</th>
-                            <th>MO</th>
+                            $sum_total_order = array_sum(array_column($campaigns,'total_order'));
+                            $sum_budget = array_sum(array_column($campaigns,'budget'));
+                        @endphp
+                        <tr {!! display_row_bg_dashboard($sum_mo) !!} class="fw-bold" >
+                            <td>Total</td>
+                            <td>All Accounts</td>
+                            <td {!! display_zero_cell_dashboard( $sum_totalSpend )!!} >{!! gifttify_price_format( $sum_totalSpend );  !!} </td>
+                            <td {!! display_zero_cell_dashboard( $sum_total_order_amount )!!} >{!! gifttify_price_format( $sum_total_order_amount );  !!} </td>
+                            <td {!! display_zero_cell_dashboard( $sum_cpc )!!} >{!! number_format($sum_cpc, 2);  !!} </td>
+                            <td {!! display_zero_cell_dashboard( $sum_cpm )!!} >{!! number_format($sum_cpm, 2);  !!} </td>
+                            <td {!! display_zero_cell_dashboard( $sum_mo )!!} >{!! round( $sum_mo ) . '%';  !!} </td>
+                            <td {!! display_zero_cell_dashboard( $sum_total_order )!!} >{!! round( $sum_total_order ) !!} </td>
+                            <td {!! display_zero_cell_dashboard( $sum_budget )!!} >{!! gifttify_price_format( $sum_budget, 0 ) !!} </td>
+                            <td>
+                                <select id="filter_status">
+                                    <option value="ALL">-- All --</option>
+                                    <option value="ACTIVE">ACTIVE</option>
+                                    <option value="PAUSED">PAUSED</option>
+                                    <option value=""></option>
+                                </select>
+                            </td>
                         </tr>
-                        </thead>
-                        <tbody>
-                        <?php foreach ($productTypes as $v): ?>
-                        <tr>
-                            <td><?php echo $v['product_type_name'] . "[{$v['product_type_code']}]"; ?></td>
-                            <td><?php echo gifttify_price_format($v['totalSpend']); ?></td>
-                            <td><?php echo gifttify_price_format($v['total_order_amount']); ?></td>
-                            <td><?php echo number_format($v['cpc'], 2); ?></td>
-                            <td><?php echo round($v['mo']) . '%'; ?></td>
+
+                        <?php foreach ($campaigns as $v): ?>
+                        <tr {!! display_row_bg_dashboard($v['mo']) !!} class="tr_sortable" >
+                            <td>{!! $v['campaign_name'] !!} </td>
+                            <td>{!! $v['account_name'] !!} </td>
+                            <td {!! display_zero_cell_dashboard($v['totalSpend'])!!} >{!! gifttify_price_format($v['totalSpend']);  !!} </td>
+                            <td {!! display_zero_cell_dashboard($v['total_order_amount'])!!} >{!! gifttify_price_format($v['total_order_amount']);  !!} </td>
+                            <td {!! display_zero_cell_dashboard($v['cpc'])!!} >{!! number_format($v['cpc'], 2);  !!} </td>
+                            <td {!! display_zero_cell_dashboard($v['cpm'])!!} >{!! number_format($v['cpm'], 2);  !!} </td>
+                            <td {!! display_zero_cell_dashboard($v['mo'])!!} >{!! round($v['mo']) . '%';  !!} </td>
+                            <td {!! display_zero_cell_dashboard($v['total_order'])!!} >{!! round($v['total_order']) !!} </td>
+                            <td {!! display_zero_cell_dashboard($v['budget'])!!} >{!! gifttify_price_format( $v['budget'], 0 ) !!} </td>
+                            <td {!! display_row_bg_campaign_status($v['mo'], $v['totalSpend'], $v['status']) !!}>{!! $v['status'] !!} </td>
                         </tr>
-                        <?php endforeach;?>
+                        <?php endforeach; ?>
                         </tbody>
                     </table>
-
-                    <table class="table table-responsive table-bordered" style="width: auto">
-                        <h1>By Ads Type</h1>
-                        <thead>
-                        <tr>
-                            <th></th>
-                            <th>AdsCost</th>
-                            <th>Percent</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <?php foreach ($adsTypes as $v): ?>
-                        <tr>
-                            <td><?php echo $v['ads_type']; ?></td>
-                            <td><?php echo gifttify_price_format($v['totalSpend']); ?></td>
-                            <td><?php echo round($v['percent'],2) . '%'; ?></td>
-                        </tr>
-                        <?php endforeach;?>
-                        </tbody>
-                    </table>
-
-                    <table class="table table-responsive table-bordered" style="width: auto">
-                        <h1>By Designer</h1>
-                        <thead>
-                        <tr>
-                            <th></th>
-                            <th>AdsCost</th>
-                            <th>Rev</th>
-                            <th>CPC</th>
-                            <th>MO</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <?php foreach ($designerAds as $v): ?>
-                        <tr>
-                            <td><?php echo $v['designer_name'] . "[{$v['designer_code']}]"; ?></td>
-                            <td><?php echo gifttify_price_format($v['totalSpend']); ?></td>
-                            <td><?php echo gifttify_price_format($v['total_order_amount']); ?></td>
-                            <td><?php echo number_format($v['cpc'], 2); ?></td>
-                            <td><?php echo round($v['mo']) . '%'; ?></td>
-                        </tr>
-                        <?php endforeach;?>
-                        </tbody>
-                    </table>
-
-                    <table class="table table-responsive table-bordered" style="width: auto">
-                        <h1>By Idea</h1>
-                        <thead>
-                        <tr>
-                            <th></th>
-                            <th>AdsCost</th>
-                            <th>Rev</th>
-                            <th>CPC</th>
-                            <th>MO</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <?php foreach ($ideaAds as $v): ?>
-                        <tr>
-                            <td><?php echo $v['idea_name'] . "[{$v['idea_code']}]"; ?></td>
-                            <td><?php echo gifttify_price_format($v['totalSpend']); ?></td>
-                            <td><?php echo gifttify_price_format($v['total_order_amount']); ?></td>
-                            <td><?php echo number_format($v['cpc'], 2); ?></td>
-                            <td><?php echo round($v['mo']) . '%'; ?></td>
-                        </tr>
-                        <?php endforeach;?>
-                        </tbody>
-                    </table>
-
-                    <table class="table table-responsive table-bordered" style="width: auto">
-                        <h1>By Ads Staff</h1>
-                        <thead>
-                        <tr>
-                            <th></th>
-                            <th>AdsCost</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <?php foreach ($adsStaffs as $v): ?>
-                        <tr>
-                            <td><?php echo $v['adsStaff']; ?></td>
-                            <td><?php echo gifttify_price_format($v['totalSpend']); ?></td>
-                        </tr>
-                        <?php endforeach;?>
-                        </tbody>
-                    </table>
-
                 </div>
             </div>
         </div>
     </div>
 
+    <script>
+        const getCellValue = (tr, idx) => tr.children[idx].innerText.replace('$','').replace(',','') || tr.children[idx].textContent.replace('$','').replace(',','');
+
+        const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
+                v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2)
+        )(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
+
+        // do the work...
+        document.querySelectorAll('th').forEach(th => th.addEventListener('click', (() => {
+            const table = th.closest('table');
+
+            if ( th.classList.contains("sort_asc") ) {
+                document.querySelectorAll('th').forEach( th => {
+                    th.classList.remove("sort_asc")
+                    th.classList.remove("sort_desc")}
+                );
+                th.classList.add("sort_desc");
+                this.asc = false;
+            } else if ( th.classList.contains("sort_desc") ) {
+                document.querySelectorAll('th').forEach( th => {
+                    th.classList.remove("sort_asc")
+                    th.classList.remove("sort_desc")}
+                );
+                th.classList.add("sort_asc");
+                this.asc = true;
+            } else {
+                document.querySelectorAll('th').forEach( th => {
+                    th.classList.remove("sort_asc")
+                    th.classList.remove("sort_desc")}
+                );
+                th.classList.add("sort_asc");
+                this.asc = true;
+            }
+
+            Array.from(table.querySelectorAll('tr:nth-child(n+2)'))
+                .sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc))
+                .forEach( tr => table.appendChild(tr) );
+        })));
+
+        var filter_status = document.querySelector('#filter_status');
+        filter_status.addEventListener('change',function() {
+            const table = document.getElementById('campaign_info');
+            const status = this.value;
+
+            document.querySelectorAll('tr.tr_sortable').forEach( tr => tr.classList.remove("hidden"));
+            if (status == 'ALL') return false;
+
+            Array.from(table.querySelectorAll('tr.tr_sortable'))
+                .forEach( tr => {
+                    if (tr.children.item(9).innerText != status) {
+                        tr.classList.add("hidden");
+                    }
+                } );
+        });
+
+        var triggerClickElement = document.querySelector('#campaign_info thead th:nth-child(3)');
+        triggerClickElement.click();
+        triggerClickElement.click();
+
+    </script>
 </x-app-layout>

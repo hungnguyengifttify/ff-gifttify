@@ -89,7 +89,7 @@ class PushProductsToRemix extends Command
         $this->info("Cron Job Push Remix Products running at ". now());
 
         $timeReport = $this->argument('time_report') ?? '';
-        $limit = 100;
+        $limit = 1000;
         if ($timeReport == 'all') {
             $limit = 1000;
         }
@@ -158,8 +158,10 @@ class PushProductsToRemix extends Command
                     $body = array(
                         'slug' => $p->handle,
                         'title' => $p->title,
-                        'productType' => $p->product_type,
-                        'status' => $p->status,
+                        //'productType' => $p->product_type,
+                        //'status' => $p->status,
+                        'productType' => 't-shirt',
+                        'status' => 'publish',
                         'tags' => $p->tags,
                         'images' => $imagesArr,
                         'options' => $optionsArr,

@@ -137,7 +137,7 @@ class DashboardController extends Controller {
         }
 
         $range_report = array_search ($labelDate, Dashboard::$rangeDate);
-        $campaigns = Dashboard::getCanpaignInfoByDate($store, $range_report, $fromDateReq, $toDateReq, $debug);
+        $campaigns = Dashboard::getCampaignInfoByDate($store, $range_report, $fromDateReq, $toDateReq, $debug);
         return view('report.dashboard_campaign_info', compact('campaigns', 'params', 'store'));
     }
 }

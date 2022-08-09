@@ -922,7 +922,7 @@ class Dashboard extends Model
         return $adsResult;
     }
 
-    public static function getCanpaignInfoByDate ($store = 'thecreattify', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '',$debug = 0) {
+    public static function getCampaignInfoByDate ($store = 'thecreattify', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '',$debug = 0) {
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 

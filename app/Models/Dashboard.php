@@ -15,6 +15,7 @@ class Dashboard extends Model
     static $rangeDate = array(
         'today' => 'Today',
         'yesterday' => 'Yesterday',
+        'last_7_days' => 'Last 7 Days',
         'this_week' => 'This Week',
         'last_week' => 'Last Week',
         'this_month' => 'This Month',
@@ -222,6 +223,10 @@ class Dashboard extends Model
             $dateTimeStart->subDays(1);
             $dateTimeEnd->subDays(1);
 
+            $fromDate = $dateTimeStart->format('Y-m-d');
+            $toDate = $dateTimeEnd->format('Y-m-d 23:59:59');
+        } elseif ($rangeDate == 'last_7_days') {
+            $dateTimeStart->subDays(7);
             $fromDate = $dateTimeStart->format('Y-m-d');
             $toDate = $dateTimeEnd->format('Y-m-d 23:59:59');
         } elseif ($rangeDate == 'this_week') {

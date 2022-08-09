@@ -72,6 +72,7 @@
                                     ranges: {
                                         'Today': [moment(), moment()],
                                         'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                                        'Last 7 Days': [moment().subtract(7, 'days'), moment()],
                                         'This Week': [moment().startOf('isoWeek'), moment().endOf('isoWeek')],
                                         'Last Week': [moment().subtract(7, 'days').startOf('isoWeek'), moment().subtract(7, 'days').endOf('isoWeek')],
                                         'This Month': [moment().startOf('month'), moment().endOf('month')],

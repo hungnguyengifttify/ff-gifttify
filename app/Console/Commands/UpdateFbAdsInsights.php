@@ -101,7 +101,7 @@ class UpdateFbAdsInsights extends Command
             }
             $params['time_ranges'] = $fbTimeRanges;
 
-            $cursor = (new AdAccount("act_$accountId"))->getInsights(
+            $cursor = (new AdAccount("act_$accountId"))->createCampaign(
                 $fields,
                 $params
             );

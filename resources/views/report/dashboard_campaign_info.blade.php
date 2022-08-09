@@ -4,6 +4,7 @@
     }
     table, th, td {
         border: 1px solid black;
+        padding: 5px;
     }
     th {
         cursor: pointer;
@@ -249,7 +250,7 @@
                         <?php foreach ($campaigns as $v): ?>
                         <tr {!! display_row_bg_dashboard($v['mo']) !!} class="tr_sortable" >
                             <td>{!! $v['campaign_name'] !!} </td>
-                            <td>{!! $v['account_name'] !!} </td>
+                            <td style="white-space: nowrap">{!! $v['account_name'] !!} </td>
                             <td {!! display_zero_cell_dashboard($v['totalSpend'])!!} >{!! gifttify_price_format($v['totalSpend']);  !!} </td>
                             <td {!! display_zero_cell_dashboard($v['total_order_amount'])!!} >{!! gifttify_price_format($v['total_order_amount']);  !!} </td>
                             <td {!! display_zero_cell_dashboard($v['cpc'])!!} >{!! number_format($v['cpc'], 2);  !!} </td>

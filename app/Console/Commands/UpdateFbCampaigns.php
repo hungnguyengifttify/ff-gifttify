@@ -95,9 +95,10 @@ class UpdateFbCampaigns extends Command
                 }
                 $cursor->fetchAfter();
             } while (empty($data) === false);
-            sleep(30);
+            sleep(10);
         }
 
+        $this->info("Cron Job end at ". now());
         $this->info('Success!');
     }
 }

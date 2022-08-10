@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('store')->default('');
             $table->unsignedBigInteger('shopify_id')->default(0);
             $table->string('title')->default('');
-            $table->text('body_html')->nullable();
+            $table->longText('body_html')->nullable();
             $table->string('vendor')->default('');
             $table->string('product_type')->default('');
             $table->dateTime('shopify_created_at')->default('1900-01-01');

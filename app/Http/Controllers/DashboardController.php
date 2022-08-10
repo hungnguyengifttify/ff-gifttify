@@ -79,7 +79,8 @@ class DashboardController extends Controller {
         $ideaAds = Dashboard::getIdeaReportByDate($store, $range_report, $fromDateReq, $toDateReq, $debug);
         $adsStaffs = Dashboard::getAdsStaffReportByDate($store, $range_report, $fromDateReq, $toDateReq, $debug);
 
-        return view('report.dashboard_detail', compact('title', 'store', 'params', 'accountsAds', 'countriesAds', 'productTypes', 'adsTypes', 'designerAds', 'ideaAds', 'adsStaffs'));
+        $storesConfig = Dashboard::getAllStoreConfig();
+        return view('report.dashboard_detail', compact('storesConfig', 'title', 'store', 'params', 'accountsAds', 'countriesAds', 'productTypes', 'adsTypes', 'designerAds', 'ideaAds', 'adsStaffs'));
     }
 
     public function ads_creative(Request $request) {

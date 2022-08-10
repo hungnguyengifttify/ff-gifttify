@@ -854,7 +854,7 @@ class Dashboard extends Model
             $adsStaff = 'Việt Anh';
         } elseif (preg_match('/.*hoang.*/', strtolower($campaignName), $result)) {
             $adsStaff = 'Hoàng';
-        } elseif (preg_match('/^m.*/', strtolower($campaignName), $result)) {
+        } elseif (preg_match('/^m .*/', strtolower($campaignName), $result)) {
             $adsStaff = 'Minh';
         } elseif (preg_match('/^([A-Z]{3})\s.*/', $campaignName, $result)) {
             $adsStaff = isset($result[1]) ? $result[1] : '';

@@ -43,7 +43,11 @@ class FbAds extends Model
         '2913344045636158'
     );
 
-    static $gifttifyusAccountIds = array('0');
+    static $gifttifyusAccountIds = array(
+        '600026628197610',
+        '1366470850544115',
+        '737747440975590',
+    );
 
     static $owllifyAccountIds = array('0');
 
@@ -51,18 +55,15 @@ class FbAds extends Model
         return array_merge(
             FbAds::$thecreattifyAccountIds,
             FbAds::$auThecreattifyAccountIds,
-            FbAds::$singlecloudyAccountIds
+            FbAds::$singlecloudyAccountIds,
+            FbAds::$gifttifyusAccountIds,
         );
     }
 
     public static function getPhpDateTimeZoneByAccountId($accountId) {
-        $dateTimeZone = "";
-        if (in_array($accountId, FbAds::$thecreattifyAccountIds)) {
-            $dateTimeZone = new \DateTimeZone('America/Los_Angeles');
-        } elseif (in_array($accountId, FbAds::$auThecreattifyAccountIds)) {
+        $dateTimeZone = new \DateTimeZone('America/Los_Angeles');
+        if (in_array($accountId, FbAds::$auThecreattifyAccountIds)) {
             $dateTimeZone = new \DateTimeZone('Australia/Sydney');
-        } elseif (in_array($accountId, FbAds::$singlecloudyAccountIds)) {
-            $dateTimeZone = new \DateTimeZone('America/Los_Angeles');
         }
         return $dateTimeZone;
     }

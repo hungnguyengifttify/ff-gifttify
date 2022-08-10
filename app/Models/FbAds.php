@@ -15,11 +15,10 @@ class FbAds extends Model
         '309846854338542',
         '588068822423832',
         '651874502834964',
-        '748598509494241',
+        //'748598509494241',
         '1038512286982822',
-        '300489508749827',
-        '977262739875449',
-        '737747440975590',
+        //'300489508749827',
+        //'977262739875449',
         //'1056823075169563',
         '786388902366696',
         '1004611960231517'
@@ -49,7 +48,14 @@ class FbAds extends Model
         '737747440975590',
     );
 
-    static $owllifyAccountIds = array('0');
+    static $owllifyAccountIds = array(
+        '3342632042729233'
+    );
+
+    static $hippiesyAccountIds = array(
+        '1101927910729121',
+        '348916160782979',
+    );
 
     public static function getAllRunningAccountIds() {
         return array_merge(
@@ -57,6 +63,8 @@ class FbAds extends Model
             FbAds::$auThecreattifyAccountIds,
             FbAds::$singlecloudyAccountIds,
             FbAds::$gifttifyusAccountIds,
+            FbAds::$owllifyAccountIds,
+            FbAds::$hippiesyAccountIds,
         );
     }
 

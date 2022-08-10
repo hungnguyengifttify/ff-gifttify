@@ -108,6 +108,23 @@ class Dashboard extends Model
                     'dateTimeZone' => new \DateTimeZone('America/Los_Angeles'),
                 )
             ),
+
+            'hippiesy' => array (
+                'domain' => 'hippiesy.com',
+                'common' => array (
+                    'phpTimeZone' => 'America/Los_Angeles',
+                    'fbAccountIds' => FbAds::$hippiesyAccountIds,
+                    'mysqlTimeZone' => 'US/Pacific',
+                    'radioCurrency' => 1
+                ),
+                'shopify' => array (
+                    'apiKey' => env('SHOPIFY_HIPPIESY_API_KEY', ''),
+                    'password' => env('SHOPIFY_HIPPIESY_PASSWORD', ''),
+                    'domain' => env('SHOPIFY_HIPPIESY_DOMAIN', ''),
+                    'apiVersion' => env('SHOPIFY_HIPPIESY_API_VERSION', ''),
+                    'dateTimeZone' => new \DateTimeZone('America/Los_Angeles'),
+                )
+            ),
         );
 
     }

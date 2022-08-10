@@ -16,6 +16,7 @@ class DashboardController extends Controller {
         $rangeDates = array_keys($rangeDates);
 
         $stores = Dashboard::getStoresList();
+        $storesConfig = Dashboard::getAllStoreConfig();
         $reports = array();
         foreach ($rangeDates as $v) {
             foreach ($stores as $store) {
@@ -43,7 +44,7 @@ class DashboardController extends Controller {
             }
         }
 
-        return view('report.dashboard_sum', array('reports' => $reports));
+        return view('report.dashboard_sum', array('reports' => $reports, 'storesConfig' => $storesConfig));
     }
 
     public function report_detail(Request $request, $store = 'thecreattify') {

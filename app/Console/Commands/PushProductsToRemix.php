@@ -27,58 +27,6 @@ class PushProductsToRemix extends Command
      */
     protected $description = 'Update Remix Products';
 
-    /*public function handle()
-    {
-        $this->info("Cron Job Update Products running at ". now());
-
-        $stores = array('thecreattify');
-
-        foreach ($stores as $store) {
-            $shopifyConfig = Dashboard::getShopifyConfig($store);
-
-            $apiKey = $shopifyConfig['apiKey'];
-            $password = $shopifyConfig['password'];
-            $domain = $shopifyConfig['domain'];
-            $apiVersion = $shopifyConfig['apiVersion'];
-            $dateTimeZone = $shopifyConfig['dateTimeZone'];
-
-            $dateTime = new \DateTime("now", $dateTimeZone);
-            $dateTime->modify('-1 day');
-            $updatedAtMin = $dateTime->format('Y-m-d');
-
-            $timeReport = $this->argument('time_report') ?? '';
-            if ($timeReport == 'all') {
-                $updatedAtMin = '1900-01-01';
-            }
-
-            $shopify = new Shopify($apiKey, $password, $domain, $apiVersion);
-            $products = $shopify->paginateProducts([
-                'updated_at_min' => $updatedAtMin,
-                'limit' => 3
-            ]);
-
-            foreach ($products as $p) {
-                $values = $p->toArray();
-                foreach ($values as $v) {
-                    $body['body'] = $v;
-
-                    $remixApi = new RemixApi();
-                    $response = $remixApi->request('POST', 'products/variable', null, $body);
-                    if ($response->getStatusCode() == '201') {
-                        $res = $response->getBody()->getContents();
-                        $res = json_decode($res);
-
-                        $this->info($res->message);
-                    } else {
-                        $this->error('Can not created');
-                    }
-
-                }
-            }
-        }
-        $this->info("Cron Job Update Products DONE at ". now());
-    }*/
-
     /**
      * Execute the console command.
      *
@@ -89,14 +37,22 @@ class PushProductsToRemix extends Command
         $this->info("Cron Job Push Remix Products running at ". now());
 
         $timeReport = $this->argument('time_report') ?? '';
-        $limit = 1000;
+        $limit = 2;
         if ($timeReport == 'all') {
             $limit = 1000;
         }
 
         $stores = array('thecreattify');
         foreach ($stores as $store) {
-            DB::table('products')->where('store', $store)->orderBy('id', 'asc')->chunk($limit, function ($products) {
+            DB::table('products')
+                ->select(DB::raw("*, (select product_type_code from shopify_product_type where product_type_name=products.product_type LIMIT 1) as productType"))
+                ->where('store', $store)
+                ->where('status', 'active')
+                ->where('id', '>', 14434)
+                ->where('variants', 'not like', '"gid://shopify/Product/%')
+                ->orderBy('id', 'asc')
+                ->chunk($limit, function ($products) {
+
                 foreach ($products as $p) {
                     $images = json_decode($p->images);
                     $image = json_decode($p->image);
@@ -158,9 +114,7 @@ class PushProductsToRemix extends Command
                     $body = array(
                         'slug' => $p->handle,
                         'title' => $p->title,
-                        //'productType' => $p->product_type,
-                        //'status' => $p->status,
-                        'productType' => 't-shirt',
+                        'productType' => $p->productType,
                         'status' => 'publish',
                         'tags' => $p->tags,
                         'images' => $imagesArr,
@@ -174,12 +128,13 @@ class PushProductsToRemix extends Command
 
                     $remixApi = new RemixApi();
                     $response = $remixApi->request('POST', 'products/variable', null, $body);
-                    if ($response->getStatusCode() == '201') {
+                    if ($response && $response->getStatusCode() == '201') {
                         $res = $response->getBody()->getContents();
                         $res = json_decode($res);
 
                         $this->info($res->message);
                     } else {
+                        dump($body);
                         $this->error('Can not created');
                     }
                 }

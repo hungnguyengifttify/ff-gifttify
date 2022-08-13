@@ -62,7 +62,9 @@
             "dont-discover": []
         },
         "google/apiclient-services": [
-            "Drive"
+            "Drive",
+            "Analytics",
+            "AnalyticsReporting"
         ]
     },
     "config": {

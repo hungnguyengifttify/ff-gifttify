@@ -1,85 +1,91 @@
 <?php
+
 namespace App\Services;
 
 use Google\Client;
 use Illuminate\Support\Facades\Config;
 use Google\Service\AnalyticsReporting;
 
-class GoogleAnalytics {
+class GoogleAnalytics
+{
 
-    protected $client;
+    protected $analytics;
     public $service;
+
+    public $dateRange;
+    public $metrics = [];
+
 
     public $viewID = '230760666';
 
-    function __construct() {
+    function __construct()
+    {
         $client = new Client();
         $client->setApplicationName('Google Analytic API');
-
-//        $KEY_FILE_LOCATION = json_decode(Config::get('google.drive_api.json_config'), true);
+        //$KEY_FILE_LOCATION = json_decode(Config::get('google.ga_api.json_config'), true);
         $KEY_FILE_LOCATION = __DIR__ . '/../../service-account-credentials.json';
         // Create and configure a new client object.
+
         $client->setAuthConfig($KEY_FILE_LOCATION);
         $client->setScopes(['https://www.googleapis.com/auth/analytics.readonly']);
-        $analytics = new AnalyticsReporting($client);
-
-        return $analytics;
+        $this->analytics = new AnalyticsReporting($client);
+        $this->setMetrics();
     }
 
-    public function crawlCampaigns($fromTime, $toTime){
-        $analytics = $this->__construct();
+    public function setMetrics()
+    {
+        // Create the Metrics object.
+        $listMetric = [
+            "ga:users" => "users",
+            "ga:newUsers" => "new_users",
+            "ga:sessions" => "session",
+            "ga:bounceRate" => "bounce_rate",
+            "ga:pageviewsPerSession" => "pageviews_per_session",
+            "ga:avgSessionDuration" => "avg_session_duration",
+            "ga:goalConversionRateAll" => "goal_conversion_rate_all",
+            "ga:goalCompletionsAll" => "goal_completions_all",
+            "ga:goalValueAll" => "goal_value_all"
+        ];
 
+        foreach ($listMetric as $gaKey => $gaAlias) {
+            $sessions = new \Google\Service\AnalyticsReporting\Metric();
+            $sessions->setExpression($gaKey);
+            $sessions->setAlias($gaAlias);
+            $this->metrics[] = $sessions;
+        }
+    }
+
+    public function crawlCampaigns($viewId = null, $fromTime, $toTime)
+    {
+        if($viewId){
+            $this->viewId = $viewId;
+        }
         // Create the DateRange object.
         $dateRange = new \Google\Service\AnalyticsReporting\DateRange();
-        $dateRange->setStartDate("7daysAgo");
-        $dateRange->setEndDate("today");
+        $dateRange->setStartDate($fromTime);
+        $dateRange->setEndDate($toTime);
 
-        // Create the Metrics object.
-        $sessions = new \Google\Service\AnalyticsReporting\Metric();
-        $sessions->setExpression("ga:users");
-    $sessions->setAlias("Users");
-        $metrics[] = $sessions;
-
-        $sessions = new \Google\Service\AnalyticsReporting\Metric();
-        $sessions->setExpression("ga:newUsers");
-        $sessions->setAlias("NewUsers");
-        $metrics[] = $sessions;
-
-        $sessions = new \Google\Service\AnalyticsReporting\Metric();
-        $sessions->setExpression("ga:sessions");
-        $sessions->setAlias("Session");
-        $metrics[] = $sessions;
-
-        $sessions = new \Google\Service\AnalyticsReporting\Metric();
-        $sessions->setExpression("ga:avgSessionDuration");
-        $sessions->setAlias("AvgSessionDuration");
-        $metrics[] = $sessions;
-
-        $sessions = new \Google\Service\AnalyticsReporting\Metric();
-        $sessions->setExpression("ga:bounceRate");
-        $sessions->setAlias("BounceRate");
-        $metrics[] = $sessions;
-
-        $sessions = new \Google\Service\AnalyticsReporting\Metric();
-        $sessions->setExpression("ga:goalCompletionsAll");
-        $sessions->setAlias("GoalCompletionsAll");
-        $metrics[] = $sessions;
-
-        $sessions = new \Google\Service\AnalyticsReporting\Metric();
-        $sessions->setExpression("ga:goalValueAll");
-        $sessions->setAlias("GoalValueAll");
-        $metrics[] = $sessions;
+        // Create the Dimension object.
+        $dimension = new \Google\Service\AnalyticsReporting\Dimension();
+        $dimension->setName("ga:campaign");
 
         // Create the ReportRequest object.
         $request = new \Google\Service\AnalyticsReporting\ReportRequest();
-        $request->setViewId('230760666');
-        $request->setDateRanges($dateRange);
-        $request->setMetrics($metrics);
+        $request->setViewId($viewId);  // View ID
+        $request->setDateRanges($dateRange);  // Set Date
+        $request->setDimensions([$dimension]); // Set Dimension
+        $request->setMetrics($this->metrics);  // set Metrics
 
         $body = new \Google\Service\AnalyticsReporting\GetReportsRequest();
-        $body->setReportRequests( array( $request) );
-        $reports = $analytics->reports->batchGet($body);
+        $body->setReportRequests(array($request));
+        $reports = $this->analytics->reports->batchGet($body);
 
+        return $this->handleData($reports);
+    }
+
+    public function handleData($reports)
+    {
+        $returnValue = [];
         for ($reportIndex = 0; $reportIndex < count($reports); $reportIndex++) {
             $report = $reports[$reportIndex];
             $header = $report->getColumnHeader();
@@ -91,20 +97,18 @@ class GoogleAnalytics {
                 $row = $rows[$rowIndex];
                 $dimensions = $row->getDimensions();
                 $metrics = $row->getMetrics();
-//                for ($i = 0; $i < count($dimensionHeaders) && $i < count($dimensions); $i++) {
-//                    $result1[] = $dimensionHeaders[$i] . ": " . $dimensions[$i];
-//                }
 
+                $campainName = $dimensions[0];
                 for ($j = 0; $j < count($metrics); $j++) {
                     $values = $metrics[$j]->getValues();
                     for ($k = 0; $k < count($values); $k++) {
                         $entry = $metricHeaders[$k];
-                        $result2[$entry->getName()] = $entry->getName() . ": " . $values[$k];
+                        $result[$entry->getName()] = $values[$k];
                     }
                 }
+                $returnValue[$campainName] = $result;
             }
         }
-        //fix
-        dd([$result2]);
+        return $returnValue;
     }
 }

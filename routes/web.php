@@ -40,6 +40,6 @@ Route::get('/create_shopify_csv', [\App\Http\Controllers\ToolsController::class,
 Route::get('/order_management/{store}', [\App\Http\Controllers\OrderManagementController::class, 'list'])
     ->name('order_management');
 
-Route::get('/dashboard_ga', [\App\Http\Controllers\DashboardController::class, 'report_ga_campaign'])
+Route::get('/report_ga_campaign', [\App\Http\Controllers\DashboardController::class, 'report_ga_campaign'])
 ->name('order_management');
 require __DIR__.'/auth.php';

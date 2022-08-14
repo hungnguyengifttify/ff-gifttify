@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Dashboard;
+use App\Services\GoogleAnalytics;
+use App\Models\GaCampaignReports;
 
 class DashboardController extends Controller {
 
@@ -144,30 +146,14 @@ class DashboardController extends Controller {
     }
 
     public function report_ga_campaign(){
+        //get From service
         $gaService = new GoogleAnalytics();
-
-//         Replace with your view ID, for example XXXX.
-         $VIEW_ID = "230760666";
-
-         // Create the DateRange object.
-         $dateRange = new Google_Service_AnalyticsReporting_DateRange();
-         $dateRange->setStartDate("7daysAgo");
-         $dateRange->setEndDate("today");
-
-     // Create the Metrics object.
-         $sessions = new Google_Service_AnalyticsReporting_Metric();
-         $sessions->setExpression("ga:sessions");
-         $sessions->setAlias("sessions");
-
-         // Create the ReportRequest object.
-         $request = new Google_Service_AnalyticsReporting_ReportRequest();
-         $request->setViewId($VIEW_ID);
-         $request->setDateRanges($dateRange);
-         $request->setMetrics(array($sessions));
-
-         $body = new Google_Service_AnalyticsReporting_GetReportsRequest();
-         $body->setReportRequests( array( $request) );
-         $analytics->reports->batchGet( $body );
-
+        $viewId = env('GA_VIEW_ID', '230760666'); // Must set
+        $data = $gaService->crawlCampaigns($viewId, 'today', 'today');
+        dd($data);
+        
+        //get From DB
+        $data = GaCampaignReports::all();
+        dd($data);
     }
 }

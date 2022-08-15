@@ -67,3 +67,13 @@ if (! function_exists('display_row_bg_campaign_cpc')) {
     }
 }
 
+if (! function_exists('display_row_bg_account_status')) {
+    function display_row_bg_account_status($account_status = 'ACTIVE')
+    {
+        if ( $account_status != 'ACTIVE' ) {
+            return " style='background-color:#f66' ";
+        }
+        return "";
+    }
+}
+

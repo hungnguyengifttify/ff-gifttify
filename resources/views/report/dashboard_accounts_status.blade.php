@@ -47,13 +47,16 @@
 
                         <tbody>
                         @foreach($accounts as $v)
-                        <tr>
+                            @php
+                                $account_status = \App\Models\FbAccount::$status[$v->account_status] ?? '';
+                            @endphp
+                        <tr {!! display_row_bg_account_status($account_status) !!}>
                             <td>{{$v->id}}</td>
                             <td>{{$v->name}}</td>
                             <td style="white-space: nowrap;">{!! \App\Models\Dashboard::getStoreFromAccountId($v->id) !!}</td>
                             <td>{!! gifttify_price_format($v->amount_spent, 0) !!}</td>
                             <td>{{ gifttify_price_format($v->balance, 0) }}</td>
-                            <td>{{ \App\Models\FbAccount::$status[$v->account_status] ?? '' }}</td>
+                            <td>{{ $account_status }}</td>
                             <td>{{ \App\Models\FbAccount::$disable_reason[$v->disable_reason] ?? '' }}</td>
                             <td>{{$v->created_time}}</td>
                         </tr>

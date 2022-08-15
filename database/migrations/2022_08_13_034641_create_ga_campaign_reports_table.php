@@ -24,10 +24,18 @@ return new class extends Migration
             $table->float('bounce_rate');
             $table->float('pageviews_per_session');
             $table->float('avg_session_duration');
-            $table->float('goal_conversion_rate_all');
-            $table->integer('goal_completions_all');
-            $table->float('goal_value_all');
+//            $table->float('goal_conversion_rate_all');
+//            $table->integer('goal_completions_all');
+//            $table->float('goal_value_all');
+            $table->integer('transactions');
+            $table->float('transactions_per_session');
+            $table->float('transaction_revenue');
             $table->timestamps();
+
+            $table->index('campains_name');
+            $table->index('view_id');
+            $table->index('date_record');
+            $table->unique(['campains_name', 'view_id', 'date_record']);
         });
     }
 

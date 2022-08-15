@@ -34,7 +34,7 @@ class GoogleAnalytics
 
     public function setMetrics()
     {
-        // Create the Metrics object.
+        // Create the Metrics object. max 10 metric in one Api
         $listMetric = [
             "ga:users" => "users",
             "ga:newUsers" => "new_users",
@@ -42,9 +42,12 @@ class GoogleAnalytics
             "ga:bounceRate" => "bounce_rate",
             "ga:pageviewsPerSession" => "pageviews_per_session",
             "ga:avgSessionDuration" => "avg_session_duration",
-            "ga:goalConversionRateAll" => "goal_conversion_rate_all",
-            "ga:goalCompletionsAll" => "goal_completions_all",
-            "ga:goalValueAll" => "goal_value_all"
+//            "ga:goalConversionRateAll" => "goal_conversion_rate_all",
+//            "ga:goalCompletionsAll" => "goal_completions_all",
+//            "ga:goalValueAll" => "goal_value_all",
+            "ga:transactions" => "transactions",
+            "ga:transactionsPerSession" => "transactions_per_session",
+            "ga:transactionRevenue" => "transaction_revenue"
         ];
 
         foreach ($listMetric as $gaKey => $gaAlias) {
@@ -55,11 +58,8 @@ class GoogleAnalytics
         }
     }
 
-    public function crawlCampaigns($viewId = null, $fromTime, $toTime)
+    public function crawlCampaigns($viewId, $fromTime, $toTime)
     {
-        if($viewId){
-            $this->viewId = $viewId;
-        }
         // Create the DateRange object.
         $dateRange = new \Google\Service\AnalyticsReporting\DateRange();
         $dateRange->setStartDate($fromTime);

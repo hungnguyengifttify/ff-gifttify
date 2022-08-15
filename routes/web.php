@@ -41,5 +41,5 @@ Route::get('/order_management/{store}', [\App\Http\Controllers\OrderManagementCo
     ->name('order_management');
 
 Route::get('/report_ga_campaign', [\App\Http\Controllers\DashboardController::class, 'report_ga_campaign'])
-->name('order_management');
+->name('report_ga_campaign');
 require __DIR__.'/auth.php';

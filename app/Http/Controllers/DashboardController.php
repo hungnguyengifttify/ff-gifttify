@@ -145,15 +145,22 @@ class DashboardController extends Controller {
         return view('report.dashboard_campaign_info', compact('campaigns', 'params', 'store'));
     }
 
-    public function report_ga_campaign(){
+    public function report_ga_campaign(Request $request){
+
+        $fromDateReq = $request->input('fromDate') ?? 'today';
+        $toDateReq = $request->input('toDate') ?? 'today';
+        $siteName = $request->input('siteName') ?? 'gift-us';
+        //'gift-us' => '253293522',
+        //'hippiessy.com' =>'272705190',
+        $viewIds = GaCampaignReports::$viewIds;
+        $viewId = $viewIds[$siteName];
+        //Example : report_ga_campaign?fromDate=2022-08-14&toDate=2022-08-14&siteName=hippiessy.com
         //get From service
         $gaService = new GoogleAnalytics();
-        $viewId = env('GA_VIEW_ID', '230760666'); // Must set
-        $data = $gaService->crawlCampaigns($viewId, 'today', 'today');
+        $data = $gaService->crawlCampaigns($viewId, $fromDateReq, $toDateReq);
         dd($data);
-        
-        //get From DB
-        $data = GaCampaignReports::all();
-        dd($data);
+//get From DB
+//        $data = GaCampaignReports::all();
+//        dd($data);
     }
 }

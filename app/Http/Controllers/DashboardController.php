@@ -142,4 +142,9 @@ class DashboardController extends Controller {
         $campaigns = Dashboard::getCampaignInfoByDate($store, $range_report, $fromDateReq, $toDateReq, $debug);
         return view('report.dashboard_campaign_info', compact('campaigns', 'params', 'store'));
     }
+
+    public function accounts_status (Request $request) {
+        $accounts = Dashboard::getAccounts();
+        return view('report.dashboard_accounts_status', compact('accounts'));
+    }
 }

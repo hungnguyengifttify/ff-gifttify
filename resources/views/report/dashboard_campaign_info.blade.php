@@ -141,6 +141,15 @@
                                 </svg>
                             </th>
                             <th>
+                                AccountStatus
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_down" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_up" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </th>
+                            <th>
                                 AdsCost
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_down" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
@@ -230,7 +239,17 @@
                         @endphp
                         <tr {!! display_row_bg_dashboard($sum_mo) !!} class="fw-bold" >
                             <td>Total</td>
-                            <td>All Accounts</td>
+                            <td>
+                                <input id="filter_account_name" class="form-control" />
+                            </td>
+                            <td>
+                                <select id="filter_account_status">
+                                    <option value="ALL">-- All --</option>
+                                    <option value="ACTIVE">ACTIVE</option>
+                                    <option value="DISABLED">DISABLED</option>
+                                    <option value=""></option>
+                                </select>
+                            </td>
                             <td {!! display_zero_cell_dashboard( $sum_totalSpend )!!} >{!! gifttify_price_format( $sum_totalSpend );  !!} </td>
                             <td {!! display_zero_cell_dashboard( $sum_total_order_amount )!!} >{!! gifttify_price_format( $sum_total_order_amount );  !!} </td>
                             <td {!! display_zero_cell_dashboard( $sum_cpc )!!} >{!! number_format($sum_cpc, 2);  !!} </td>
@@ -250,8 +269,12 @@
 
                         <?php foreach ($campaigns as $v): ?>
                         <tr {!! display_row_bg_dashboard($v['mo']) !!} class="tr_sortable" >
+                            @php
+                                $account_status = \App\Models\FbAccount::$status[$v['account_status']] ?? '';
+                            @endphp
                             <td>{!! $v['campaign_name'] !!} </td>
                             <td style="white-space: nowrap">{!! $v['account_name'] !!} </td>
+                            <td style="white-space: nowrap">{!! $account_status !!} </td>
                             <td {!! display_zero_cell_dashboard($v['totalSpend'])!!} >{!! gifttify_price_format($v['totalSpend']);  !!} </td>
                             <td {!! display_zero_cell_dashboard($v['total_order_amount'])!!} >{!! gifttify_price_format($v['total_order_amount']);  !!} </td>
                             <td {!! display_row_bg_campaign_cpc($v['cpc'])!!} >{!! number_format($v['cpc'], 2);  !!} </td>
@@ -259,7 +282,7 @@
                             <td {!! display_zero_cell_dashboard($v['mo'])!!} >{!! round($v['mo']) . '%';  !!} </td>
                             <td {!! display_zero_cell_dashboard($v['total_order'])!!} >{!! round($v['total_order']) !!} </td>
                             <td {!! display_zero_cell_dashboard($v['budget'])!!} >{!! gifttify_price_format( $v['budget'], 0 ) !!} </td>
-                            <td {!! display_row_bg_campaign_status($v['mo'], $v['totalSpend'], $v['status']) !!}>{!! $v['status'] !!} </td>
+                            <td {!! display_row_bg_campaign_status($v['mo'], $v['totalSpend'], $v['status'], $account_status) !!}>{!! $v['status'] !!} </td>
                         </tr>
                         <?php endforeach; ?>
                         </tbody>
@@ -318,13 +341,45 @@
 
             Array.from(table.querySelectorAll('tr.tr_sortable'))
                 .forEach( tr => {
-                    if (tr.children.item(9).innerText != status) {
+                    if (tr.children.item(10).innerText != status) {
                         tr.classList.add("hidden");
                     }
                 } );
         });
 
-        var triggerClickElement = document.querySelector('#campaign_info thead th:nth-child(3)');
+        var filter_account_status = document.querySelector('#filter_account_status');
+        filter_account_status.addEventListener('change',function() {
+            const table = document.getElementById('campaign_info');
+            const account_status = this.value;
+
+            document.querySelectorAll('tr.tr_sortable').forEach( tr => tr.classList.remove("hidden"));
+            if (account_status == 'ALL') return false;
+
+            Array.from(table.querySelectorAll('tr.tr_sortable'))
+                .forEach( tr => {
+                    if (tr.children.item(2).innerText != account_status) {
+                        tr.classList.add("hidden");
+                    }
+                } );
+        });
+
+        var filter_account_name = document.querySelector('#filter_account_name');
+        filter_account_name.addEventListener('keyup',function() {
+            const table = document.getElementById('campaign_info');
+            const account_name = this.value;
+
+            document.querySelectorAll('tr.tr_sortable').forEach( tr => tr.classList.remove("hidden"));
+            if (account_name == '') return false;
+
+            Array.from(table.querySelectorAll('tr.tr_sortable'))
+                .forEach( tr => {
+                    if ( !tr.children.item(1).innerText.includes(account_name) ) {
+                        tr.classList.add("hidden");
+                    }
+                } );
+        });
+
+        var triggerClickElement = document.querySelector('#campaign_info thead th:nth-child(4)');
         triggerClickElement.click();
         triggerClickElement.click();
 

@@ -134,6 +134,16 @@ class Dashboard extends Model
         return array_keys($allStore);
     }
 
+    public static function getStoreFromAccountId ($accountId) {
+        $allStore = Dashboard::getAllStoreConfig();
+        foreach ($allStore as $store => $value) {
+            if ( in_array($accountId, $value['common']['fbAccountIds']) ) {
+                return $store;
+            }
+        }
+        return '';
+    }
+
     public static function getStoreConfig ($store) {
         $allStore = Dashboard::getAllStoreConfig();
         return isset($allStore[$store]['common']) ? $allStore[$store]['common'] : false;
@@ -965,16 +975,18 @@ class Dashboard extends Model
                         THEN (select SUM(daily_budget/100) from fb_ad_sets where campaign_id=fb_ads_insights.campaign_id )
                     ELSE (select SUM(daily_budget/100) from fb_campaigns where fb_campaign_id=fb_ads_insights.campaign_id)
                 END as budget,
-                (select status from fb_campaigns where fb_campaign_id=fb_ads_insights.campaign_id) as status
+                (select status from fb_campaigns where fb_campaign_id=fb_ads_insights.campaign_id) as status,
+                (select account_status from fb_accounts where id=fb_ads_insights.account_id) as account_status
             '))
             ->whereIn('fb_ads_insights.account_id', $fbAccountIds)
             ->where('date_record', '>=', $fromDate)
             ->where('date_record', '<=', $toDate)
-            ->groupBy(array('campaign_name', 'campaign_id'))->get();
+            ->groupBy(array('account_id', 'campaign_name', 'campaign_id'))->get();
 
         $adsResult = array();
         foreach ($fbAds->all() as $v) {
             if (!isset($adsResult[$v->campaign_name])) {
+                $adsResult[$v->campaign_name]['account_status'] = $v->account_status;
                 $adsResult[$v->campaign_name]['account_name'] = $v->account_name;
                 $adsResult[$v->campaign_name]['campaign_name'] = $v->campaign_name;
                 $adsResult[$v->campaign_name]['status'] = $v->status;
@@ -1034,11 +1046,16 @@ class Dashboard extends Model
             $result[$v]['mo'] = ($result[$v]['total_order_amount']) > 0 ? 100*($result[$v]['totalSpend'] / $result[$v]['total_order_amount']) : 0;
             $result[$v]['account_name'] = $adsResult[$v]['account_name'] ?? '';
             $result[$v]['status'] = $adsResult[$v]['status'] ?? '';
+            $result[$v]['account_status'] = $adsResult[$v]['account_status'] ?? '';
         }
         usort($result, [self::class, 'sort_result_by_ads_cost']);
 
         return $result;
 
+    }
+
+    public static function getAccounts () {
+        return DB::table('fb_accounts')->get();
     }
 
 }

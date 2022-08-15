@@ -141,6 +141,7 @@ class UpdateFbAds extends Command
                     break;
                 }
             } while (empty($data) === false);
+            sleep(10);
         }
 
         $this->info("Cron Job End at ". now());

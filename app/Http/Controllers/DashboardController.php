@@ -146,7 +146,6 @@ class DashboardController extends Controller {
     }
 
     public function report_ga_campaign(Request $request){
-
         $fromDateReq = $request->input('fromDate') ?? 'today';
         $toDateReq = $request->input('toDate') ?? 'today';
         $siteName = $request->input('siteName') ?? 'gift-us';
@@ -162,5 +161,10 @@ class DashboardController extends Controller {
 //get From DB
 //        $data = GaCampaignReports::all();
 //        dd($data);
+    }
+
+    public function accounts_status (Request $request) {
+        $accounts = Dashboard::getAccounts();
+        return view('report.dashboard_accounts_status', compact('accounts'));
     }
 }

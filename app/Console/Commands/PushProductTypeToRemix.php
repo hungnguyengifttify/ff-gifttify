@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use App\Models\Products;
 use App\Models\ProductVariants;
 use Illuminate\Support\Facades\Config;
+use Prophecy\Exception\Exception;
 use Signifly\Shopify\Shopify;
 use Illuminate\Support\Facades\DB;
 use App\Services\RemixApi;
@@ -36,11 +37,14 @@ class PushProductTypeToRemix extends Command
     {
         $this->info("Cron Job Push Remix Product Type running at ". now());
 
-        $limit = 2;
+        $limit = 1000;
         $stores = array('thecreattify');
         foreach ($stores as $store) {
             DB::table(DB::raw("( select product_type from products where store='$store' group by product_type ) a"))
-                ->select(DB::raw("a.product_type, shopify_product_type.product_type_code, (select product_type_name from product_type where product_type_code = shopify_product_type.product_type_code) as product_type_name"))
+                ->select(DB::raw("a.product_type, shopify_product_type.product_type_code as id,
+	(select product_type_name from product_type where product_type_code=shopify_product_type.product_type_code) as title,
+	(select body_html from products where product_type=a.product_type and body_html != '' limit 1) as description,
+	(select variants->>'$[0].price' from products where product_type=a.product_type and body_html != '' limit 1) as basePrice"))
                 ->leftJoin('shopify_product_type', 'shopify_product_type.product_type_name', '=', 'a.product_type')
                 ->where('a.product_type', '!=', 'options_price')
                 ->where('a.product_type', '!=', '')
@@ -48,17 +52,18 @@ class PushProductTypeToRemix extends Command
                 ->chunk($limit, function ($productTypes) {
 
                 foreach ($productTypes as $pt) {
-                    dd($pt);
-
                     $body = array(
-                        'title' => $pt->product_type_name,
-                        'description' => "[{$pt->product_type_code}]" . " " . $pt->product_type_name,
+                        'id' => $pt->id,
+                        'title' => $pt->title,
+                        'description' => $pt->description,
+                        'basePrice' => $pt->basePrice,
                         'status' => 'publish',
                     );
 
                     $remixApi = new RemixApi();
-                    $response = $remixApi->request('POST', 'catalogs', null, $body);
-                    if ($response->getStatusCode() == '200') {
+
+                    $response = $remixApi->request('POST', 'templates', null, $body);
+                    if ($response && $response->getStatusCode() == '201') {
                         $res = $response->getBody()->getContents();
                         $res = json_decode($res);
 

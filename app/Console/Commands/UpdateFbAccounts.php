@@ -8,24 +8,24 @@ use FacebookAds\Object\AdAccount;
 use Illuminate\Console\Command;
 use Carbon\Carbon;
 use App\Models\FbAds;
+use App\Models\FbAccount;
 use App\Models\FbCampaigns;
-use FacebookAds\Object\Fields\AdAccountFields;
 
-class TestCmd extends Command
+class UpdateFbAccounts extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'test:cmd {time_report?}';
+    protected $signature = 'fbacc:update';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Get Google Drive files';
+    protected $description = 'Update FB Account';
 
     /**
      * Execute the console command.
@@ -35,25 +35,7 @@ class TestCmd extends Command
     public function handle()
     {
         $this->info("Cron Job running at ". now());
-        $fbAccountIds = array(
-            '2978647975730170',
-            '612291543439190',
-            '309846854338542',
-            '588068822423832',
-            '651874502834964',
-            //'748598509494241',
-            '1038512286982822',
-            //'300489508749827',
-            //'977262739875449',
-            //'1056823075169563',
-            '786388902366696',
-            '1004611960231517',
-            '1101927910729121',
-            '737747440975590',
-            '348916160782979',
-            '760002925207268',
-            '3342632042729233'
-        );
+        $fbAccountIds = FbAds::getAllRunningAccountIds();
 
         $access_token = env('FB_ADS_ACCESS_TOKEN', '');
         $app_secret = env('FB_ADS_APP_SECRET', '');
@@ -122,22 +104,41 @@ class TestCmd extends Command
         );
 
         foreach ($fbAccountIds as $accountId) {
-            $cursor = (new AdAccount("act_$accountId"))->read($fields);
-            $data = $cursor->getData();
-            dump(
-                $accountId,
-                $data['id'],
-                $data['account_status'],
-                $data['business_country_code'],
-                $data['balance'],
-                $data['amount_spent'],
-                $data['timezone_name'],
-                $data['min_daily_budget'],
-                $data['name'],
-                '_________________________'
+            if ($accountId == 0) continue;
 
-            );
-            //sleep(10);
+            $cursor = (new AdAccount("act_$accountId"))->read($fields);
+            $v = $cursor->getData();
+
+            FbAccount::updateOrCreate([
+                'id' => $v['account_id'] ?? 0,
+            ], [
+                'account_act_id' => $v['id'] ?? '',
+                'name' => $v['name'] ?? '',
+                'account_status' => $v['account_status'] ?? 0,
+                'store' => $v['store'] ?? '',
+                'age' => $v['age'] ?? 0,
+                'amount_spent' => $v['amount_spent'] ?? 0,
+                'balance' => $v['balance'] ?? 0,
+                'currency' => $v['currency'] ?? '',
+                'disable_reason' => $v['disable_reason'] ?? 0,
+                'end_advertiser' => $v['end_advertiser'] ?? 0,
+                'end_advertiser_name' => $v['end_advertiser_name'] ?? '',
+                'min_campaign_group_spend_cap' => $v['min_campaign_group_spend_cap'] ?? 0,
+                'min_daily_budget' => $v['min_daily_budget'] ?? 0,
+                'owner' => $v['owner'] ?? 0,
+                'spend_cap' => $v['spend_cap'] ?? 0,
+                'timezone_id' => $v['timezone_id'] ?? 0,
+                'timezone_name' => $v['timezone_name'] ?? '',
+                'timezone_offset_hours_utc' => $v['timezone_offset_hours_utc'] ?? 0,
+                'business_city' => $v['business_city'] ?? '',
+                'business_country_code' => $v['business_country_code'] ?? '',
+                'business_name' => $v['business_name'] ?? '',
+                'business_state' => $v['business_state'] ?? '',
+                'business_street' => $v['business_street'] ?? '',
+                'business_street2' => $v['business_street2'] ?? '',
+                'business_zip' => $v['business_zip'] ?? '',
+                'created_time' => Carbon::createFromFormat(\DateTime::ISO8601, $v['created_time'], 'UTC') ?? '1900-01-01',
+            ]);
         }
 
         $this->info("Cron Job end at ". now());

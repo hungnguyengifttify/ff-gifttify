@@ -54,14 +54,20 @@ class RemixApi {
     }
 
     function request($method, $uri, $query = null, $body = null) {
-        $res = $this->client->request($method, "{$this->url}/$uri", [
-            'headers' => [
-                'Content-Type' =>	'application/json',
-                'Authorization' => "Bearer " . $this->getToken()
-            ],
-            'query' => $query,
-            'body' => json_encode($body)
-        ]);
-        return $res;
+        try {
+            $res = $this->client->request($method, "{$this->url}/$uri", [
+                'headers' => [
+                    'Content-Type' =>	'application/json',
+                    'Authorization' => "Bearer " . $this->getToken()
+                ],
+                'query' => $query,
+                'body' => json_encode($body)
+            ]);
+            return $res;
+        } catch (\Exception $e) {
+            dump($e->getMessage());
+            return false;
+        }
+
     }
 }

@@ -34,9 +34,9 @@ if (! function_exists('display_row_bg_dashboard')) {
 }
 
 if (! function_exists('display_row_bg_campaign_status')) {
-    function display_row_bg_campaign_status($mo, $spend, $status)
+    function display_row_bg_campaign_status($mo, $spend, $status, $account_status = 'ACTIVE')
     {
-        if ( (0 < $mo && $mo < 40 && $status == 'PAUSED') || (round($mo) >= 60 && $status == 'ACTIVE') || ($mo == 0 && $spend > 40 && $status == 'ACTIVE') ) {
+        if ( $account_status == 'ACTIVE' && (0 < $mo && $mo <= 60 && $status == 'PAUSED') || (round($mo) >= 60 && $status == 'ACTIVE') || ($mo == 0 && $spend > 40 && $status == 'ACTIVE') ) {
             return " style='background-color:#f66' ";
         }
         return "";
@@ -61,6 +61,16 @@ if (! function_exists('display_row_bg_campaign_cpc')) {
         if ($cpc <= 0) {
             return " style='color:#ddd' ";
         } else if ( $cpc > 0.8 ) {
+            return " style='background-color:#f66' ";
+        }
+        return "";
+    }
+}
+
+if (! function_exists('display_row_bg_account_status')) {
+    function display_row_bg_account_status($account_status = 'ACTIVE')
+    {
+        if ( $account_status != 'ACTIVE' ) {
             return " style='background-color:#f66' ";
         }
         return "";

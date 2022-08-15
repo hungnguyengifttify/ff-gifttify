@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Dashboard;
+use App\Services\GoogleAnalytics;
+use App\Models\GaCampaignReports;
 
 class DashboardController extends Controller {
 
@@ -141,6 +143,24 @@ class DashboardController extends Controller {
         $range_report = array_search ($labelDate, Dashboard::$rangeDate);
         $campaigns = Dashboard::getCampaignInfoByDate($store, $range_report, $fromDateReq, $toDateReq, $debug);
         return view('report.dashboard_campaign_info', compact('campaigns', 'params', 'store'));
+    }
+
+    public function report_ga_campaign(Request $request){
+        $fromDateReq = $request->input('fromDate') ?? 'today';
+        $toDateReq = $request->input('toDate') ?? 'today';
+        $siteName = $request->input('siteName') ?? 'gift-us';
+        //'gift-us' => '253293522',
+        //'hippiessy.com' =>'272705190',
+        $viewIds = GaCampaignReports::$viewIds;
+        $viewId = $viewIds[$siteName];
+        //Example : report_ga_campaign?fromDate=2022-08-14&toDate=2022-08-14&siteName=hippiessy.com
+        //get From service
+        $gaService = new GoogleAnalytics();
+        $data = $gaService->crawlCampaigns($viewId, $fromDateReq, $toDateReq);
+        dd($data);
+//get From DB
+//        $data = GaCampaignReports::all();
+//        dd($data);
     }
 
     public function accounts_status (Request $request) {

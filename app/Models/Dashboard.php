@@ -1041,6 +1041,7 @@ class Dashboard extends Model
         }
 
         foreach ($gaAds->all() as $v) {
+            $v->campaign_name = ($v->campaign_name == '(not set)') ? 'UNKNOWN' : $v->campaign_name;
             if (!isset($adsResult[$v->campaign_name])) {
                 $adsResult[$v->campaign_name]['account_status'] = '';
                 $adsResult[$v->campaign_name]['account_name'] = '';

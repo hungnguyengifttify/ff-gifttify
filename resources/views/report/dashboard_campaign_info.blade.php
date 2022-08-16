@@ -282,7 +282,7 @@
                             <td>{!! $v['account_name'] !!} </td>
                             <td {!! display_zero_cell_dashboard($v['totalSpend'])!!} >{!! gifttify_price_format($v['totalSpend']);  !!} </td>
                             <td {!! display_zero_cell_dashboard($v['total_order_amount'])!!} >{!! gifttify_price_format($v['total_order_amount']);  !!} </td>
-                            <td {!! display_ga_cell_dashboard($v['ga_total_order_amount'], $v['total_order_amount'])!!} >{!! gifttify_price_format($v['total_order_amount']);  !!} </td>
+                            <td {!! display_ga_cell_dashboard($v['ga_total_order_amount'], $v['total_order_amount'])!!} >{!! gifttify_price_format($v['ga_total_order_amount']);  !!} </td>
                             <td {!! display_row_bg_campaign_cpc($v['cpc'])!!} >{!! number_format($v['cpc'], 2);  !!} </td>
                             <td {!! display_row_bg_campaign_cpm($v['cpm'])!!} >{!! number_format($v['cpm'], 2);  !!} </td>
                             <td {!! display_zero_cell_dashboard($v['mo'])!!} >{!! round($v['mo']) . '%';  !!} </td>

@@ -1011,9 +1011,10 @@ class Dashboard extends Model
         $gaAds = DB::table('ga_campaign_reports')
             ->select(DB::raw('campaign_name, SUM(transactions) as ga_total_order,
                 SUM(transaction_revenue) as ga_total_order_amount'))
-            ->whereIn('ga_campaign_reports.store', $store)
+            ->where('ga_campaign_reports.store', $store)
             ->where('ga_campaign_reports.date_record', '>=', $fromDate)
             ->where('ga_campaign_reports.date_record', '<=', $toDate)
+            ->where('ga_campaign_reports.transactions', '>', 0)
             ->groupBy(array('campaign_name'))
             ->get();
 

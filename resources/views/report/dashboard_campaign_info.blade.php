@@ -255,12 +255,12 @@
                             </td>
                             <td {!! display_zero_cell_dashboard( $sum_totalSpend )!!} >{!! gifttify_price_format( $sum_totalSpend );  !!} </td>
                             <td {!! display_zero_cell_dashboard( $sum_total_order_amount )!!} >{!! gifttify_price_format( $sum_total_order_amount );  !!} </td>
-                            <td {!! display_zero_cell_dashboard( $sum_ga_total_order_amount )!!} >{!! gifttify_price_format( $sum_ga_total_order_amount );  !!} </td>
+                            <td {!! display_ga_cell_dashboard( $sum_ga_total_order_amount, $sum_total_order_amount )!!} >{!! gifttify_price_format( $sum_ga_total_order_amount );  !!} </td>
                             <td {!! display_zero_cell_dashboard( $sum_cpc )!!} >{!! number_format($sum_cpc, 2);  !!} </td>
                             <td {!! display_zero_cell_dashboard( $sum_cpm )!!} >{!! number_format($sum_cpm, 2);  !!} </td>
                             <td {!! display_zero_cell_dashboard( $sum_mo )!!} >{!! round( $sum_mo ) . '%';  !!} </td>
                             <td {!! display_zero_cell_dashboard( $sum_total_order )!!} >{!! round( $sum_total_order ) !!} </td>
-                            <td {!! display_zero_cell_dashboard( $sum_ga_total_order )!!} >{!! round( $sum_ga_total_order ) !!} </td>
+                            <td {!! display_ga_cell_dashboard( $sum_ga_total_order, $sum_total_order )!!} >{!! round( $sum_ga_total_order ) !!} </td>
                             <td {!! display_zero_cell_dashboard( $sum_budget )!!} >{!! gifttify_price_format( $sum_budget, 0 ) !!} </td>
                             <td>
                                 <select id="filter_status">
@@ -282,12 +282,12 @@
                             <td>{!! $v['account_name'] !!} </td>
                             <td {!! display_zero_cell_dashboard($v['totalSpend'])!!} >{!! gifttify_price_format($v['totalSpend']);  !!} </td>
                             <td {!! display_zero_cell_dashboard($v['total_order_amount'])!!} >{!! gifttify_price_format($v['total_order_amount']);  !!} </td>
-                            <td {!! display_zero_cell_dashboard($v['ga_total_order_amount'])!!} >{!! gifttify_price_format($v['total_order_amount']);  !!} </td>
+                            <td {!! display_ga_cell_dashboard($v['ga_total_order_amount'], $v['total_order_amount'])!!} >{!! gifttify_price_format($v['total_order_amount']);  !!} </td>
                             <td {!! display_row_bg_campaign_cpc($v['cpc'])!!} >{!! number_format($v['cpc'], 2);  !!} </td>
                             <td {!! display_row_bg_campaign_cpm($v['cpm'])!!} >{!! number_format($v['cpm'], 2);  !!} </td>
                             <td {!! display_zero_cell_dashboard($v['mo'])!!} >{!! round($v['mo']) . '%';  !!} </td>
                             <td {!! display_zero_cell_dashboard($v['total_order'])!!} >{!! round($v['total_order']) !!} </td>
-                            <td {!! display_zero_cell_dashboard($v['ga_total_order'])!!} >{!! round($v['ga_total_order']) !!} </td>
+                            <td {!! display_ga_cell_dashboard($v['ga_total_order'], $v['total_order'])!!} >{!! round($v['ga_total_order']) !!} </td>
                             <td {!! display_zero_cell_dashboard($v['budget'])!!} >{!! gifttify_price_format( $v['budget'], 0 ) !!} </td>
                             <td {!! display_row_bg_campaign_status($v['mo'], $v['totalSpend'], $v['status'], $account_status) !!}>{!! $account_status == 'DISABLED' ? 'DISABLED' : $v['status'] !!} </td>
                         </tr>

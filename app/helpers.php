@@ -13,6 +13,19 @@ if (! function_exists('display_zero_cell_dashboard')) {
     }
 }
 
+if (! function_exists('display_ga_cell_dashboard')) {
+    function display_ga_cell_dashboard($gaNumber, $shopifyNumber)
+    {
+        $style = "";
+        if ($gaNumber <= 0) {
+            $style = " style='color:#ddd' ";
+        } else if ($gaNumber != $shopifyNumber) {
+            $style = " style='color: #E47401;font-weight: bold;' ";
+        }
+        return $style;
+    }
+}
+
 if (! function_exists('display_row_bg_dashboard')) {
     function display_row_bg_dashboard($number)
     {

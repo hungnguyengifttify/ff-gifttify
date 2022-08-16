@@ -994,12 +994,28 @@ class Dashboard extends Model
                     ELSE (select SUM(daily_budget/100) from fb_campaigns where fb_campaign_id=fb_ads_insights.campaign_id)
                 END as budget,
                 (select status from fb_campaigns where fb_campaign_id=fb_ads_insights.campaign_id) as status,
-                (select account_status from fb_accounts where id=fb_ads_insights.account_id) as account_status
+                (select account_status from fb_accounts where id=fb_ads_insights.account_id) as account_status,
+                MAX(transactions) as ga_total_order,
+                MAX(transaction_revenue) as ga_total_order_amount
             '))
+            ->leftJoin('ga_campaign_reports', function($join) use ($store) {
+                $join->on('fb_ads_insights.campaign_name', '=', 'ga_campaign_reports.campaign_name');
+                $join->on('ga_campaign_reports.date_record', '=', 'fb_ads_insights.date_record');
+                $join->where('ga_campaign_reports.store', '=', $store);
+            })
             ->whereIn('fb_ads_insights.account_id', $fbAccountIds)
-            ->where('date_record', '>=', $fromDate)
-            ->where('date_record', '<=', $toDate)
+            ->where('fb_ads_insights.date_record', '>=', $fromDate)
+            ->where('fb_ads_insights.date_record', '<=', $toDate)
             ->groupBy(array('account_id', 'campaign_name', 'campaign_id'))->get();
+
+        $gaAds = DB::table('ga_campaign_reports')
+            ->select(DB::raw('campaign_name, SUM(transactions) as ga_total_order,
+                SUM(transaction_revenue) as ga_total_order_amount'))
+            ->whereIn('ga_campaign_reports.store', $store)
+            ->where('ga_campaign_reports.date_record', '>=', $fromDate)
+            ->where('ga_campaign_reports.date_record', '<=', $toDate)
+            ->groupBy(array('campaign_name'))
+            ->get();
 
         $adsResult = array();
         foreach ($fbAds->all() as $v) {
@@ -1012,6 +1028,8 @@ class Dashboard extends Model
                 $adsResult[$v->campaign_name]['totalUniqueClicks'] = 0;
                 $adsResult[$v->campaign_name]['impressions'] = 0;
                 $adsResult[$v->campaign_name]['budget'] = 0;
+                $adsResult[$v->campaign_name]['ga_total_order'] = 0;
+                $adsResult[$v->campaign_name]['ga_total_order_amount'] = 0;
             }
             $adsResult[$v->campaign_name]['totalSpend'] += $v->totalSpend;
             $adsResult[$v->campaign_name]['totalUniqueClicks'] += $v->totalUniqueClicks;
@@ -1019,6 +1037,23 @@ class Dashboard extends Model
             $adsResult[$v->campaign_name]['budget'] += $v->budget;
             $adsResult[$v->campaign_name]['cpc'] = ($adsResult[$v->campaign_name]['totalUniqueClicks'] != 0 ? $adsResult[$v->campaign_name]['totalSpend'] / $adsResult[$v->campaign_name]['totalUniqueClicks'] : 0);
             $adsResult[$v->campaign_name]['cpm'] = ($adsResult[$v->campaign_name]['impressions'] != 0 ? 1000 * $adsResult[$v->campaign_name]['totalSpend'] / $adsResult[$v->campaign_name]['impressions'] : 0);
+        }
+
+        foreach ($gaAds->all() as $v) {
+            if (!isset($adsResult[$v->campaign_name])) {
+                $adsResult[$v->campaign_name]['account_status'] = '';
+                $adsResult[$v->campaign_name]['account_name'] = '';
+                $adsResult[$v->campaign_name]['campaign_name'] = $v->campaign_name;
+                $adsResult[$v->campaign_name]['status'] = '';
+                $adsResult[$v->campaign_name]['totalSpend'] = 0;
+                $adsResult[$v->campaign_name]['totalUniqueClicks'] = 0;
+                $adsResult[$v->campaign_name]['impressions'] = 0;
+                $adsResult[$v->campaign_name]['budget'] = 0;
+                $adsResult[$v->campaign_name]['ga_total_order'] = 0;
+                $adsResult[$v->campaign_name]['ga_total_order_amount'] = 0;
+            }
+            $adsResult[$v->campaign_name]['ga_total_order'] += $v->ga_total_order;
+            $adsResult[$v->campaign_name]['ga_total_order_amount'] += $v->ga_total_order_amount;
         }
 
         $orders = DB::select("select name, note_attributes,1 as total_order, (total_price)/$radioCurrency as total_order_amount from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate;"
@@ -1065,6 +1100,8 @@ class Dashboard extends Model
             $result[$v]['account_name'] = $adsResult[$v]['account_name'] ?? '';
             $result[$v]['status'] = $adsResult[$v]['status'] ?? '';
             $result[$v]['account_status'] = $adsResult[$v]['account_status'] ?? '';
+            $result[$v]['ga_total_order'] = $adsResult[$v]['ga_total_order'] ?? 0;
+            $result[$v]['ga_total_order_amount'] = $adsResult[$v]['ga_total_order_amount'] ?? 0;
         }
         usort($result, [self::class, 'sort_result_by_ads_cost']);
 

@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('ga_campaign_reports', function (Blueprint $table) {
             $table->id();
-            $table->string('campains_name');
+            $table->string('campaign_name');
             $table->string('store');
             $table->integer('view_id');
             $table->date('date_record');
@@ -33,10 +33,11 @@ return new class extends Migration
             $table->float('transaction_revenue');
             $table->timestamps();
 
-            $table->index('campains_name');
+            $table->index('campaign_name');
             $table->index('view_id');
             $table->index('date_record');
-            $table->unique(['campains_name', 'view_id', 'date_record']);
+            $table->index('store');
+            $table->unique(['campaign_name', 'store', 'date_record']);
         });
     }
 

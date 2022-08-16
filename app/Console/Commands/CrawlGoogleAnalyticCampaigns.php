@@ -62,11 +62,11 @@ class CrawlGoogleAnalyticCampaigns extends Command
 
                 foreach ($data as $camp_name => $v) {
                     GaCampaignReports::updateOrCreate([
-                        'campains_name' => $camp_name,
-                        'view_id' => $viewId,
+                        'campaign_name' => $camp_name,
+                        'store' => $site ?? '',
                         'date_record' => $date_record,
                     ], [
-                        'store' => $site ?? '',
+                        'view_id' => $viewId,
                         'users' => $v['users'] ?? 0,
                         'new_users' => $v['new_users'] ?? 0,
                         'session' => $v['session'] ?? 0,

@@ -27,6 +27,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('googledrive:get_files')->everyFiveMinutes();
         $schedule->command('googledrive:trashed_files')->everyTwoHours();
         $schedule->command('fbacc:update')->everyMinute();
+        $schedule->command('ga:crawl_google_analytic_campaigns')->everyMinute();
     }
 
     /**

@@ -141,15 +141,6 @@
                                 </svg>
                             </th>
                             <th>
-                                AccountStatus
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_down" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                                </svg>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_up" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                </svg>
-                            </th>
-                            <th>
                                 AdsCost
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_down" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
@@ -160,6 +151,15 @@
                             </th>
                             <th>
                                 Rev
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_down" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_up" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </th>
+                            <th>
+                                Rev<br/>(GA)
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_down" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                                 </svg>
@@ -204,6 +204,15 @@
                                 </svg>
                             </th>
                             <th>
+                                OrdersQty<br/>(GA)
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_down" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_up" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </th>
+                            <th>
                                 Budget
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_down" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
@@ -229,12 +238,14 @@
                         @php
                             $sum_totalSpend = array_sum(array_column($campaigns,'totalSpend'));
                             $sum_total_order_amount = array_sum(array_column($campaigns,'total_order_amount'));
+                            $sum_ga_total_order_amount = array_sum(array_column($campaigns,'ga_total_order_amount'));
 
                             $sum_cpc = array_sum(array_column($campaigns,'totalUniqueClicks')) != 0 ? array_sum(array_column($campaigns,'totalSpend')) / array_sum(array_column($campaigns,'totalUniqueClicks')) : 0;
                             $sum_cpm = array_sum(array_column($campaigns,'impressions')) != 0 ? 1000 * array_sum(array_column($campaigns,'totalSpend')) / array_sum(array_column($campaigns,'impressions')) : 0;
                             $sum_mo = $sum_total_order_amount > 0 ? 100 * ($sum_totalSpend / $sum_total_order_amount) : 0;
 
                             $sum_total_order = array_sum(array_column($campaigns,'total_order'));
+                            $sum_ga_total_order = array_sum(array_column($campaigns,'ga_total_order'));
                             $sum_budget = array_sum(array_column($campaigns,'budget'));
                         @endphp
                         <tr {!! display_row_bg_dashboard($sum_mo) !!} class="fw-bold" >
@@ -242,20 +253,14 @@
                             <td>
                                 <input id="filter_account_name" class="form-control" />
                             </td>
-                            <td>
-                                <select id="filter_account_status">
-                                    <option value="ALL">-- All --</option>
-                                    <option value="ACTIVE">ACTIVE</option>
-                                    <option value="DISABLED">DISABLED</option>
-                                    <option value=""></option>
-                                </select>
-                            </td>
                             <td {!! display_zero_cell_dashboard( $sum_totalSpend )!!} >{!! gifttify_price_format( $sum_totalSpend );  !!} </td>
                             <td {!! display_zero_cell_dashboard( $sum_total_order_amount )!!} >{!! gifttify_price_format( $sum_total_order_amount );  !!} </td>
+                            <td {!! display_zero_cell_dashboard( $sum_ga_total_order_amount )!!} >{!! gifttify_price_format( $sum_ga_total_order_amount );  !!} </td>
                             <td {!! display_zero_cell_dashboard( $sum_cpc )!!} >{!! number_format($sum_cpc, 2);  !!} </td>
                             <td {!! display_zero_cell_dashboard( $sum_cpm )!!} >{!! number_format($sum_cpm, 2);  !!} </td>
                             <td {!! display_zero_cell_dashboard( $sum_mo )!!} >{!! round( $sum_mo ) . '%';  !!} </td>
                             <td {!! display_zero_cell_dashboard( $sum_total_order )!!} >{!! round( $sum_total_order ) !!} </td>
+                            <td {!! display_zero_cell_dashboard( $sum_ga_total_order )!!} >{!! round( $sum_ga_total_order ) !!} </td>
                             <td {!! display_zero_cell_dashboard( $sum_budget )!!} >{!! gifttify_price_format( $sum_budget, 0 ) !!} </td>
                             <td>
                                 <select id="filter_status">
@@ -274,14 +279,15 @@
                                 $account_status = \App\Models\FbAccount::$status[$v['account_status']] ?? '';
                             @endphp
                             <td>{!! $v['campaign_name'] !!} </td>
-                            <td style="white-space: nowrap">{!! $v['account_name'] !!} </td>
-                            <td style="white-space: nowrap">{!! $account_status !!} </td>
+                            <td>{!! $v['account_name'] !!} </td>
                             <td {!! display_zero_cell_dashboard($v['totalSpend'])!!} >{!! gifttify_price_format($v['totalSpend']);  !!} </td>
                             <td {!! display_zero_cell_dashboard($v['total_order_amount'])!!} >{!! gifttify_price_format($v['total_order_amount']);  !!} </td>
+                            <td {!! display_zero_cell_dashboard($v['ga_total_order_amount'])!!} >{!! gifttify_price_format($v['total_order_amount']);  !!} </td>
                             <td {!! display_row_bg_campaign_cpc($v['cpc'])!!} >{!! number_format($v['cpc'], 2);  !!} </td>
                             <td {!! display_row_bg_campaign_cpm($v['cpm'])!!} >{!! number_format($v['cpm'], 2);  !!} </td>
                             <td {!! display_zero_cell_dashboard($v['mo'])!!} >{!! round($v['mo']) . '%';  !!} </td>
                             <td {!! display_zero_cell_dashboard($v['total_order'])!!} >{!! round($v['total_order']) !!} </td>
+                            <td {!! display_zero_cell_dashboard($v['ga_total_order'])!!} >{!! round($v['ga_total_order']) !!} </td>
                             <td {!! display_zero_cell_dashboard($v['budget'])!!} >{!! gifttify_price_format( $v['budget'], 0 ) !!} </td>
                             <td {!! display_row_bg_campaign_status($v['mo'], $v['totalSpend'], $v['status'], $account_status) !!}>{!! $account_status == 'DISABLED' ? 'DISABLED' : $v['status'] !!} </td>
                         </tr>
@@ -342,23 +348,7 @@
 
             Array.from(table.querySelectorAll('tr.tr_sortable'))
                 .forEach( tr => {
-                    if (tr.children.item(10).innerText != status) {
-                        tr.classList.add("hidden");
-                    }
-                } );
-        });
-
-        var filter_account_status = document.querySelector('#filter_account_status');
-        filter_account_status.addEventListener('change',function() {
-            const table = document.getElementById('campaign_info');
-            const account_status = this.value;
-
-            document.querySelectorAll('tr.tr_sortable').forEach( tr => tr.classList.remove("hidden"));
-            if (account_status == 'ALL') return false;
-
-            Array.from(table.querySelectorAll('tr.tr_sortable'))
-                .forEach( tr => {
-                    if (tr.children.item(2).innerText != account_status) {
+                    if (tr.children.item(11).innerText != status) {
                         tr.classList.add("hidden");
                     }
                 } );

@@ -22,11 +22,9 @@ class GoogleAnalytics
     {
         $client = new Client();
         $client->setApplicationName('Google Analytic API');
-        //$KEY_FILE_LOCATION = json_decode(Config::get('google.ga_api.json_config'), true);
-        $KEY_FILE_LOCATION = __DIR__ . '/../../service-account-credentials.json';
-        // Create and configure a new client object.
+        $config = json_decode(Config::get('google.analytic_report_api.json_config'), true);
+        $client->setAuthConfig($config);
 
-        $client->setAuthConfig($KEY_FILE_LOCATION);
         $client->setScopes(['https://www.googleapis.com/auth/analytics.readonly']);
         $this->analytics = new AnalyticsReporting($client);
         $this->setMetrics();

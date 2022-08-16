@@ -38,6 +38,9 @@ class Dashboard extends Model
                     'domain' => env('SHOPIFY_THECREATTIFY_DOMAIN', ''),
                     'apiVersion' => env('SHOPIFY_THECREATTIFY_API_VERSION', ''),
                     'dateTimeZone' => new \DateTimeZone('America/Los_Angeles'),
+                ),
+                'google' => array (
+                    'viewId' => '256866587'
                 )
             ),
 
@@ -55,6 +58,9 @@ class Dashboard extends Model
                     'domain' => env('SHOPIFY_AU_THECREATTIFY_DOMAIN', ''),
                     'apiVersion' => env('SHOPIFY_AU_THECREATTIFY_API_VERSION', ''),
                     'dateTimeZone' => new \DateTimeZone('Australia/Sydney'),
+                ),
+                'google' => array (
+                    'viewId' => '269048495'
                 )
             ),
 
@@ -72,6 +78,9 @@ class Dashboard extends Model
                     'domain' => env('SHOPIFY_SINGLECLOUDY_DOMAIN', ''),
                     'apiVersion' => env('SHOPIFY_SINGLECLOUDY_API_VERSION', ''),
                     'dateTimeZone' => new \DateTimeZone('America/Los_Angeles'),
+                ),
+                'google' => array (
+                    'viewId' => '272196026'
                 )
             ),
 
@@ -89,6 +98,9 @@ class Dashboard extends Model
                     'domain' => env('SHOPIFY_GIFTTIFYUS_DOMAIN', ''),
                     'apiVersion' => env('SHOPIFY_GIFTTIFYUS_API_VERSION', ''),
                     'dateTimeZone' => new \DateTimeZone('America/Los_Angeles'),
+                ),
+                'google' => array (
+                    'viewId' => '253293522'
                 )
             ),
 
@@ -106,6 +118,9 @@ class Dashboard extends Model
                     'domain' => env('SHOPIFY_OWLLIFY_DOMAIN', ''),
                     'apiVersion' => env('SHOPIFY_OWLLIFY_API_VERSION', ''),
                     'dateTimeZone' => new \DateTimeZone('America/Los_Angeles'),
+                ),
+                'google' => array (
+                    'viewId' => '268312544'
                 )
             ),
 
@@ -123,6 +138,9 @@ class Dashboard extends Model
                     'domain' => env('SHOPIFY_HIPPIESY_DOMAIN', ''),
                     'apiVersion' => env('SHOPIFY_HIPPIESY_API_VERSION', ''),
                     'dateTimeZone' => new \DateTimeZone('America/Los_Angeles'),
+                ),
+                'google' => array (
+                    'viewId' => '272705190'
                 )
             ),
         );

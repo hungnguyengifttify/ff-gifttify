@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('ga_campaign_reports', function (Blueprint $table) {
             $table->id();
             $table->string('campains_name');
+            $table->string('store');
             $table->integer('view_id');
             $table->date('date_record');
             $table->integer('users');

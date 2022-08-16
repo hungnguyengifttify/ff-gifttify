@@ -32,15 +32,7 @@ class CrawlGoogleAnalyticCampaigns extends Command
     {
         $this->info("Cron Job running at ". now());
 
-        $fromTime = $this->argument('from_time') ?? Carbon::now()->format('Y-m-d');
-        $toTime = $this->argument('to_time') ?? $fromTime;
-        if($fromTime > $toTime){
-            $this->info("Error: from_time > to_time.");
-            return false;
-        };
-
-        $dateRange = $this->dateRange($fromTime, $toTime);
-        $viewIds = GaCampaignReports::$viewIds; // MUST SET
+        $viewIds = GaCampaignReports::getViewIds(); // MUST SET
         if(count($viewIds) < 1){
             $this->info("Error: View id not set.");
             return false;
@@ -48,6 +40,19 @@ class CrawlGoogleAnalyticCampaigns extends Command
 
         $service = new GoogleAnalytics();
         foreach ($viewIds as $site => $viewId) {
+            $timezone = GaCampaignReports::getViewTimezone();
+
+            $datetimezone = $timezone[$site] ?? '';
+            $datetimezone = new \DateTimeZone($datetimezone);
+            $fromTime = $this->argument('from_time') ?? Carbon::now($datetimezone)->subDays(2)->format('Y-m-d');
+            $toTime = $this->argument('to_time') ?? Carbon::now($datetimezone)->format('Y-m-d');
+            if($fromTime > $toTime){
+                $this->info("Error: from_time > to_time.");
+                continue;
+            };
+
+            $dateRange = $this->dateRange($fromTime, $toTime, $timezone[$site]);
+
             foreach ($dateRange as  $date_record) {
                 $this->info("Cron Job crawl date ". ' view ' . $viewId . '(' . $site .') '. $date_record );
                 $data = $service->crawlCampaigns($viewId, $date_record, $date_record);
@@ -61,6 +66,7 @@ class CrawlGoogleAnalyticCampaigns extends Command
                         'view_id' => $viewId,
                         'date_record' => $date_record,
                     ], [
+                        'store' => $site ?? '',
                         'users' => $v['users'] ?? 0,
                         'new_users' => $v['new_users'] ?? 0,
                         'session' => $v['session'] ?? 0,
@@ -70,9 +76,9 @@ class CrawlGoogleAnalyticCampaigns extends Command
                         'transactions' => $v['transactions'] ?? 0,
                         'transactions_per_session' => $v['transactions_per_session'] ?? 0,
                         'transaction_revenue' => $v['transaction_revenue'] ?? 0,
-//                        'goal_conversion_rate_all' => $v['goal_conversion_rate_all'] ?? 0,
-//                        'goal_completions_all' => $v['goal_completions_all'] ?? 0,
-//                        'goal_value_all' => $v['goal_value_all'] ?? 0,
+                        //'goal_conversion_rate_all' => $v['goal_conversion_rate_all'] ?? 0,
+                        //'goal_completions_all' => $v['goal_completions_all'] ?? 0,
+                        //'goal_value_all' => $v['goal_value_all'] ?? 0,
                     ]);
                 }
             }
@@ -82,17 +88,23 @@ class CrawlGoogleAnalyticCampaigns extends Command
         $this->info('Success!');
     }
 
-    function dateRange($first, $last, $step = '+1 day', $format = 'Y-m-d')
+    function dateRange($first, $last, $timezone = 'America/Los_Angeles')
     {
-        $dates = [];
-        $current = \DateTime::createFromFormat($format, $first)->getTimestamp();
-        $last = \DateTime::createFromFormat($format, $last)->getTimestamp();
+        $timezone = new \DateTimeZone($timezone);
+        $format = 'Y-m-d';
+        $step = 1;
 
-        while ($current <= $last) {
-            $dates[] = date($format, $current);
-            $current = strtotime($step, $current);
+        $begin = \DateTime::createFromFormat($format, $first, $timezone);
+        $end = \DateTime::createFromFormat($format, $last, $timezone);
+        $end = $end->modify( '+1 day' );
+
+        $interval = new \DateInterval("P{$step}D");
+        $dateRange = new \DatePeriod($begin, $interval ,$end);
+
+        $gTimeRanges = array();
+        foreach($dateRange as $date){
+            $gTimeRanges[] = $date->format("Y-m-d");
         }
-
-        return $dates;
+        return $gTimeRanges;
     }
 }

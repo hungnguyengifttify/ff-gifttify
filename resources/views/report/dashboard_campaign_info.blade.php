@@ -262,6 +262,7 @@
                                     <option value="ALL">-- All --</option>
                                     <option value="ACTIVE">ACTIVE</option>
                                     <option value="PAUSED">PAUSED</option>
+                                    <option value="DISABLED">DISABLED</option>
                                     <option value=""></option>
                                 </select>
                             </td>
@@ -282,7 +283,7 @@
                             <td {!! display_zero_cell_dashboard($v['mo'])!!} >{!! round($v['mo']) . '%';  !!} </td>
                             <td {!! display_zero_cell_dashboard($v['total_order'])!!} >{!! round($v['total_order']) !!} </td>
                             <td {!! display_zero_cell_dashboard($v['budget'])!!} >{!! gifttify_price_format( $v['budget'], 0 ) !!} </td>
-                            <td {!! display_row_bg_campaign_status($v['mo'], $v['totalSpend'], $v['status'], $account_status) !!}>{!! $v['status'] !!} </td>
+                            <td {!! display_row_bg_campaign_status($v['mo'], $v['totalSpend'], $v['status'], $account_status) !!}>{!! $account_status == 'DISABLED' ? 'DISABLED' : $v['status'] !!} </td>
                         </tr>
                         <?php endforeach; ?>
                         </tbody>

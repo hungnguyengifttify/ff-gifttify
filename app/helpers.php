@@ -16,6 +16,9 @@ if (! function_exists('display_zero_cell_dashboard')) {
 if (! function_exists('display_ga_cell_dashboard')) {
     function display_ga_cell_dashboard($gaNumber, $shopifyNumber)
     {
+        $gaNumber = round($gaNumber, 2);
+        $shopifyNumber = round($shopifyNumber, 2);
+
         $style = "";
         if ($gaNumber <= 0) {
             $style = " style='color:#ddd' ";

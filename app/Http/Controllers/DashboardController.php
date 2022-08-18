@@ -153,10 +153,11 @@ class DashboardController extends Controller {
         //'hippiessy.com' =>'272705190',
         $viewIds = GaCampaignReports::$viewIds;
         $viewId = $viewIds[$siteName];
+        $viewId = '256866587';
         //Example : report_ga_campaign?fromDate=2022-08-14&toDate=2022-08-14&siteName=hippiessy.com
         //get From service
         $gaService = new GoogleAnalytics();
-        $data = $gaService->crawlCampaigns($viewId, $fromDateReq, $toDateReq);
+        $data = $gaService->crawlCampaignsTest($viewId, $fromDateReq, $toDateReq);
         dd($data);
 //get From DB
 //        $data = GaCampaignReports::all();

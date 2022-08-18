@@ -11,6 +11,7 @@ use Signifly\Shopify\Shopify;
 use Illuminate\Support\Facades\DB;
 use App\Services\RemixApi;
 use App\Models\Dashboard;
+use App\Models\RemixProductType;
 
 class PushProductTypeToRemix extends Command
 {
@@ -40,15 +41,8 @@ class PushProductTypeToRemix extends Command
         $limit = 1000;
         $stores = array('thecreattify');
         foreach ($stores as $store) {
-            DB::table(DB::raw("( select product_type from products where store='$store' group by product_type ) a"))
-                ->select(DB::raw("a.product_type, shopify_product_type.product_type_code as id,
-	(select product_type_name from product_type where product_type_code=shopify_product_type.product_type_code) as title,
-	(select body_html from products where product_type=a.product_type and body_html != '' limit 1) as description,
-	(select variants->>'$[0].price' from products where product_type=a.product_type and body_html != '' limit 1) as basePrice"))
-                ->leftJoin('shopify_product_type', 'shopify_product_type.product_type_name', '=', 'a.product_type')
-                ->where('a.product_type', '!=', 'options_price')
-                ->where('a.product_type', '!=', '')
-                ->orderBy('a.product_type', 'asc')
+            DB::table('remix_product_type')
+                ->orderBy('id', 'asc')
                 ->chunk($limit, function ($productTypes) {
 
                 foreach ($productTypes as $pt) {
@@ -56,8 +50,10 @@ class PushProductTypeToRemix extends Command
                         'id' => $pt->id,
                         'title' => $pt->title,
                         'description' => $pt->description,
-                        'basePrice' => $pt->basePrice,
+                        'basePrice' => $pt->base_price,
                         'status' => 'publish',
+                        'category' => $pt->category,
+                        'gender' => $pt->gender,
                     );
 
                     $remixApi = new RemixApi();

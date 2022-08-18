@@ -27,6 +27,12 @@ class PushProductsToRemix extends Command
      */
     protected $description = 'Update Remix Products';
 
+    public $fixProductTypeArr = array(
+        '3DS' => 'T3DS',
+        'HSAHSO' => 'HS',
+        'POLOAHSO' => 'POLO',
+    );
+
     /**
      * Execute the console command.
      *
@@ -54,6 +60,9 @@ class PushProductsToRemix extends Command
                 ->chunk($limit, function ($products) {
 
                 foreach ($products as $p) {
+                    if ( isset($this->$fixProductTypeArr[$p->productType]) ) {
+                        $p->productType = $this->$fixProductTypeArr[$p->productType];
+                    }
                     $images = json_decode($p->images);
                     $image = json_decode($p->image);
 

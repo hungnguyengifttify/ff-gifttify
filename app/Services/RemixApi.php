@@ -31,6 +31,9 @@ class RemixApi {
     }
 
     function login () {
+        $this->token = Config::get('remix.permanent_token');
+        return true;
+
         $body = array(
             'id' => $this->id,
             'password' => $this->password,

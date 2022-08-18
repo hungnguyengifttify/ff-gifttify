@@ -1,0 +1,14 @@
+// Get Product Type Data
+select id, max(product_type) as product_type, max(title) as title, max(description) as description, max(basePrice) as base_price FROM
+(
+	select a.product_type, shopify_product_type.product_type_code as id,
+		(select product_type_name from product_type where product_type_code=shopify_product_type.product_type_code) as title,
+		(select body_html from products where product_type=a.product_type and body_html != '' limit 1) as description,
+		(select variants->>'$[0].price' from products where product_type=a.product_type and body_html != '' limit 1) as 		basePrice
+	from ( select product_type from products where store='thecreattify' group by product_type ) a
+	left join shopify_product_type on shopify_product_type.product_type_name = a.product_type
+	where
+	a.product_type != 'options_price' and a.product_type != ''
+) aa
+group by id;
+

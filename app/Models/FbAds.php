@@ -30,7 +30,10 @@ class FbAds extends Model
         '605826157700629',
         '298584852478230',
         '8233760193308267',
-        '821019145735527'
+        '821019145735527',
+        '1103239003626786',
+        '412049937660963',
+        '783889102810922',
     );
 
     static $auThecreattifyAccountIds = array(
@@ -64,7 +67,7 @@ class FbAds extends Model
     );
 
     static $hippiesyAccountIds = array(
-        '0'
+        '1320735945000228'
     );
 
     public static function getAllRunningAccountIds() {

@@ -17,7 +17,7 @@ class UpdateFbCampaigns extends Command
      * time ['all', 'today']
      * @var string
      */
-    protected $signature = 'fbads:update_campaigns {time_report?}';
+    protected $signature = 'fbads:update_campaigns {time_report?} {account_id?}';
 
     /**
      * The console command description.
@@ -33,8 +33,12 @@ class UpdateFbCampaigns extends Command
      */
     public function handle()
     {
-        $this->info("Cron Job running at ". now());
+        $account_id = $this->argument('account_id') ?? '';
         $fbAccountIds = FbAds::getAllRunningAccountIds();
+        if ($account_id) {
+            $fbAccountIds = array($account_id);
+        }
+        $this->info("Cron Job $account_id running at ". now());
 
         $access_token = env('FB_ADS_ACCESS_TOKEN', '');
         $app_secret = env('FB_ADS_APP_SECRET', '');

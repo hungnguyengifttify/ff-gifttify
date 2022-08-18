@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use App\Models\FbAds;
 use App\Models\FbAccount;
 use App\Models\FbCampaigns;
+use Prophecy\Exception\Exception;
 
 class UpdateFbAccounts extends Command
 {
@@ -106,8 +107,15 @@ class UpdateFbAccounts extends Command
         foreach ($fbAccountIds as $accountId) {
             if ($accountId == 0) continue;
 
-            $cursor = (new AdAccount("act_$accountId"))->read($fields);
-            $v = $cursor->getData();
+            try {
+                $this->info("Id: $accountId");
+                $cursor = (new AdAccount("act_$accountId"))->read($fields);
+                $v = $cursor->getData();
+            } catch (AuthorizationException $e) {
+                dump($accountId, $e->getMessage());
+            }
+
+            if (!$v) continue;
 
             FbAccount::updateOrCreate([
                 'id' => $v['account_id'] ?? 0,

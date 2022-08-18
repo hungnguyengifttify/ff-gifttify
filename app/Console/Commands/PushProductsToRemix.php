@@ -60,8 +60,8 @@ class PushProductsToRemix extends Command
                 ->chunk($limit, function ($products) {
 
                 foreach ($products as $p) {
-                    if ( isset($this->$fixProductTypeArr[$p->productType]) ) {
-                        $p->productType = $this->$fixProductTypeArr[$p->productType];
+                    if ( isset($this->fixProductTypeArr[$p->productType]) ) {
+                        $p->productType = $this->fixProductTypeArr[$p->productType];
                     }
                     $images = json_decode($p->images);
                     $image = json_decode($p->image);

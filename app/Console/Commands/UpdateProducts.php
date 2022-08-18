@@ -15,7 +15,7 @@ class UpdateProducts extends Command
      * time ['all', 'today']
      * @var string
      */
-    protected $signature = 'products:update {time_report?}';
+    protected $signature = 'products:update {time_report?} {store?}';
 
     /**
      * The console command description.
@@ -31,9 +31,13 @@ class UpdateProducts extends Command
      */
     public function handle()
     {
-        $this->info("Cron Job Update Products running at ". now());
-
+        $storeRequest = $this->argument('store') ?? '';
         $stores = Dashboard::getStoresList();
+        if ($storeRequest) {
+            $stores = array($storeRequest);
+        }
+
+        $this->info("Cron Job $storeRequest Update Products  running at ". now());
 
         foreach ($stores as $store) {
             $shopifyConfig = Dashboard::getShopifyConfig($store);

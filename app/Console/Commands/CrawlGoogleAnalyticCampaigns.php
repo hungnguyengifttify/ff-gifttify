@@ -76,9 +76,7 @@ class CrawlGoogleAnalyticCampaigns extends Command
                         'transactions' => $v['transactions'] ?? 0,
                         'transactions_per_session' => $v['transactions_per_session'] ?? 0,
                         'transaction_revenue' => $v['transaction_revenue'] ?? 0,
-                        //'goal_conversion_rate_all' => $v['goal_conversion_rate_all'] ?? 0,
-                        //'goal_completions_all' => $v['goal_completions_all'] ?? 0,
-                        //'goal_value_all' => $v['goal_value_all'] ?? 0,
+                        'ad_cost' => $v['ad_cost'] ?? 0
                     ]);
                 }
             }

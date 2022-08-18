@@ -45,6 +45,8 @@ class GaCampaignReports extends Model
     }
 
     protected $fillable = [
-        'campaign_name', 'store', 'view_id', 'date_record', 'users', 'new_users', 'session', 'bounce_rate', 'pageviews_per_session', 'avg_session_duration', 'transactions', 'transactions_per_session', 'transaction_revenue'
+        'campaign_name', 'store', 'view_id', 'date_record', 'users', 'new_users', 'session',
+        'bounce_rate', 'pageviews_per_session', 'avg_session_duration', 'transactions',
+        'transactions_per_session', 'transaction_revenue', 'ad_cost'
     ];
 }

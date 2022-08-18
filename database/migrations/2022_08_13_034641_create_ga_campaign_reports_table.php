@@ -31,6 +31,7 @@ return new class extends Migration
             $table->integer('transactions');
             $table->float('transactions_per_session');
             $table->float('transaction_revenue');
+            $table->float('ad_cost');
             $table->timestamps();
 
             $table->index('campaign_name');

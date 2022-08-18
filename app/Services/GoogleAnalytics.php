@@ -40,12 +40,10 @@ class GoogleAnalytics
             "ga:bounceRate" => "bounce_rate",
             "ga:pageviewsPerSession" => "pageviews_per_session",
             "ga:avgSessionDuration" => "avg_session_duration",
-//            "ga:goalConversionRateAll" => "goal_conversion_rate_all",
-//            "ga:goalCompletionsAll" => "goal_completions_all",
-//            "ga:goalValueAll" => "goal_value_all",
             "ga:transactions" => "transactions",
             "ga:transactionsPerSession" => "transactions_per_session",
-            "ga:transactionRevenue" => "transaction_revenue"
+            "ga:transactionRevenue" => "transaction_revenue",
+            "ga:adCost" => "ad_cost",
         ];
 
         foreach ($listMetric as $gaKey => $gaAlias) {
@@ -117,23 +115,15 @@ class GoogleAnalytics
         $dateRange->setStartDate($fromTime);
         $dateRange->setEndDate($toTime);
 
-        $dimensionsArr = array();
-        $dimensionList = array(
-            "ga:campaign", "ga:transactionId"
-        );
-        foreach ($dimensionList as $dim) {
-            // Create the Dimension object.
-            $dimension = new \Google\Service\AnalyticsReporting\Dimension();
-            $dimension->setName($dim);
-            $dimensionsArr[] = $dimension;
-        }
-
+        // Create the Dimension object.
+        $dimension = new \Google\Service\AnalyticsReporting\Dimension();
+        $dimension->setName("ga:campaign");
 
         // Create the ReportRequest object.
         $request = new \Google\Service\AnalyticsReporting\ReportRequest();
         $request->setViewId($viewId);  // View ID
         $request->setDateRanges($dateRange);  // Set Date
-        $request->setDimensions($dimensionsArr); // Set Dimension
+        $request->setDimensions([$dimension]); // Set Dimension
         $request->setMetrics($this->metrics);  // set Metrics
 
         $body = new \Google\Service\AnalyticsReporting\GetReportsRequest();
@@ -158,9 +148,7 @@ class GoogleAnalytics
                 $dimensions = $row->getDimensions();
                 $metrics = $row->getMetrics();
 
-                $campaignName = $dimensions[0];
-                $transactionId = $dimensions[1];
-                $result['transactionId'] = $transactionId;
+                $campainName = $dimensions[0];
                 for ($j = 0; $j < count($metrics); $j++) {
                     $values = $metrics[$j]->getValues();
                     for ($k = 0; $k < count($values); $k++) {
@@ -168,8 +156,7 @@ class GoogleAnalytics
                         $result[$entry->getName()] = $values[$k];
                     }
                 }
-
-                $returnValue[$campaignName] = $result;
+                $returnValue[$campainName] = $result;
             }
         }
         return $returnValue;

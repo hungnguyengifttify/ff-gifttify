@@ -150,6 +150,15 @@
                                 </svg>
                             </th>
                             <th>
+                                Adcost<br/>(Adwords)
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_down" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_up" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </th>
+                            <th>
                                 Rev
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 svg_down" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
@@ -237,6 +246,7 @@
 
                         @php
                             $sum_totalSpend = array_sum(array_column($campaigns,'totalSpend'));
+                            $sum_ga_ad_cost = array_sum(array_column($campaigns,'ga_ad_cost'));
                             $sum_total_order_amount = array_sum(array_column($campaigns,'total_order_amount'));
                             $sum_ga_total_order_amount = array_sum(array_column($campaigns,'ga_total_order_amount'));
 
@@ -249,11 +259,19 @@
                             $sum_budget = array_sum(array_column($campaigns,'budget'));
                         @endphp
                         <tr {!! display_row_bg_dashboard($sum_mo) !!} class="fw-bold" >
-                            <td>Total</td>
+                            <td>
+                                <select id="filter_campaign_name">
+                                    <option value="ALL">-- All --</option>
+                                    <option value="test">Test</option>
+                                    <option value="maintain">Maintain</option>
+                                    <option value="scale">Scale</option>
+                                </select>
+                            </td>
                             <td>
                                 <input id="filter_account_name" class="form-control" />
                             </td>
                             <td {!! display_zero_cell_dashboard( $sum_totalSpend )!!} >{!! gifttify_price_format( $sum_totalSpend );  !!} </td>
+                            <td {!! display_zero_cell_dashboard( $sum_ga_ad_cost )!!} >{!! gifttify_price_format( $sum_ga_ad_cost, 0 ) !!} </td>
                             <td {!! display_zero_cell_dashboard( $sum_total_order_amount )!!} >{!! gifttify_price_format( $sum_total_order_amount );  !!} </td>
                             <td {!! display_ga_cell_dashboard( $sum_ga_total_order_amount, $sum_total_order_amount )!!} >{!! gifttify_price_format( $sum_ga_total_order_amount );  !!} </td>
                             <td {!! display_zero_cell_dashboard( $sum_cpc )!!} >{!! number_format($sum_cpc, 2);  !!} </td>
@@ -281,6 +299,7 @@
                             <td>{!! $v['campaign_name'] !!} </td>
                             <td>{!! $v['account_name'] !!} </td>
                             <td {!! display_zero_cell_dashboard($v['totalSpend'])!!} >{!! gifttify_price_format($v['totalSpend']);  !!} </td>
+                            <td {!! display_zero_cell_dashboard($v['ga_ad_cost'])!!} >{!! gifttify_price_format( $v['ga_ad_cost'], 0 ) !!} </td>
                             <td {!! display_zero_cell_dashboard($v['total_order_amount'])!!} >{!! gifttify_price_format($v['total_order_amount']);  !!} </td>
                             <td {!! display_ga_cell_dashboard($v['ga_total_order_amount'], $v['total_order_amount'])!!} >{!! gifttify_price_format($v['ga_total_order_amount']);  !!} </td>
                             <td {!! display_row_bg_campaign_cpc($v['cpc'])!!} >{!! number_format($v['cpc'], 2);  !!} </td>
@@ -348,7 +367,7 @@
 
             Array.from(table.querySelectorAll('tr.tr_sortable'))
                 .forEach( tr => {
-                    if (tr.children.item(11).innerText != status) {
+                    if (tr.children.item(12).innerText != status) {
                         tr.classList.add("hidden");
                     }
                 } );
@@ -370,7 +389,23 @@
                 } );
         });
 
-        var triggerClickElement = document.querySelector('#campaign_info thead th:nth-child(4)');
+        var filter_campaign_name = document.querySelector('#filter_campaign_name');
+        filter_campaign_name.addEventListener('change',function() {
+            const table = document.getElementById('campaign_info');
+            const campaign_name = this.value;
+
+            document.querySelectorAll('tr.tr_sortable').forEach( tr => tr.classList.remove("hidden"));
+            if (campaign_name == 'ALL') return false;
+
+            Array.from(table.querySelectorAll('tr.tr_sortable'))
+                .forEach( tr => {
+                    if ( !tr.children.item(0).innerText.toLowerCase().includes(campaign_name) ) {
+                        tr.classList.add("hidden");
+                    }
+                } );
+        });
+
+        var triggerClickElement = document.querySelector('#campaign_info thead th:nth-child(5)');
         triggerClickElement.click();
         triggerClickElement.click();
 

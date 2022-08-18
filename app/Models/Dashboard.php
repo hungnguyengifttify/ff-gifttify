@@ -1010,7 +1010,8 @@ class Dashboard extends Model
 
         $gaAds = DB::table('ga_campaign_reports')
             ->select(DB::raw('campaign_name, SUM(transactions) as ga_total_order,
-                SUM(transaction_revenue) as ga_total_order_amount'))
+                SUM(transaction_revenue) as ga_total_order_amount,
+                SUM(ad_cost) as ga_ad_cost'))
             ->where('ga_campaign_reports.store', $store)
             ->where('ga_campaign_reports.date_record', '>=', $fromDate)
             ->where('ga_campaign_reports.date_record', '<=', $toDate)
@@ -1031,6 +1032,7 @@ class Dashboard extends Model
                 $adsResult[$v->campaign_name]['budget'] = 0;
                 $adsResult[$v->campaign_name]['ga_total_order'] = 0;
                 $adsResult[$v->campaign_name]['ga_total_order_amount'] = 0;
+                $adsResult[$v->campaign_name]['ga_ad_cost'] = 0;
             }
             $adsResult[$v->campaign_name]['totalSpend'] += $v->totalSpend;
             $adsResult[$v->campaign_name]['totalUniqueClicks'] += $v->totalUniqueClicks;
@@ -1053,9 +1055,11 @@ class Dashboard extends Model
                 $adsResult[$v->campaign_name]['budget'] = 0;
                 $adsResult[$v->campaign_name]['ga_total_order'] = 0;
                 $adsResult[$v->campaign_name]['ga_total_order_amount'] = 0;
+                $adsResult[$v->campaign_name]['ga_ad_cost'] = 0;
             }
             $adsResult[$v->campaign_name]['ga_total_order'] += $v->ga_total_order;
             $adsResult[$v->campaign_name]['ga_total_order_amount'] += $v->ga_total_order_amount;
+            $adsResult[$v->campaign_name]['ga_ad_cost'] += $v->ga_ad_cost;
         }
 
         $orders = DB::select("select name, note_attributes,1 as total_order, (total_price)/$radioCurrency as total_order_amount from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate;"
@@ -1104,6 +1108,7 @@ class Dashboard extends Model
             $result[$v]['account_status'] = $adsResult[$v]['account_status'] ?? '';
             $result[$v]['ga_total_order'] = $adsResult[$v]['ga_total_order'] ?? 0;
             $result[$v]['ga_total_order_amount'] = $adsResult[$v]['ga_total_order_amount'] ?? 0;
+            $result[$v]['ga_ad_cost'] = $adsResult[$v]['ga_ad_cost'] ?? 0;
         }
         usort($result, [self::class, 'sort_result_by_ads_cost']);
 

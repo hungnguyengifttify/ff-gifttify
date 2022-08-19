@@ -43,7 +43,7 @@ class PushProductsToRemix extends Command
         $this->info("Cron Job Push Remix Products running at ". now());
 
         $timeReport = $this->argument('time_report') ?? '';
-        $limit = 2;
+        $limit = 1000;
         if ($timeReport == 'all') {
             $limit = 1000;
         }
@@ -54,12 +54,17 @@ class PushProductsToRemix extends Command
                 ->select(DB::raw("*, (select product_type_code from shopify_product_type where product_type_name=products.product_type LIMIT 1) as productType"))
                 ->where('store', $store)
                 ->where('status', 'active')
-                ->where('id', '>', 14434)
+                ->where('id', '>', 0)
                 ->where('variants', 'not like', '"gid://shopify/Product/%')
                 ->orderBy('id', 'asc')
                 ->chunk($limit, function ($products) {
 
                 foreach ($products as $p) {
+                    if (!$p->productType) {
+                        $this->info($p->shopify_id . ' ProductType is empty');
+                        continue;
+                    }
+
                     if ( isset($this->fixProductTypeArr[$p->productType]) ) {
                         $p->productType = $this->fixProductTypeArr[$p->productType];
                     }
@@ -121,6 +126,7 @@ class PushProductsToRemix extends Command
                     }
 
                     $body = array(
+                        'shopifyId' => $p->shopify_id,
                         'slug' => $p->handle,
                         'title' => $p->title,
                         'productType' => $p->productType,

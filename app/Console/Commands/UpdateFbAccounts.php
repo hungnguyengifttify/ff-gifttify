@@ -108,7 +108,7 @@ class UpdateFbAccounts extends Command
             if ($accountId == 0) continue;
 
             try {
-                //$this->info("Id: $accountId");
+                $this->info("Id: $accountId");
                 $cursor = (new AdAccount("act_$accountId"))->read($fields);
                 $v = $cursor->getData();
             } catch (AuthorizationException $e) {

@@ -82,7 +82,7 @@ class FbAds extends Model
             FbAds::$auThecreattifyAccountIds,
             FbAds::$singlecloudyAccountIds,
             FbAds::$gifttifyusAccountIds,
-            FbAds::$owllifyAccountIds,
+            //FbAds::$owllifyAccountIds,
             FbAds::$hippiesyAccountIds,
         );
     }

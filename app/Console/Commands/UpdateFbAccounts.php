@@ -19,7 +19,7 @@ class UpdateFbAccounts extends Command
      *
      * @var string
      */
-    protected $signature = 'fbacc:update';
+    protected $signature = 'fbacc:update {isShowLog?}';
 
     /**
      * The console command description.
@@ -108,8 +108,11 @@ class UpdateFbAccounts extends Command
             if ($accountId == 0) continue;
 
             try {
-                $this->info("Id: $accountId");
-                $cursor = (new AdAccount("act_$accountId"))->read($fields);
+                $isShowLog = $this->argument('isShowLog') ?? 0;
+                if ($isShowLog) {
+                    $this->info("Id: $accountId");
+                }
+                $cursor = (new AdAccount("act_$accountId"))->getSelf($fields);
                 $v = $cursor->getData();
             } catch (AuthorizationException $e) {
                 dump($accountId, $e->getMessage());

@@ -25,6 +25,7 @@ class Dashboard extends Model
     public static function getAllStoreConfig () {
         return array(
             'thecreattify' => array (
+                'storeType' => 'shopify',
                 'domain' => 'thecreattify.com',
                 'common' => array (
                     'phpTimeZone' => 'America/Los_Angeles',
@@ -45,6 +46,7 @@ class Dashboard extends Model
             ),
 
             'au-thecreattify' => array (
+                'storeType' => 'shopify',
                 'domain' => 'au.thecreattify.com',
                 'common' => array (
                     'phpTimeZone' => 'Australia/Sydney',
@@ -65,6 +67,7 @@ class Dashboard extends Model
             ),
 
             'singlecloudy' => array (
+                'storeType' => 'shopify',
                 'domain' => 'singlecloudy.com',
                 'common' => array (
                     'phpTimeZone' => 'America/Los_Angeles',
@@ -85,6 +88,7 @@ class Dashboard extends Model
             ),
 
             'gifttifyus' => array (
+                'storeType' => 'shopify',
                 'domain' => 'gifttifyus.com',
                 'common' => array (
                     'phpTimeZone' => 'America/Los_Angeles',
@@ -105,6 +109,7 @@ class Dashboard extends Model
             ),
 
             'owllify' => array (
+                'storeType' => 'shopify',
                 'domain' => 'owllify.com',
                 'common' => array (
                     'phpTimeZone' => 'America/Los_Angeles',
@@ -120,11 +125,12 @@ class Dashboard extends Model
                     'dateTimeZone' => new \DateTimeZone('America/Los_Angeles'),
                 ),
                 'google' => array (
-                    'viewId' => '268312544'
+                    'viewId' => '244142345'
                 )
             ),
 
             'hippiesy' => array (
+                'storeType' => 'shopify',
                 'domain' => 'hippiesy.com',
                 'common' => array (
                     'phpTimeZone' => 'America/Los_Angeles',

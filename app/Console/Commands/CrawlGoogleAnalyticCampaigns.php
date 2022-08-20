@@ -14,7 +14,7 @@ class CrawlGoogleAnalyticCampaigns extends Command
      * []
      * @var string
      */
-    protected $signature = 'ga:crawl_google_analytic_campaigns {from_time?} {to_time?}';
+    protected $signature = 'ga:crawl_google_analytic_campaigns {from_time?} {to_time?} {store?}';
 
     /**
      * The console command description.
@@ -30,9 +30,14 @@ class CrawlGoogleAnalyticCampaigns extends Command
      */
     public function handle()
     {
+        $storeRequest = $this->argument('store') ?? '';
         $this->info("Cron Job running at ". now());
 
-        $viewIds = GaCampaignReports::getViewIds(); // MUST SET
+        $viewIds = GaCampaignReports::getViewIds();
+        if ($storeRequest) {
+            $viewIds = array($storeRequest => $viewIds[$storeRequest]);
+        }
+
         if(count($viewIds) < 1){
             $this->info("Error: View id not set.");
             return false;

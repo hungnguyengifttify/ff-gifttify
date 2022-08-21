@@ -295,8 +295,9 @@
                         <tr {!! display_row_bg_dashboard($v['mo']) !!} class="tr_sortable" >
                             @php
                                 $account_status = \App\Models\FbAccount::$status[$v['account_status']] ?? '';
+                                $creativeLink = route('ads_creative') . "?store=" . $store . "&" . app('request')->input('store') . "&fromDate=" . app('request')->input('fromDate') . "&toDate=" . app('request')->input('toDate') . "&labelDate=" . app('request')->input('labelDate') . "&code=" . $v['campaign_name'] . "&type=campaign_name";
                             @endphp
-                            <td>{!! $v['campaign_name'] !!} </td>
+                            <td><a href="{{$creativeLink}}" target="_blank">{!! $v['campaign_name'] !!}</a> </td>
                             <td>{!! $v['account_name'] !!} </td>
                             <td {!! display_zero_cell_dashboard($v['totalSpend'])!!} >{!! gifttify_price_format($v['totalSpend']);  !!} </td>
                             <td {!! display_zero_cell_dashboard($v['ga_ad_cost'])!!} >{!! gifttify_price_format( $v['ga_ad_cost'], 0 ) !!} </td>

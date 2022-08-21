@@ -944,6 +944,8 @@ class Dashboard extends Model
                 $checkCode = self::getDesignerFromCampaignName ($v->campaign_name);
             } elseif ($type == 'product_type') {
                 $checkCode = self::getProductTypeFromCampaignName ($v->campaign_name);
+            } elseif ($type == 'campaign_name') {
+                $checkCode = $v->campaign_name;
             }
 
             if ($checkCode != $code) continue;

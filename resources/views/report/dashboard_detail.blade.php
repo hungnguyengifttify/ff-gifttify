@@ -126,6 +126,7 @@
                                 <th></th>
                                 <th>AdsCost</th>
                                 <th>CPC</th>
+                                <th>Status</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -134,6 +135,7 @@
                                 <td>{!! $acc['account_name']  !!} </td>
                                 <td>{!! gifttify_price_format($acc['totalSpend']);  !!} </td>
                                 <td>{!! number_format($acc['cpc'], 2);  !!} </td>
+                                <td>{!! $acc['account_status'];  !!} </td>
                             </tr>
                             <?php endforeach; ?>
                             </tbody>

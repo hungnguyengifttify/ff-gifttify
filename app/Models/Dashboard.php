@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use App\Models\FbAds;
+use App\Models\FbAccount;
 use Carbon\Carbon;
 
 class Dashboard extends Model
@@ -319,7 +320,8 @@ class Dashboard extends Model
         $toDate = $dateTimeRange['toDate'];
 
         $fbAds = DB::table('fb_campaign_insights')
-            ->select(DB::raw('account_name, sum(spend) as totalSpend, sum(inline_link_clicks) as totalUniqueClicks'))
+            ->select(DB::raw('account_name, sum(spend) as totalSpend, sum(inline_link_clicks) as totalUniqueClicks, max(fb_accounts.account_status) as account_status'))
+            ->leftJoin('fb_accounts', 'fb_accounts.name', '=', 'fb_campaign_insights.account_name')
             ->whereIn('account_id', $fbAccountIds)
             ->where('date_record', '>=', $fromDate)
             ->where('date_record', '<=', $toDate)
@@ -328,6 +330,7 @@ class Dashboard extends Model
         $result = array();
         foreach ($fbAds->all() as $acc) {
             $result[] = array(
+                'account_status' => FbAccount::$status[$acc->account_status] ?? '',
                 'account_name' => $acc->account_name,
                 'totalSpend' => $acc->totalSpend,
                 'cpc' => $acc->totalUniqueClicks != 0 ? $acc->totalSpend / $acc->totalUniqueClicks : 0,

@@ -520,8 +520,14 @@ class Dashboard extends Model
         }
 
         $result = array();
-        preg_match('/.*Type(\w{0,2})/', $campaignName, $result);
+        preg_match('/.*Type(\w{0,7})/', $campaignName, $result);
         $productType = $result[1] ?? '';
+
+        if (!$productType) {
+            $result = array();
+            preg_match('/([A-Z]{2,7}) carousel/', $campaignName, $result);
+            $productType = $result[1] ?? '';
+        }
 
         if (!$productType) {
             $result = array();
@@ -909,6 +915,8 @@ class Dashboard extends Model
         } elseif (preg_match('/.*hoang.*/', strtolower($campaignName), $result)) {
             $adsStaff = 'Hoàng';
         } elseif (preg_match('/^m .*/', strtolower($campaignName), $result)) {
+            $adsStaff = 'Minh';
+        } elseif (preg_match('/.* minh .*/', strtolower($campaignName), $result)) {
             $adsStaff = 'Minh';
         } elseif (preg_match('/^([A-Z]{3})\s.*/', $campaignName, $result)) {
             $adsStaff = isset($result[1]) ? $result[1] : '';

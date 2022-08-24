@@ -55,7 +55,7 @@ if (! function_exists('display_row_bg_campaign_status')) {
         if ($account_status == 'DISABLED') {
             return " style='background-color:#ffc107' ";
         } elseif ( $account_status == 'ACTIVE' && ( (0 < $mo && $mo <= 60 && $status == 'PAUSED') || (round($mo) >= 60 && $status == 'ACTIVE') || ($mo == 0 && $spend > 40 && $status == 'ACTIVE') ) ) {
-            return " style='background-color:#f66' ";
+            return " style='background-color:#f66' class='g-warning' ";
         }
         return "";
     }

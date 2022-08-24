@@ -286,6 +286,7 @@
                                     <option value="ACTIVE">ACTIVE</option>
                                     <option value="PAUSED">PAUSED</option>
                                     <option value="DISABLED">DISABLED</option>
+                                    <option value="WARNING">WARNING</option>
                                     <option value=""></option>
                                 </select>
                             </td>
@@ -368,7 +369,11 @@
 
             Array.from(table.querySelectorAll('tr.tr_sortable'))
                 .forEach( tr => {
-                    if (tr.children.item(12).innerText != status) {
+                    if (status == 'WARNING') {
+                        if (tr.children.item(12).classList.contains("g-warning") == false) {
+                            tr.classList.add("hidden");
+                        }
+                    } else if (tr.children.item(12).innerText != status) {
                         tr.classList.add("hidden");
                     }
                 } );

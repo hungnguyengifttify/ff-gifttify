@@ -150,24 +150,35 @@ class Dashboard extends Model
                     'viewId' => '272705190'
                 )
             ),
+
             'demo' => array (
-                'storeType' => 'shopify',
+                'storeType' => 'woocommerce',
                 'domain' => 'hippiesy.com',
                 'woocommerce' => array (
-                    'consumerKey' => env('KEY', 'ck_5c3f6604530f3434df64e581732d6b9d513e655a'),
-                    'consumerSecret' => env('PASSWORD', 'cs_cb9c8f5e7543cc15b95b2353948a09bc10d5812c'),
-                    'domainWp' => env('DOMAIN', 'https://sim.wifi247.vn'),
-                    'apiVersion' => env('SHOPIFY_HIPPIESY_API_VERSION', ''),
+                    'phpTimeZone' => 'America/Los_Angeles',
+                    'domain' => env('WOOCOMMERCE_DEMO_DOMAIN', 'https://sim.wifi247.vn'),
+                    'consumerKey' => env('WOOCOMMERCE_DEMO_CONSUMER_KEY', 'ck_5c3f6604530f3434df64e581732d6b9d513e655a'),
+                    'consumerSecret' => env('WOOCOMMERCE_DEMO_CONSUMER_SECRET', 'cs_cb9c8f5e7543cc15b95b2353948a09bc10d5812c'),
                     'dateTimeZone' => new \DateTimeZone('America/Los_Angeles'),
+                    'apiVersion' => 'wc/v3', // Enable the WP REST API integration
                 ),
             ),
         );
-
     }
 
     public static function getStoresList () {
         $allStore = Dashboard::getAllStoreConfig();
         return array_keys($allStore);
+    }
+
+    public static function getWooStoresList () {
+        $wooStore = [];
+        foreach(Dashboard::getAllStoreConfig() as $storeKey => $storeConfig){
+            if($storeConfig['storeType'] == 'woocommerce'){
+                $wooStore[] = $storeKey;
+            }
+        };
+        return $wooStore;
     }
 
     public static function getStoreFromAccountId ($accountId) {

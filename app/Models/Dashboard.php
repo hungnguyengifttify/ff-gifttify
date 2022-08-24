@@ -150,6 +150,17 @@ class Dashboard extends Model
                     'viewId' => '272705190'
                 )
             ),
+            'demo' => array (
+                'storeType' => 'shopify',
+                'domain' => 'hippiesy.com',
+                'woocommerce' => array (
+                    'consumerKey' => env('KEY', 'ck_5c3f6604530f3434df64e581732d6b9d513e655a'),
+                    'consumerSecret' => env('PASSWORD', 'cs_cb9c8f5e7543cc15b95b2353948a09bc10d5812c'),
+                    'domainWp' => env('DOMAIN', 'https://sim.wifi247.vn'),
+                    'apiVersion' => env('SHOPIFY_HIPPIESY_API_VERSION', ''),
+                    'dateTimeZone' => new \DateTimeZone('America/Los_Angeles'),
+                ),
+            ),
         );
 
     }
@@ -178,6 +189,11 @@ class Dashboard extends Model
     public static function getShopifyConfig ($store) {
         $allStore = Dashboard::getAllStoreConfig();
         return isset($allStore[$store]['shopify']) ? $allStore[$store]['shopify'] : false;
+    }
+
+    public static function getWoocommerceConfig ($store) {
+        $allStore = Dashboard::getAllStoreConfig();
+        return isset($allStore[$store]['woocommerce']) ? $allStore[$store]['woocommerce'] : false;
     }
 
     public static function sort_result($a, $b)

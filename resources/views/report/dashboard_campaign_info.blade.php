@@ -260,12 +260,7 @@
                         @endphp
                         <tr {!! display_row_bg_dashboard($sum_mo) !!} class="fw-bold" >
                             <td>
-                                <select id="filter_campaign_name">
-                                    <option value="ALL">-- All --</option>
-                                    <option value="test">Test</option>
-                                    <option value="maintain">Maintain</option>
-                                    <option value="scale">Scale</option>
-                                </select>
+                                <input id="filter_campaign_name" class="form-control" />
                             </td>
                             <td>
                                 <input id="filter_account_name" class="form-control" />
@@ -401,11 +396,11 @@
             const campaign_name = this.value;
 
             document.querySelectorAll('tr.tr_sortable').forEach( tr => tr.classList.remove("hidden"));
-            if (campaign_name == 'ALL') return false;
+            if (campaign_name == '') return false;
 
             Array.from(table.querySelectorAll('tr.tr_sortable'))
                 .forEach( tr => {
-                    if ( !tr.children.item(0).innerText.toLowerCase().includes(campaign_name) ) {
+                    if ( !tr.children.item(0).innerText.includes(campaign_name) ) {
                         tr.classList.add("hidden");
                     }
                 } );

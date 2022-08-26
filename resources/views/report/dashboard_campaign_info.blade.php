@@ -375,7 +375,7 @@
         });
 
         var filter_account_name = document.querySelector('#filter_account_name');
-        filter_account_name.addEventListener('keyup',function() {
+        filter_account_name.addEventListener('change',function() {
             const table = document.getElementById('campaign_info');
             const account_name = this.value;
 

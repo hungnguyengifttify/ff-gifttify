@@ -1058,7 +1058,7 @@ class Dashboard extends Model
             $adsResult[$v->campaign_name]['impressions'] += $v->impressions;
             $adsResult[$v->campaign_name]['budget'] += $v->budget;
             $adsResult[$v->campaign_name]['cpc'] = ($adsResult[$v->campaign_name]['totalUniqueClicks'] != 0 ? $adsResult[$v->campaign_name]['totalSpend'] / $adsResult[$v->campaign_name]['totalUniqueClicks'] : 0);
-            $adsResult[$v->campaign_name]['cpm'] = ($adsResult[$v->campaign_name]['impressions'] != 0 ? 1000 * $adsResult[$v->campaign_name]['totalSpend'] / $adsResult[$v->campaign_name]['impressions'] : 0);
+            $adsResult[$v->campaign_name]['cpm'] = ($adsResult[$v->campaign_name]['impressions'] >= 1 ? 1000 * $adsResult[$v->campaign_name]['totalSpend'] / $adsResult[$v->campaign_name]['impressions'] : 0);
         }
 
         foreach ($gaAds->all() as $v) {

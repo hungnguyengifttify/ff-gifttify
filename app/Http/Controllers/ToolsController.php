@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\GoogleDriveFiles;
 
 use App\Services\Spreadsheet;
+use Carbon\Carbon;
 
 class ToolsController extends Controller {
 
@@ -24,6 +25,12 @@ class ToolsController extends Controller {
         }
 
         $result = array();
+
+        if ($id && $action == 'download_csv_v2') {
+            $result_v2 = GoogleDriveFiles::flat_image_links_from_folder_id_by_mysql_query($id, 'tree');
+            $this->export_image_links_v2($result_v2);
+        }
+
         if ($id) {
             //$result = GoogleDriveFiles::flat_image_links_from_folder_id($id);
             $result = GoogleDriveFiles::flat_image_links_from_folder_id_by_mysql_query($id);
@@ -50,6 +57,106 @@ class ToolsController extends Controller {
             $excelData[] = $line;
         }
         $fileName = "image_links_" . time() . '.xls';
+        return Spreadsheet::exportFromArray($excelData, $fileName);
+    }
+
+    protected function export_image_links_v2($data)
+    {
+        $header = [
+            'Handle',
+            'Title',
+            'Body (HTML)',
+            'Vendor',
+            'Type',
+            'Tags',
+            'Published',
+            'Option1 Name',
+            'Option1 Value',
+            'Option2 Name',
+            'Option2 Value',
+            'Option3 Name',
+            'Option3 Value',
+            'Variant SKU',
+            'Variant Grams',
+            'Variant Inventory Tracker',
+            'Variant Inventory Qty',
+            'Variant Inventory Policy',
+            'Variant Fulfillment Service',
+            'Variant Price',
+            'Variant Compare At Price',
+            'Variant Requires Shipping',
+            'Variant Taxable',
+            'Variant Barcode',
+            'Image Src',
+            'Image Position',
+            'Image Alt Text',
+            'Gift Card',
+            'SEO Title',
+            'SEO Description',
+            'Google Shopping / Google Product Category',
+            'Google Shopping / Gender',
+            'Google Shopping / Age Group',
+            'Google Shopping / MPN',
+            'Google Shopping / AdWords Grouping',
+            'Google Shopping / AdWords Labels',
+            'Google Shopping / Condition',
+            'Google Shopping / Custom Product',
+            'Google Shopping / Custom Label 0',
+            'Google Shopping / Custom Label 1',
+            'Google Shopping / Custom Label 2',
+            'Google Shopping / Custom Label 3',
+            'Google Shopping / Custom Label 4',
+            'Variant Image',
+            'Variant Weight Unit',
+            'Variant Tax Code',
+            'Cost per item',
+            'Status'
+        ];
+
+        $productTypeTable = DB::table('product_type')->get()->keyBy('product_type_code')->toArray();
+        $rowData = [];
+        $numberValue = count($header);
+        for($i = 0; $i < $numberValue; $i++ ){
+            $rowData[$i] = '';
+        }
+
+        $excelData = [];
+        $excelData[] = $header; 
+        $p = 1;
+        foreach($data as $key => $dateData){
+            foreach($dateData->children as $product){
+                foreach($product->children as $product_variable){
+                    $splitName = explode(' @NamePType ', $product_variable->name);
+                    $extraData = explode('! ',str_replace(['(',')'], '', $splitName[2]));
+                    $tags = [];
+                    $rowData[array_search('Vendor', $header)] = str_replace(['t^code_','@CodePType^',' '], '', trim($extraData[0]));
+                    $tags[] = str_replace(['t^name_'], '', trim($extraData[1]));
+                    $codePType = str_replace(['t^ptype_','@CodePType^'], '', trim($extraData[2]));
+                    $typeName = isset($productTypeTable[$codePType]) ? $productTypeTable[$codePType]->product_type_name : $codePType;
+                    $tags[] = $codePType;
+
+                    $title = $splitName[0] .' '.  $typeName .' ' . $splitName[1];
+                    $rowData[array_search('Title', $header)] =  $title;
+                    $rowData[array_search('Handle', $header)] =  strtolower(str_replace(',', '', str_replace(' ', '_', $title))) .'_'. Carbon::now()->format('dmy').'_p' . $p;
+
+                    $colection = str_replace(['t^collection'], 'collection', trim($extraData[3]));
+                    $tags[] = $colection;
+                    $rowData[array_search('Tags', $header)] = implode(', ' , $tags);
+
+                    foreach ($product_variable->children as $key => $image) {
+                        if ($key > 1) {
+                            $rowData[array_search('Title', $header)] = '';
+                        }
+                        $rowData[array_search('Image Src', $header)] = $image->link;
+                        $rowData[array_search('Image Position', $header)] = $key++;
+                        $rowData[array_search('Image Alt Text', $header)] = $image->name;
+                        $excelData[] = $rowData;
+                    }
+                    $p++;
+                }
+            }
+        }
+        $fileName = "image_links_" . time() . '_v2.xls';
         return Spreadsheet::exportFromArray($excelData, $fileName);
     }
 

@@ -102,7 +102,7 @@ class GoogleDriveFiles extends Model
         return $result;
     }
 
-    public static function flat_image_links_from_folder_id_by_mysql_query ($folderId) {
+    public static function flat_image_links_from_folder_id_by_mysql_query ($folderId, $type = 'flat') {
         $deepLevel = 8;
         $data = DB::select("
             WITH RECURSIVE google_drive_files_flat
@@ -141,6 +141,19 @@ class GoogleDriveFiles extends Model
             ",
             ['folderId' => $folderId]
         );
+
+        if ($type == 'tree') {
+            $c = collect($data)->keyBy('id');
+            return $c->map(
+                function ($item) use ($c) {
+                    if (!($parent = $c->get($item->parentId))) {
+                        return $item;
+                    }
+                    $parent->children[] = $item;
+                }
+            )->filter()->toArray();
+        }
+        
         return collect($data)->map(function($x){ return (array) $x; })->toArray();
     }
 

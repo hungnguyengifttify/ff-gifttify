@@ -18,6 +18,9 @@
                 <div class="col-auto">
                     <button type="submit" class="btn btn-info mb-3" name="action" value="download_csv">Download CSV</button>
                 </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-info mb-3" name="action" value="download_csv_v2">Download CSV V2</button>
+                </div>
                 @endif
             </form>
         </div>

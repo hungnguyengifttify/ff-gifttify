@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\GoogleDriveFiles;
-
+use App\Services\OdooService;
 use App\Services\Spreadsheet;
 use Carbon\Carbon;
 
@@ -62,6 +62,8 @@ class ToolsController extends Controller {
 
     protected function export_image_links_v2($data)
     {
+        $odooService = new OdooService();
+
         $header = [
             'Handle',
             'Title',
@@ -116,42 +118,93 @@ class ToolsController extends Controller {
         $productTypeTable = DB::table('product_type')->get()->keyBy('product_type_code')->toArray();
         $rowData = [];
         $numberValue = count($header);
-        for($i = 0; $i < $numberValue; $i++ ){
+        for ($i = 0; $i < $numberValue; $i++) {
             $rowData[$i] = '';
         }
 
         $excelData = [];
-        $excelData[] = $header; 
+        $excelData[] = $header;
         $p = 1;
-        foreach($data as $key => $dateData){
-            foreach($dateData->children as $product){
-                foreach($product->children as $product_variable){
-                    $splitName = explode(' @NamePType ', $product_variable->name);
-                    $extraData = explode('! ',str_replace(['(',')'], '', $splitName[2]));
+
+        foreach ($data as $key => $dateData) {
+            foreach ($dateData->children as $product) {
+                foreach ($product->children as $product_variable) {
                     $tags = [];
-                    $rowData[array_search('Vendor', $header)] = str_replace(['t^code_','@CodePType^',' '], '', trim($extraData[0]));
-                    $tags[] = str_replace(['t^name_'], '', trim($extraData[1]));
-                    $codePType = str_replace(['t^ptype_','@CodePType^'], '', trim($extraData[2]));
+
+                    $namePTypes = explode(' @NamePType ', $product_variable->name);
+                    $tCodes = explode('! ', str_replace(['(', ')'], '', $namePTypes[2]));
+                    
+                    $codePType = str_replace(['t^ptype_', '@CodePType^'], '', trim($tCodes[2]));
                     $typeName = isset($productTypeTable[$codePType]) ? $productTypeTable[$codePType]->product_type_name : $codePType;
-                    $tags[] = $codePType;
+                    $productTempate = $odooService->getProductByProductType($codePType);
 
-                    $title = $splitName[0] .' '.  $typeName .' ' . $splitName[1];
-                    $rowData[array_search('Title', $header)] =  $title;
-                    $rowData[array_search('Handle', $header)] =  strtolower(str_replace(',', '', str_replace(' ', '_', $title))) .'_'. Carbon::now()->format('dmy').'_p' . $p;
-
-                    $colection = str_replace(['t^collection'], 'collection', trim($extraData[3]));
-                    $tags[] = $colection;
-                    $rowData[array_search('Tags', $header)] = implode(', ' , $tags);
-
-                    foreach ($product_variable->children as $key => $image) {
-                        if ($key > 1) {
-                            $rowData[array_search('Title', $header)] = '';
-                        }
-                        $rowData[array_search('Image Src', $header)] = $image->link;
-                        $rowData[array_search('Image Position', $header)] = $key++;
-                        $rowData[array_search('Image Alt Text', $header)] = $image->name;
-                        $excelData[] = $rowData;
+                    $listProductVariants = [];
+                    if (count($productTempate) && isset($productTempate['id'])) {
+                        $listProductVariants = $odooService->getProductVariantByTemplateId($productTempate['id']);
                     }
+                    $productTypeDesc = $odooService->getProductTypeInfo($codePType)['x_studio_description_html'] ?? '';
+
+                    $title = $namePTypes[0] . ' ' .  $typeName . ' ' . $namePTypes[1];
+                    $colection = str_replace(['t^collection'], 'collection', trim($tCodes[3]));
+                    $tags[] = str_replace(['t^name_'], '', trim($tCodes[1]));
+                    $tags[] = $typeName;
+                    $tags[] = $colection;
+
+                    $rowData[array_search('Vendor', $header)] = str_replace(['t^code_', '@CodePType^', ' '], '', trim($tCodes[0]));
+                    $rowData[array_search('Tags', $header)] = implode(', ', $tags);
+                    $rowData[array_search('Title', $header)] =  $title;
+                    $rowData[array_search('Type', $header)] =  $codePType;
+                    $rowData[array_search('Handle', $header)] =  strtolower(str_replace([',',')','('], '', str_replace([' '], '_', $title))) . '_' . Carbon::now()->format('dmy') . '_p' . $p;
+                    $rowData[array_search('Body (HTML)', $header)] = $productTypeDesc;
+
+                    if (isset($listProductVariants)) {
+                        foreach ($listProductVariants as $indexKey => $product) {
+                            $attributes = [];
+                            if ($product) {
+                                $attributes =  $odooService->getVariantAttributeNameByValue($product['product_template_attribute_value_ids']);
+                                if (count($attributes)) {
+                                    $rowData[array_search('Option1 Name', $header)] = $attributes[0]['attribute_id'][1] ?? '';
+                                    $rowData[array_search('Option1 Value', $header)] = $attributes[0]['name'] ?? '';
+                                    $rowData[array_search('Option2 Name', $header)] = $attributes[1]['attribute_id'][1] ?? '';
+                                    $rowData[array_search('Option2 Value', $header)] = $attributes[1]['name'] ?? '';
+                                    $rowData[array_search('Option3 Name', $header)] = $attributes[2]['attribute_id'][1] ?? '';
+                                    $rowData[array_search('Option3 Value', $header)] = $attributes[2]['name'] ?? '';
+                                }
+                            }
+                            if ($indexKey > 0) {
+                                $rowData[array_search('Title', $header)] = '';
+                            }
+                            $rowData[array_search('Variant Price', $header)] = $product['lst_price'];
+                            $rowData[array_search('Image Src', $header)] = $product_variable->children[$indexKey]->link ?? '';
+                            $rowData[array_search('Image Position', $header)] =  isset($product_variable->children[$indexKey]) ? ($indexKey + 1) : '';
+                            $rowData[array_search('Image Alt Text', $header)] = $product_variable->children[$indexKey]->name ?? '';
+                            if (isset($product_variable->children[$indexKey])) {
+                                unset($product_variable->children[$indexKey]);
+                            }
+                            $excelData[] = $rowData;
+                        }
+                    }
+
+                    if (isset($product_variable->children) && count($product_variable->children)) {
+                        $rowData[array_search('Option1 Name', $header)] = '';
+                        $rowData[array_search('Option1 Value', $header)] = '';
+                        $rowData[array_search('Option2 Name', $header)] = '';
+                        $rowData[array_search('Option2 Value', $header)] = '';
+                        $rowData[array_search('Option3 Name', $header)] = '';
+                        $rowData[array_search('Option3 Value', $header)] = '';
+
+                        foreach ($product_variable->children as $keyPrv => $image) {
+                            if ($keyPrv > 0) {
+                                $rowData[array_search('Title', $header)] = '';
+                            }
+
+                            $rowData[array_search('Image Src', $header)] = $image->link;
+                            $rowData[array_search('Image Position', $header)] = ($keyPrv + 1);
+                            $rowData[array_search('Image Alt Text', $header)] = $image->name;
+                            $excelData[] = $rowData;
+                        }
+                    }
+
                     $p++;
                 }
             }

@@ -161,7 +161,7 @@ class ToolsController extends Controller {
                         foreach ($listProductVariants as $indexKey => $product) {
                             $attributes = [];
                             if ($product) {
-                                $attributes =  $odooService->getVariantAttributeNameByValue($product['product_template_attribute_value_ids']);
+                                $attributes =  $odooService->getVariantAttributeNameByAttrIds($product['product_template_attribute_value_ids']);
                                 if (count($attributes)) {
                                     $rowData[array_search('Option1 Name', $header)] = $attributes[0]['attribute_id'][1] ?? '';
                                     $rowData[array_search('Option1 Value', $header)] = $attributes[0]['name'] ?? '';
@@ -192,6 +192,7 @@ class ToolsController extends Controller {
                         $rowData[array_search('Option2 Value', $header)] = '';
                         $rowData[array_search('Option3 Name', $header)] = '';
                         $rowData[array_search('Option3 Value', $header)] = '';
+                        $rowData[array_search('Variant Price', $header)] = '';
 
                         foreach ($product_variable->children as $keyPrv => $image) {
                             if ($keyPrv > 0) {

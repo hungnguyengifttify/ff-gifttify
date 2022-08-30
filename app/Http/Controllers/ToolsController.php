@@ -162,7 +162,6 @@ class ToolsController extends Controller {
 
                     if (isset($listProductVariants)) {
                         foreach ($listProductVariants as $indexKey => $product) {
-                            dd($product);
                             $attributes = [];
                             if ($product) {
                                 $attributes =  $odooService->getVariantAttributeNameByAttrIds($product['product_template_attribute_value_ids']);

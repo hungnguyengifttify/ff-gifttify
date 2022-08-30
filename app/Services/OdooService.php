@@ -32,33 +32,28 @@ class OdooService
         return $common->version();
     }
 
-    function getProductTypeInfo($typeName)
+    function getProductTypeInfo()
     {
         $models = ripcord::client($this->url . "/xmlrpc/2/object");
         return  Cache::remember(
-            'product_type_info_' . $typeName,
+            'product_type_info',
             OdooService::CACHE_TIME,
-            function () use ($typeName, $models) {
+            function () use ($models) {
                 return $models->execute_kw(
                     $this->db,
                     $this->uid,
                     $this->password,
                     'x_producttype',
                     'search_read',
+                    [],
                     [
-                        [
-                            ['x_name', '=', $typeName]
-                        ]
-                    ],
-                    [
-                        'limit' => 1,
                         'fields' => [ // Comment if get all
                             'display_name',
                             'x_studio_description_html',
                             'x_name'
                         ]
                     ]
-                )[0] ?? [];
+                );
             }
         );
     }

@@ -125,7 +125,7 @@ class ToolsController extends Controller {
         $excelData = [];
         $excelData[] = $header;
         $p = 1;
-
+        $productTypeDesc = $odooService->getProductTypeInfo() ?? '';
         foreach ($data as $key => $dateData) {
             foreach ($dateData->children as $product) {
                 foreach ($product->children as $product_variable) {
@@ -142,7 +142,10 @@ class ToolsController extends Controller {
                     if (count($productTempate) && isset($productTempate['id'])) {
                         $listProductVariants = $odooService->getProductVariantByTemplateId($productTempate['id']);
                     }
-                    $productTypeDesc = $odooService->getProductTypeInfo($codePType)['x_studio_description_html'] ?? '';
+                    
+                    $bodyHtml = collect($productTypeDesc)->first(function ($item) {
+                        return $item['display_name'] == 'HS';
+                    });
 
                     $title = $namePTypes[0] . ' ' .  $typeName . ' ' . $namePTypes[1];
                     $colection = str_replace(['t^collection'], 'collection', trim($tCodes[3]));
@@ -155,7 +158,7 @@ class ToolsController extends Controller {
                     $rowData[array_search('Title', $header)] =  $title;
                     $rowData[array_search('Type', $header)] =  $codePType;
                     $rowData[array_search('Handle', $header)] =  strtolower(str_replace([',',')','('], '', str_replace([' '], '_', $title))) . '_' . Carbon::now()->format('dmy') . '_p' . $p;
-                    $rowData[array_search('Body (HTML)', $header)] = $productTypeDesc;
+                    $rowData[array_search('Body (HTML)', $header)] = $bodyHtml['x_studio_description_html'] ?? '';
 
                     if (isset($listProductVariants)) {
                         foreach ($listProductVariants as $indexKey => $product) {

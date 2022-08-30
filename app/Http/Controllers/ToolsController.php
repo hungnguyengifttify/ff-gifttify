@@ -142,9 +142,9 @@ class ToolsController extends Controller {
                     if (count($productTempate) && isset($productTempate['id'])) {
                         $listProductVariants = $odooService->getProductVariantByTemplateId($productTempate['id']);
                     }
-                    
-                    $bodyHtml = collect($productTypeDesc)->first(function ($item) {
-                        return $item['display_name'] == 'HS';
+
+                    $bodyHtml = collect($productTypeDesc)->first(function ($item) use ($codePType) {
+                        return $item['display_name'] == $codePType;
                     });
 
                     $title = $namePTypes[0] . ' ' .  $typeName . ' ' . $namePTypes[1];
@@ -162,6 +162,7 @@ class ToolsController extends Controller {
 
                     if (isset($listProductVariants)) {
                         foreach ($listProductVariants as $indexKey => $product) {
+                            dd($product);
                             $attributes = [];
                             if ($product) {
                                 $attributes =  $odooService->getVariantAttributeNameByAttrIds($product['product_template_attribute_value_ids']);

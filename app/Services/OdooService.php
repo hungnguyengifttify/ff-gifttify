@@ -82,10 +82,12 @@ class OdooService
                             'id',
                             'name',
                             'list_price',
+                            'lst_price',
                             'type',
                             'description',
                             'product_variant_count',
                             'product_variant_ids',
+                            'weight_uom_name'
                         ]
                     ]
                 )[0] ?? [];

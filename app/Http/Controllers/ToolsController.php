@@ -126,6 +126,17 @@ class ToolsController extends Controller {
         $excelData[] = $header;
         $p = 1;
         $productTypeDesc = $odooService->getProductTypeInfo() ?? '';
+
+        // Set default falue
+        $rowData[array_search('Variant Inventory Policy', $header)] =  'deny';
+        $rowData[array_search('Variant Fulfillment Service', $header)] =  'manual';
+        $rowData[array_search('Variant Requires Shipping', $header)] =  'TRUE';
+        $rowData[array_search('Variant Taxable', $header)] = 'FALSE';
+        $rowData[array_search('Variant Grams', $header)] = 500;
+        $rowData[array_search('Variant Inventory Qty', $header)] = '0';
+        $rowData[array_search('Status', $header)] = 'active';
+        	
+
         foreach ($data as $key => $dateData) {
             foreach ($dateData->children as $product) {
                 foreach ($product->children as $product_variable) {
@@ -156,14 +167,18 @@ class ToolsController extends Controller {
                     $rowData[array_search('Vendor', $header)] = str_replace(['t^code_', '@CodePType^', ' '], '', trim($tCodes[0]));
                     $rowData[array_search('Tags', $header)] = implode(', ', $tags);
                     $rowData[array_search('Title', $header)] =  $title;
+                    $rowData[array_search('SEO Title', $header)] =  $title;
                     $rowData[array_search('Type', $header)] =  $codePType;
                     $rowData[array_search('Handle', $header)] =  strtolower(str_replace([',',')','('], '', str_replace([' '], '_', $title))) . '_' . Carbon::now()->format('dmy') . '_p' . $p;
                     $rowData[array_search('Body (HTML)', $header)] = $bodyHtml['x_studio_description_html'] ?? '';
+                    $rowData[array_search('Published', $header)] =  'TRUE';
+                    $rowData[array_search('Gift Card', $header)] = 'FALSE';
+                    $rowData[array_search('Variant Weight Unit', $header)] = $productTempate['weight_uom_name'] ?? 'kg';
 
                     if (isset($listProductVariants)) {
                         foreach ($listProductVariants as $indexKey => $product) {
                             $attributes = [];
-                            if ($product) {
+                            if (count($product)) {
                                 $attributes =  $odooService->getVariantAttributeNameByAttrIds($product['product_template_attribute_value_ids']);
                                 if (count($attributes)) {
                                     $rowData[array_search('Option1 Name', $header)] = $attributes[0]['attribute_id'][1] ?? '';
@@ -173,11 +188,22 @@ class ToolsController extends Controller {
                                     $rowData[array_search('Option3 Name', $header)] = $attributes[2]['attribute_id'][1] ?? '';
                                     $rowData[array_search('Option3 Value', $header)] = $attributes[2]['name'] ?? '';
                                 }
+                                $rowData[array_search('Variant Price', $header)] = (($product['x_studio_custom_price']) > 0) ? $product['x_studio_custom_price'] : $product['lst_price'];
+                                $rowData[array_search('Variant Compare At Price', $header)] = $product['lst_price'];
                             }
                             if ($indexKey > 0) {
                                 $rowData[array_search('Title', $header)] = '';
+                                $rowData[array_search('Option1 Name', $header)] = '';
+                                $rowData[array_search('Option2 Name', $header)] = '';
+                                $rowData[array_search('Option3 Name', $header)] = '';
+                                $rowData[array_search('SEO Title', $header)] =  '';
+                                $rowData[array_search('Published', $header)] =  '';
+                                $rowData[array_search('Gift Card', $header)] = '';
+                                $rowData[array_search('Vendor', $header)] = '';
+                                $rowData[array_search('Type', $header)] =  '';
+                                $rowData[array_search('Tags', $header)] =  '';
                             }
-                            $rowData[array_search('Variant Price', $header)] = $product['lst_price'];
+
                             $rowData[array_search('Image Src', $header)] = $product_variable->children[$indexKey]->link ?? '';
                             $rowData[array_search('Image Position', $header)] =  isset($product_variable->children[$indexKey]) ? ($indexKey + 1) : '';
                             $rowData[array_search('Image Alt Text', $header)] = $product_variable->children[$indexKey]->name ?? '';
@@ -195,11 +221,18 @@ class ToolsController extends Controller {
                         $rowData[array_search('Option2 Value', $header)] = '';
                         $rowData[array_search('Option3 Name', $header)] = '';
                         $rowData[array_search('Option3 Value', $header)] = '';
-                        $rowData[array_search('Variant Price', $header)] = '';
+                        $rowData[array_search('Variant Price', $header)] = $productTempate['lst_price'] ?? '0';
+                        $rowData[array_search('Variant Compare At Price', $header)] = $productTempate['lst_price'] ?? '0';
 
                         foreach ($product_variable->children as $keyPrv => $image) {
                             if ($keyPrv > 0) {
                                 $rowData[array_search('Title', $header)] = '';
+                                $rowData[array_search('SEO Title', $header)] =  '';
+                                $rowData[array_search('Published', $header)] =  '';
+                                $rowData[array_search('Gift Card', $header)] = '';
+                                $rowData[array_search('Vendor', $header)] = '';
+                                $rowData[array_search('Type', $header)] =  '';
+                                $rowData[array_search('Tags', $header)] =  '';
                             }
 
                             $rowData[array_search('Image Src', $header)] = $image->link;

@@ -147,10 +147,13 @@ class ToolsController extends Controller {
                     
                     $codePType = str_replace(['t^ptype_', '@CodePType^'], '', trim($tCodes[2]));
                     $typeName = isset($productTypeTable[$codePType]) ? $productTypeTable[$codePType]->product_type_name : $codePType;
+                    
+                    //get template
                     $productTempate = $odooService->getProductByProductType($codePType);
 
                     $listProductVariants = [];
                     if (count($productTempate) && isset($productTempate['id'])) {
+                        // get Variant by template ID (Or get variant by codeType)
                         $listProductVariants = $odooService->getProductVariantByTemplateId($productTempate['id']);
                     }
 
@@ -179,6 +182,7 @@ class ToolsController extends Controller {
                         foreach ($listProductVariants as $indexKey => $product) {
                             $attributes = [];
                             if (count($product)) {
+                                //get Variant option
                                 $attributes =  $odooService->getVariantAttributeNameByAttrIds($product['product_template_attribute_value_ids']);
                                 if (count($attributes)) {
                                     $rowData[array_search('Option1 Name', $header)] = $attributes[0]['attribute_id'][1] ?? '';

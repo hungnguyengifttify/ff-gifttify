@@ -225,8 +225,8 @@ class ToolsController extends Controller {
                         $rowData[array_search('Option2 Value', $header)] = '';
                         $rowData[array_search('Option3 Name', $header)] = '';
                         $rowData[array_search('Option3 Value', $header)] = '';
-                        $rowData[array_search('Variant Price', $header)] = $productTempate['lst_price'] ?? '0';
-                        $rowData[array_search('Variant Compare At Price', $header)] = $productTempate['lst_price'] ?? '0';
+                        $rowData[array_search('Variant Price', $header)] = $productTempate['lst_price'] ?? 0;
+                        $rowData[array_search('Variant Compare At Price', $header)] = $productTempate['lst_price'] ?? 0;
 
                         foreach ($product_variable->children as $keyPrv => $image) {
                             if ($keyPrv > 0) {

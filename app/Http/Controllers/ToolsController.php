@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use App\Models\GoogleDriveFiles;
 use App\Services\OdooService;
@@ -26,9 +27,16 @@ class ToolsController extends Controller {
 
         $result = array();
 
+        if ($id && $action == 'download_csv_v3') {
+            $result_v3 = GoogleDriveFiles::flat_image_links_from_folder_id_by_mysql_query($id, 'tree');
+            $this->export_image_links_v3($result_v3);
+            return true;
+        }
+
         if ($id && $action == 'download_csv_v2') {
             $result_v2 = GoogleDriveFiles::flat_image_links_from_folder_id_by_mysql_query($id, 'tree');
             $this->export_image_links_v2($result_v2);
+            return true;
         }
 
         if ($id) {
@@ -135,7 +143,7 @@ class ToolsController extends Controller {
         $rowData[array_search('Variant Grams', $header)] = 500;
         $rowData[array_search('Variant Inventory Qty', $header)] = '0';
         $rowData[array_search('Status', $header)] = 'active';
-        	
+
 
         foreach ($data as $key => $dateData) {
             foreach ($dateData->children as $product) {
@@ -144,10 +152,8 @@ class ToolsController extends Controller {
 
                     $namePTypes = explode(' @NamePType ', $product_variable->name);
                     $tCodes = explode('! ', str_replace(['(', ')'], '', $namePTypes[2]));
-                    
                     $codePType = str_replace(['t^ptype_', '@CodePType^'], '', trim($tCodes[2]));
                     $typeName = isset($productTypeTable[$codePType]) ? $productTypeTable[$codePType]->product_type_name : $codePType;
-                    
                     //get template
                     $productTempate = $odooService->getProductByProductType($codePType);
 
@@ -254,44 +260,190 @@ class ToolsController extends Controller {
         return Spreadsheet::exportFromArray($excelData, $fileName);
     }
 
+
+    protected function export_image_links_v3($data)
+    {
+        $spreadsheet_url = Config::get('google.hiep_template_link');
+        $csvData = GoogleDriveFiles::getGoogleDriveCsvFile($spreadsheet_url);
+        $header = [
+            'Handle',
+            'Title',
+            'Body (HTML)',
+            'Vendor',
+            'Type',
+            'Tags',
+            'Published',
+            'Option1 Name',
+            'Option1 Value',
+            'Option2 Name',
+            'Option2 Value',
+            'Option3 Name',
+            'Option3 Value',
+            'Variant SKU',
+            'Variant Grams',
+            'Variant Inventory Tracker',
+            'Variant Inventory Qty',
+            'Variant Inventory Policy',
+            'Variant Fulfillment Service',
+            'Variant Price',
+            'Variant Compare At Price',
+            'Variant Requires Shipping',
+            'Variant Taxable',
+            'Variant Barcode',
+            'Image Src',
+            'Image Position',
+            'Image Alt Text',
+            'Gift Card',
+            'SEO Title',
+            'SEO Description',
+            'Google Shopping / Google Product Category',
+            'Google Shopping / Gender',
+            'Google Shopping / Age Group',
+            'Google Shopping / MPN',
+            'Google Shopping / AdWords Grouping',
+            'Google Shopping / AdWords Labels',
+            'Google Shopping / Condition',
+            'Google Shopping / Custom Product',
+            'Google Shopping / Custom Label 0',
+            'Google Shopping / Custom Label 1',
+            'Google Shopping / Custom Label 2',
+            'Google Shopping / Custom Label 3',
+            'Google Shopping / Custom Label 4',
+            'Variant Image',
+            'Variant Weight Unit',
+            'Variant Tax Code',
+            'Cost per item',
+            'Status'
+        ];
+
+        $productTypeTable = DB::table('product_type')->get()->keyBy('product_type_code')->toArray();
+        $rowData = [];
+        $numberValue = count($header);
+        for ($i = 0; $i < $numberValue; $i++) {
+            $rowData[$i] = '';
+        }
+
+        $excelData = [];
+        $excelData[] = $header;
+        $p = 1;
+
+        // Set default falue
+        $rowData[array_search('Variant Inventory Policy', $header)] =  'deny';
+        $rowData[array_search('Variant Fulfillment Service', $header)] =  'manual';
+        $rowData[array_search('Variant Requires Shipping', $header)] =  'TRUE';
+        $rowData[array_search('Variant Taxable', $header)] = 'FALSE';
+        $rowData[array_search('Variant Grams', $header)] = 500;
+        $rowData[array_search('Variant Inventory Qty', $header)] = '0';
+        $rowData[array_search('Status', $header)] = 'active';
+
+
+        foreach ($data as $key => $dateData) {
+            foreach ($dateData->children as $product) {
+                foreach ($product->children as $product_variable) {
+                    $tags = [];
+
+                    $namePTypes = explode(' @NamePType ', $product_variable->name);
+                    $tCodes = explode('! ', str_replace(['(', ')'], '', $namePTypes[2]));
+
+                    $codePType = str_replace(['t^ptype_', '@CodePType^'], '', trim($tCodes[2]));
+                    $typeName = isset($productTypeTable[$codePType]) ? $productTypeTable[$codePType]->product_type_name : $codePType;
+
+                    $csvProductTypeData = $csvData[$codePType] ?? array();
+                    $bodyHtml = $csvProductTypeData[0]['Description'] ?? '';
+
+                    $title = $namePTypes[0] . ' ' .  $typeName . ' ' . $namePTypes[1];
+                    $colection = str_replace(['t^collection'], 'collection', trim($tCodes[3]));
+                    $tags[] = str_replace(['t^name_'], '', trim($tCodes[1]));
+                    $tags[] = $typeName;
+                    $tags[] = $colection;
+
+                    $rowData[array_search('Vendor', $header)] = str_replace(['t^code_', '@CodePType^', ' '], '', trim($tCodes[0]));
+                    $rowData[array_search('Tags', $header)] = implode(', ', $tags);
+                    $rowData[array_search('Title', $header)] =  $title;
+                    $rowData[array_search('SEO Title', $header)] =  $title;
+                    $rowData[array_search('Type', $header)] =  $codePType;
+                    $rowData[array_search('Handle', $header)] =  strtolower(str_replace([',',')','('], '', str_replace([' '], '_', $title))) . '_' . Carbon::now()->format('dmy') . '_p' . $p;
+                    $rowData[array_search('Body (HTML)', $header)] = $bodyHtml['x_studio_description_html'] ?? '';
+                    $rowData[array_search('Published', $header)] =  'TRUE';
+                    $rowData[array_search('Gift Card', $header)] = 'FALSE';
+                    $rowData[array_search('Variant Weight Unit', $header)] = $productTempate['weight_uom_name'] ?? 'kg';
+
+                    if (isset($csvProductTypeData)) {
+                        foreach ($csvProductTypeData as $indexKey => $product) {
+                            if (count($product)) {
+                                $rowData[array_search('Option1 Name', $header)] = $product['Option1 Name'] ?? '';
+                                $rowData[array_search('Option1 Value', $header)] = $product['Option1 Value'] ?? '';
+                                $rowData[array_search('Option2 Name', $header)] = $product['Option2 Name'] ?? '';
+                                $rowData[array_search('Option2 Value', $header)] = $product['Option2 Value'] ?? '';
+                                $rowData[array_search('Option3 Name', $header)] = $product['Option3 Name'] ?? '';
+                                $rowData[array_search('Option3 Value', $header)] = $product['Option3 Value'] ?? '';
+                                $rowData[array_search('Variant Price', $header)] = $product['Price'] ?? '';
+                                $rowData[array_search('Variant Compare At Price', $header)] = $product['Price'] ?? '';
+                            }
+                            if ($indexKey > 0) {
+                                $rowData[array_search('Title', $header)] = '';
+                                $rowData[array_search('Option1 Name', $header)] = '';
+                                $rowData[array_search('Option2 Name', $header)] = '';
+                                $rowData[array_search('Option3 Name', $header)] = '';
+                                $rowData[array_search('SEO Title', $header)] =  '';
+                                $rowData[array_search('Published', $header)] =  '';
+                                $rowData[array_search('Gift Card', $header)] = '';
+                                $rowData[array_search('Vendor', $header)] = '';
+                                $rowData[array_search('Type', $header)] =  '';
+                                $rowData[array_search('Tags', $header)] =  '';
+                            }
+
+                            $rowData[array_search('Image Src', $header)] = $product_variable->children[$indexKey]->link ?? '';
+                            $rowData[array_search('Image Position', $header)] =  isset($product_variable->children[$indexKey]) ? ($indexKey + 1) : '';
+                            $rowData[array_search('Image Alt Text', $header)] = $product_variable->children[$indexKey]->name ?? '';
+                            if (isset($product_variable->children[$indexKey])) {
+                                unset($product_variable->children[$indexKey]);
+                            }
+                            $excelData[] = $rowData;
+                        }
+                    }
+
+                    if (isset($product_variable->children) && count($product_variable->children)) {
+                        $rowData[array_search('Option1 Name', $header)] = '';
+                        $rowData[array_search('Option1 Value', $header)] = '';
+                        $rowData[array_search('Option2 Name', $header)] = '';
+                        $rowData[array_search('Option2 Value', $header)] = '';
+                        $rowData[array_search('Option3 Name', $header)] = '';
+                        $rowData[array_search('Option3 Value', $header)] = '';
+                        $rowData[array_search('Variant Price', $header)] = $csvProductTypeData[0]['Price'] ?? 0;
+                        $rowData[array_search('Variant Compare At Price', $header)] = $csvProductTypeData[0]['Price'] ?? 0;
+
+                        foreach ($product_variable->children as $keyPrv => $image) {
+                            if ($keyPrv > 0) {
+                                $rowData[array_search('Title', $header)] = '';
+                                $rowData[array_search('SEO Title', $header)] =  '';
+                                $rowData[array_search('Published', $header)] =  '';
+                                $rowData[array_search('Gift Card', $header)] = '';
+                                $rowData[array_search('Vendor', $header)] = '';
+                                $rowData[array_search('Type', $header)] =  '';
+                                $rowData[array_search('Tags', $header)] =  '';
+                            }
+
+                            $rowData[array_search('Image Src', $header)] = $image->link;
+                            $rowData[array_search('Image Position', $header)] = ($keyPrv + 1);
+                            $rowData[array_search('Image Alt Text', $header)] = $image->name;
+                            $excelData[] = $rowData;
+                        }
+                    }
+
+                    $p++;
+                }
+            }
+        }
+        $fileName = "image_links_" . time() . '_v2.xls';
+        return Spreadsheet::exportFromArray($excelData, $fileName);
+    }
+
+
     public function create_shopify_csv(Request $request)
     {
-        $url = 'https://gtferp.gifttify.com';
-        $db = 'gtferp.gifttify.com';
-        $username = 'hungnq@gifttify.com';
-        $password = 'hunglan123';
-        $common = \ripcord::client("$url/xmlrpc/2/common");
-        $common->version();
-        $uid = $common->authenticate($db, $username, $password, array());
-
-        $models = \ripcord::client("$url/xmlrpc/2/object");
-        $records = $models->execute_kw($db, $uid, $password, 'res.partner', 'search_read', array(array(array('is_company', '=', true))), array('fields'=>array('name', 'country_id', 'comment'), 'limit'=>5));
-
-        dd($records);
-
-
-
-
-
-        $link = $request->input('link') ?? '';
-        $action = $request->input('action') ?? '';
-        $uriArr = parse_url($link);
-        $path = $uriArr['path'] ? explode('/', $uriArr['path']) : '';
-
-        $id = '';
-        if ($path) {
-            $id = isset($path[count($path)-1]) ? $path[count($path)-1] : '';
-        }
-
-        $result = array();
-        if ($id) {
-            //$result = GoogleDriveFiles::flat_image_links_from_folder_id($id);
-            $result = GoogleDriveFiles::flat_image_links_from_folder_id_by_mysql_query($id);
-        }
-        if ($action == 'download_csv') {
-            $this->export_image_links($result);
-            return true;
-        }
-        return view('tools.create_shopify_csv', compact('link', 'result') );
+        $spreadsheet_url="https://docs.google.com/spreadsheets/d/e/2PACX-1vR4zFgf2v83U8DmJO-p8P8xxdkW2z_fi0DPjZBxton_eUhWg-kUgEImGSUYY_YtH1ldcwyn93eISrSe/pub?gid=0&single=true&output=csv";
+        $data = GoogleDriveFiles::getGoogleDriveCsvFile($spreadsheet_url);
+        dd($data);
     }
 }

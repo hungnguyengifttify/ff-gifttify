@@ -14,7 +14,7 @@ class UpdateGoogleDrive extends Command
      *
      * @var string
      */
-    protected $signature = 'googledrive:get_files {time_report?}';
+    protected $signature = 'googledrive:get_files {page_limit?}';
 
     /**
      * The console command description.
@@ -35,14 +35,24 @@ class UpdateGoogleDrive extends Command
         $orderByArr = array(
             'default', 'modifiedTime desc', 'createdTime desc', 'recency desc'
         );
+
+        $pageLimit = $this->argument('page_limit') ?? 2;
+        if ($pageLimit >= 10) {
+            $orderByArr = array('default');
+        }
+
         foreach ($orderByArr as $orderBy) {
             $gDrive = new GoogleDrive();
             $pageToken = NULL;
 
+            $page = 0;
             do {
                 try {
+                    $page++;
                     $parameters = array(
                         'pageSize' => 1000,
+                        'supportsAllDrives' => true,
+                        'includeItemsFromAllDrives' => true,
                         'fields' => 'nextPageToken, files(id, createdTime, fileExtension, fullFileExtension, mimeType, modifiedTime, name, originalFilename, parents, permissionIds, shared, size, spaces, thumbnailLink, viewersCanCopyContent, webContentLink, webViewLink, writersCanShare, owners, trashed, trashedTime)',
                         'q' => "trashed=false and (mimeType = 'application/vnd.google-apps.folder' or mimeType contains 'image/')"
                     );
@@ -83,8 +93,7 @@ class UpdateGoogleDrive extends Command
                         ]);
                     }
 
-                    $timeReport = $this->argument('time_report');
-                    if ($timeReport != 'all') {
+                    if ($page >= $pageLimit) {
                         break;
                     }
                 } catch (Exception $e) {

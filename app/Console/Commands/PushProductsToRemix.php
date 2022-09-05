@@ -164,14 +164,14 @@ class PushProductsToRemix extends Command
 
         $remixApi = new RemixApi();
         $response = $remixApi->request('POST', 'products/variable', null, $body);
-        if ($response && $response->getStatusCode() == '201') {
+        if ($response && ($response->getStatusCode() == '201' || $response->getStatusCode() == '200')) {
             $res = $response->getBody()->getContents();
             $res = json_decode($res);
 
             $this->info($res->message);
         } else {
             dump($body);
-            $this->error('Can not created');
+            $this->error('Can not created/updated');
         }
 
     }

@@ -151,6 +151,9 @@ class ToolsController extends Controller {
                     $tags = [];
 
                     $namePTypes = explode(' @NamePType ', $product_variable->name);
+                    if (count($namePTypes) < 2 ) {
+                        dd("Vui lòng kiểm tra lại cấu trúc và cách đặt tên file.");
+                    }
                     $tCodes = explode('! ', str_replace(['(', ')'], '', $namePTypes[2]));
                     $codePType = str_replace(['t^ptype_', '@CodePType^'], '', trim($tCodes[2]));
                     $typeName = isset($productTypeTable[$codePType]) ? $productTypeTable[$codePType]->product_type_name : $codePType;
@@ -343,6 +346,10 @@ class ToolsController extends Controller {
                     $tags = [];
 
                     $namePTypes = explode(' @NamePType ', $product_variable->name);
+                    if (count($namePTypes) < 2 ) {
+                        dd("Vui lòng kiểm tra lại cấu trúc và cách đặt tên file.");
+                    }
+
                     $tCodes = explode('! ', str_replace(['(', ')'], '', $namePTypes[2]));
 
                     $codePType = str_replace(['t^ptype_', '@CodePType^'], '', trim($tCodes[2]));

@@ -16,13 +16,16 @@
                 </div>
                 @if($link != '')
                 <div class="col-auto">
-                    <button type="submit" class="btn btn-info mb-3" name="action" value="download_csv">Download CSV</button>
+                    <button type="submit" class="btn btn-info mb-3" name="action" value="download_csv">CSV</button>
                 </div>
                 <div class="col-auto">
-                    <button type="submit" class="btn btn-info mb-3" name="action" value="download_csv_v2">Download CSV2</button>
+                    <button type="submit" class="btn btn-info mb-3" name="action" value="download_csv_v2">CSV2</button>
                 </div>
                 <div class="col-auto">
-                    <button type="submit" class="btn btn-info mb-3" name="action" value="download_csv_v3">Download CSV3</button>
+                    <button type="submit" class="btn btn-info mb-3" name="action" value="download_csv_v3">Hiep</button>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-info mb-3" name="action" value="download_csv_v4">GTF</button>
                 </div>
                 @endif
             </form>

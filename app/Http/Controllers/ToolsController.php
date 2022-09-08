@@ -27,9 +27,17 @@ class ToolsController extends Controller {
 
         $result = array();
 
+        if ($id && $action == 'download_csv_v4') {
+            $result_v4 = GoogleDriveFiles::flat_image_links_from_folder_id_by_mysql_query($id, 'tree');
+            $spreadsheet_url = Config::get('google.gtf_template_link');
+            $this->export_image_links_template($result_v4, $spreadsheet_url);
+            return true;
+        }
+
         if ($id && $action == 'download_csv_v3') {
             $result_v3 = GoogleDriveFiles::flat_image_links_from_folder_id_by_mysql_query($id, 'tree');
-            $this->export_image_links_v3($result_v3);
+            $spreadsheet_url = Config::get('google.hiep_template_link');
+            $this->export_image_links_template($result_v3, $spreadsheet_url);
             return true;
         }
 
@@ -264,9 +272,8 @@ class ToolsController extends Controller {
     }
 
 
-    protected function export_image_links_v3($data)
+    protected function export_image_links_template($data, $spreadsheet_url)
     {
-        $spreadsheet_url = Config::get('google.hiep_template_link');
         $csvData = GoogleDriveFiles::getGoogleDriveCsvFile($spreadsheet_url);
         $header = [
             'Handle',

@@ -62,7 +62,7 @@ class PushProductsToRemix extends Command
                 ->where('store', $store)
                 ->where('status', 'active')
                 ->where('id', '>', 0)
-                //->where('shopify_id', '=', 7486642716831)
+                ->where('shopify_id', '=', 7469491421343)
                 ->where('variants', 'not like', '"gid://shopify/Product/%')
                 ->orderBy('id', 'asc')
                 ->chunk($limit, function ($products) {
@@ -131,12 +131,13 @@ class PushProductsToRemix extends Command
             }
 
             $adjustPrice = 0;
-            //$adjustPrice = 13;
+            //$adjustPrice = 3;
             $var_arr[] = array(
+                'id' => $var->id,
                 'sku' => $var->sku,
                 'quantity' => 9999,
                 'price' => $var->price - $adjustPrice,
-                'compareAtPrice' => $var->compare_at_price - $adjustPrice,
+                'compareAtPrice' => ($adjustPrice > 0 ? $var->price : $var->compare_at_price),
                 'option1' => $var->option1,
                 'option2' => $var->option2,
                 'option3' => $var->option3,
@@ -156,6 +157,7 @@ class PushProductsToRemix extends Command
             'productType' => $p->productType,
             'status' => 'publish',
             'tags' => $p->tags,
+            'tagsArr' => explode(', ', $p->tags),
             'images' => $imagesArr,
             'options' => $optionsArr,
             'variants' => $var_arr,

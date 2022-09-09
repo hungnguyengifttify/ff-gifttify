@@ -108,7 +108,7 @@ class GoogleDriveFiles extends Model
             WITH RECURSIVE google_drive_files_flat
             AS (
                   SELECT gdf.id, gdf.`name` , gdf.webContentLink, gdf.mimeType, gdf.parentId, 1 `level`
-                    , @rownum := @rownum + 1 as stt, CONVERT('1', CHAR(300)) as stt_order
+                    , @rownum := @rownum + 1 as stt, CONVERT('1', CHAR(3000)) as stt_order
                   from google_drive_files gdf
                   cross join (select @rownum := 0) r
                   where gdf.id = :folderId
@@ -117,7 +117,7 @@ class GoogleDriveFiles extends Model
 
                   SELECT gdf.id, gdf.`name` , gdf.webContentLink, gdf.mimeType, gdf.parentId, `level`+1
                     , @rownum := @rownum + 1 as stt
-                    , (case gdf.mimeType when 'application/vnd.google-apps.folder' then CONCAT( CONVERT(gdff.stt_order, CHAR) , LEFT(gdf.`name`,10) ) else CONCAT( CONVERT(gdff.stt_order, CHAR) , LEFT(gdf.`name`,10) ) end )  as stt_order
+                    , (case gdf.mimeType when 'application/vnd.google-apps.folder' then CONCAT( CONVERT(gdff.stt_order, CHAR) , LEFT(gdf.`name`,50) ) else CONCAT( CONVERT(gdff.stt_order, CHAR) , LEFT(gdf.`name`,50) ) end )  as stt_order
                   FROM google_drive_files gdf
                   INNER JOIN google_drive_files_flat gdff ON gdff.id = gdf.parentId
                   WHERE `level` < $deepLevel

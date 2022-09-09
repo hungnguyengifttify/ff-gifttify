@@ -18,9 +18,9 @@
                 <div class="col-auto">
                     <button type="submit" class="btn btn-info mb-3" name="action" value="download_csv">CSV</button>
                 </div>
-                <div class="col-auto">
+                {{--<div class="col-auto">
                     <button type="submit" class="btn btn-info mb-3" name="action" value="download_csv_v2">CSV2</button>
-                </div>
+                </div>--}}
                 <div class="col-auto">
                     <button type="submit" class="btn btn-info mb-3" name="action" value="download_csv_v3">Hiep</button>
                 </div>

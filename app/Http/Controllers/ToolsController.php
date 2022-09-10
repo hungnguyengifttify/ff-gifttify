@@ -37,7 +37,7 @@ class ToolsController extends Controller {
         if ($id && $action == 'download_csv_v3') {
             $result_v3 = GoogleDriveFiles::flat_image_links_from_folder_id_by_mysql_query($id, 'tree');
             $spreadsheet_url = Config::get('google.hiep_template_link');
-            $this->export_image_links_template($result_v3, $spreadsheet_url);
+            $this->export_image_links_template($result_v3, $spreadsheet_url, true);
             return true;
         }
 
@@ -272,7 +272,7 @@ class ToolsController extends Controller {
     }
 
 
-    protected function export_image_links_template($data, $spreadsheet_url)
+    protected function export_image_links_template($data, $spreadsheet_url, $ignoreCheckDb = false)
     {
         $csvData = GoogleDriveFiles::getGoogleDriveCsvFile($spreadsheet_url);
         $header = [
@@ -326,7 +326,11 @@ class ToolsController extends Controller {
             'Status'
         ];
 
-        $productTypeTable = DB::table('product_type')->get()->keyBy('folder_mk')->toArray();
+        $productTypeTable = array();
+        if ($ignoreCheckDb == false) {
+            $productTypeTable = DB::table('product_type')->get()->keyBy('folder_mk')->toArray();
+        }
+
         $rowData = [];
         $numberValue = count($header);
         for ($i = 0; $i < $numberValue; $i++) {
@@ -337,28 +341,26 @@ class ToolsController extends Controller {
         $excelData[] = $header;
         $p = 1;
 
-        // Set default falue
-        $rowData[array_search('Variant Inventory Policy', $header)] =  'deny';
-        $rowData[array_search('Variant Fulfillment Service', $header)] =  'manual';
-        $rowData[array_search('Variant Requires Shipping', $header)] =  'TRUE';
-        $rowData[array_search('Variant Taxable', $header)] = 'FALSE';
-        $rowData[array_search('Variant Grams', $header)] = 500;
-        $rowData[array_search('Variant Inventory Qty', $header)] = '0';
-        $rowData[array_search('Status', $header)] = 'active';
-
-
         foreach ($data as $key => $dateData) {
             foreach ($dateData->children as $dbProduct) {
                 foreach ($dbProduct->children as $product_variable) {
                     $tags = [];
-                    $namePTypes = explode('(', $product_variable->name);
+
+                    if (str_contains($product_variable->name, '@NamePType')) { //Rule cu
+                        $strIncTitle = $product_variable->name;
+                    } else { // rule moi
+                        $strIncTitle = substr($dateData->name, 0, strpos($dateData->name, '^'));
+                        $strIncTitle = str_replace('@FileName', $product_variable->name, $strIncTitle);
+                    }
+                    $namePTypes = explode('(', $strIncTitle);
 
                     $title = $namePTypes[0];
                     $folderMk = $dbProduct->name;
 
-                    $title = str_replace('@NamePType', $productTypeTable[$folderMk]->product_type_name??'', $title);
-                    $codePType = $productTypeTable[$folderMk]->product_type_code??'';
+                    $title = str_replace('@NamePType', $productTypeTable[$folderMk]->product_type_name ?? $folderMk, $title);
+                    $codePType = $productTypeTable[$folderMk]->product_type_code ?? $folderMk;
 
+                    $vendor = "";
                     if(isset($namePTypes[1])) {
                         $namePTypes[1] = str_replace(['(', ')'], '', $namePTypes[1]);
                         preg_match('/vendor_([^!]+)/', $namePTypes[1], $attData);
@@ -374,6 +376,14 @@ class ToolsController extends Controller {
                             $tags[] = trim($attData[1]);
                         }
                     }
+
+                    $rowData[array_search('Variant Inventory Policy', $header)] =  'deny';
+                    $rowData[array_search('Variant Fulfillment Service', $header)] =  'manual';
+                    $rowData[array_search('Variant Requires Shipping', $header)] =  'TRUE';
+                    $rowData[array_search('Variant Taxable', $header)] = 'FALSE';
+                    $rowData[array_search('Variant Grams', $header)] = 500;
+                    $rowData[array_search('Variant Inventory Qty', $header)] = '0';
+                    $rowData[array_search('Status', $header)] = 'active';
 
                     $csvProductTypeData = $csvData[$folderMk] ?? array();
                     $bodyHtml = $csvProductTypeData[0]['Description'] ?? '';
@@ -391,7 +401,6 @@ class ToolsController extends Controller {
                     $rowData[array_search('Gift Card', $header)] = 'FALSE';
                     $rowData[array_search('Variant Weight Unit', $header)] = $productTempate['weight_uom_name'] ?? 'kg';
 
-
                     if (isset($csvProductTypeData)) {
                         foreach ($csvProductTypeData as $indexKey => $product) {
                             if (count($product)) {
@@ -402,7 +411,7 @@ class ToolsController extends Controller {
                                 $rowData[array_search('Option3 Name', $header)] = $product['Option3 Name'] ?? '';
                                 $rowData[array_search('Option3 Value', $header)] = $product['Option3 Value'] ?? '';
                                 $rowData[array_search('Variant Price', $header)] = $product['Price'] ?? '';
-                                $rowData[array_search('Variant Compare At Price', $header)] = $product['Price'] ?? '';
+                                $rowData[array_search('Variant Compare At Price', $header)] = $product['Compare Price'] ?? '';
                             }
                             if ($indexKey > 0) {
                                 $rowData[array_search('Title', $header)] = '';
@@ -415,6 +424,7 @@ class ToolsController extends Controller {
                                 $rowData[array_search('Vendor', $header)] = '';
                                 $rowData[array_search('Type', $header)] =  '';
                                 $rowData[array_search('Tags', $header)] =  '';
+                                $rowData[array_search('Body (HTML)', $header)] = '';
                             }
 
                             $rowData[array_search('Image Src', $header)] = $product_variable->children[$indexKey]->link ?? '';
@@ -434,10 +444,18 @@ class ToolsController extends Controller {
                         $rowData[array_search('Option2 Value', $header)] = '';
                         $rowData[array_search('Option3 Name', $header)] = '';
                         $rowData[array_search('Option3 Value', $header)] = '';
-                        $rowData[array_search('Variant Price', $header)] = $csvProductTypeData[0]['Price'] ?? 0;
-                        $rowData[array_search('Variant Compare At Price', $header)] = $csvProductTypeData[0]['Price'] ?? 0;
+                        $rowData[array_search('Variant Price', $header)] = '';//$csvProductTypeData[0]['Price'] ?? 0;
+                        $rowData[array_search('Variant Compare At Price', $header)] = '';//$csvProductTypeData[0]['Compare Price'] ?? 0;
                         $rowData[array_search('Body (HTML)', $header)] = '';
 
+                        $rowData[array_search('Variant Inventory Policy', $header)] = '';
+                        $rowData[array_search('Variant Fulfillment Service', $header)] = '';
+                        $rowData[array_search('Variant Requires Shipping', $header)] = '';
+                        $rowData[array_search('Variant Taxable', $header)] = '';
+                        $rowData[array_search('Variant Grams', $header)] = '';
+                        $rowData[array_search('Variant Inventory Qty', $header)] = '';
+                        $rowData[array_search('Status', $header)] = '';
+                        $rowData[array_search('Variant Weight Unit', $header)] = '';
 
                         foreach ($product_variable->children as $keyPrv => $image) {
                             if ($keyPrv > 0) {

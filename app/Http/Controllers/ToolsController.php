@@ -358,7 +358,7 @@ class ToolsController extends Controller {
                     $folderMk = $dbProduct->name;
 
                     $title = str_replace('@NamePType', $productTypeTable[$folderMk]->product_type_name ?? $folderMk, $title);
-                    $codePType = $productTypeTable[$folderMk]->product_type_code ?? $folderMk;
+                    $codePType = $productTypeTable[$folderMk]->product_type_name ?? $folderMk;
 
                     $vendor = "";
                     if(isset($namePTypes[1])) {

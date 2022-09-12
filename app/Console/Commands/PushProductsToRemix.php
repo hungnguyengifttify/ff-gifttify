@@ -62,9 +62,9 @@ class PushProductsToRemix extends Command
                 ->where('store', $store)
                 ->where('status', 'active')
                 ->where('id', '>', 0)
-                ->where('shopify_id', '=', 7469491421343)
+                ->where('shopify_id', '=', 7339148673183)
                 ->where('variants', 'not like', '"gid://shopify/Product/%')
-                ->orderBy('id', 'asc')
+                ->orderBy('id', 'desc')
                 ->chunk($limit, function ($products) {
 
                 foreach ($products as $p) {

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Carbon\Carbon;
 use FacebookAds\Http\Response;
 use Illuminate\Support\Facades\Config;
 
@@ -106,7 +107,15 @@ class Track17Service
         $response = [];
         $response['shipper_address']['country'] = $data['accepted'][0]['track_info']['shipping_info']['shipper_address']['country'];
         $response['recipient_address']['country'] = $data['accepted'][0]['track_info']['shipping_info']['recipient_address']['country'];
-        $response['tracking']  = $data['accepted'][0]['track_info']['tracking']['providers'][0]['events'];
+        $response['status'] = $data['accepted'][0]['track_info']['latest_status']['status'];
+        $response['time_metrics'] = $data['accepted'][0]['track_info']['time_metrics'];
+        foreach ($data['accepted'][0]['track_info']['tracking']['providers'][0]['events'] as $val) {
+            $response['tracking'][] = [
+                'time' =>  $val['time_utc'],
+                'content' =>  $val['location'] . ' - ' . $val['description'],
+                'stage' =>  $val['stage']
+            ];
+        }
         return $response;
     }
 }

@@ -341,6 +341,7 @@ class ToolsController extends Controller {
         $excelData[] = $header;
         $p = 1;
 
+        $checkKeyArr = array();
         foreach ($data as $key => $dateData) {
             foreach ($dateData->children as $dbProduct) {
                 if (!isset($dbProduct->children)) continue;
@@ -367,16 +368,25 @@ class ToolsController extends Controller {
 
                     $title = str_ireplace(array('@NamePType', '@NamePtype'), $productTypeTable[$folderMk]->product_type_name ?? $folderMk, $title);
                     $codePType = $productTypeTable[$folderMk]->product_type_name ?? $folderMk;
+                    $productTypeCode = $productTypeTable[$folderMk]->product_type_code ?? '';
 
-                    $vendor = "";
+                    $vendor = $sku = "";
                     if(isset($namePTypes[1])) {
                         $namePTypes[1] = str_replace(['(', ')'], '', $namePTypes[1]);
                         preg_match('/vendor_([^!]+)/', $namePTypes[1], $attData);
                         $vendor = isset($attData[1]) ? trim($attData[1]) : '';
+                        $vendor = str_ireplace(array('@PCode'), $productTypeCode, $vendor);
+                        $vendor = strtoupper($vendor);
 
-                        $attData = null;
-                        preg_match('/sku_([^!]+)/', $namePTypes[1], $attData);
-                        $sku = isset($attData[1]) ? trim($attData[1]) : '';
+                        $fName = strtoupper($product_variable->name);
+                        $fName = str_replace(array(' ', '"', "'"),'', $fName);
+                        $sku = $vendor . "-$fName";
+                        if (isset($checkKeyArr[$sku])) {
+                            $checkKeyArr[$sku] = $checkKeyArr[$sku] + 1;
+                            $sku = $vendor . "-" . $checkKeyArr[$sku];
+                        } else {
+                            $checkKeyArr[$sku] = 1;
+                        }
 
                         $attData = null;
                         preg_match('/tags_([^!]+)/', $namePTypes[1], $attData);
@@ -412,6 +422,20 @@ class ToolsController extends Controller {
                     if (isset($csvProductTypeData)) {
                         foreach ($csvProductTypeData as $indexKey => $product) {
                             if (count($product)) {
+                                $option1 = strtoupper($product['Option1 Value'] != 'Default Title' ? $product['Option1 Value'] : '');
+                                $option1 = str_replace(array(' ', '"', "'"),'', $option1);
+                                $option1 = $option1 != '' ? '-' . $option1 : '';
+
+                                $option2 = strtoupper($product['Option2 Value'] != 'Default Title' ? $product['Option2 Value'] : '');
+                                $option2 = str_replace(array(' ', '"', "'"),'', $option2);
+                                $option2 = $option2 != '' ? '-' . $option2 : '';
+
+                                $option3 = strtoupper($product['Option3 Value'] != 'Default Title' ? $product['Option3 Value'] : '');
+                                $option3 = str_replace(array(' ', '"', "'"),'', $option3);
+                                $option3 = $option3 != '' ? '-' . $option3 : '';
+
+                                $varSku = $sku != '' ? $sku . $option1 . $option2 . $option3 : '';
+
                                 $rowData[array_search('Option1 Name', $header)] = $product['Option1 Name'] ?? '';
                                 $rowData[array_search('Option1 Value', $header)] = $product['Option1 Value'] ?? '';
                                 $rowData[array_search('Option2 Name', $header)] = $product['Option2 Name'] ?? '';
@@ -420,6 +444,7 @@ class ToolsController extends Controller {
                                 $rowData[array_search('Option3 Value', $header)] = $product['Option3 Value'] ?? '';
                                 $rowData[array_search('Variant Price', $header)] = $product['Price'] ?? '';
                                 $rowData[array_search('Variant Compare At Price', $header)] = $product['Compare Price'] ?? '';
+                                $rowData[array_search('Variant SKU', $header)] = $varSku;
                             }
                             if ($indexKey > 0) {
                                 $rowData[array_search('Title', $header)] = '';
@@ -454,6 +479,7 @@ class ToolsController extends Controller {
                         $rowData[array_search('Option3 Value', $header)] = '';
                         $rowData[array_search('Variant Price', $header)] = '';//$csvProductTypeData[0]['Price'] ?? 0;
                         $rowData[array_search('Variant Compare At Price', $header)] = '';//$csvProductTypeData[0]['Compare Price'] ?? 0;
+                        $rowData[array_search('Variant SKU', $header)] = '';
                         $rowData[array_search('Body (HTML)', $header)] = '';
 
                         $rowData[array_search('Variant Inventory Policy', $header)] = '';

@@ -343,21 +343,29 @@ class ToolsController extends Controller {
 
         foreach ($data as $key => $dateData) {
             foreach ($dateData->children as $dbProduct) {
+                if (!isset($dbProduct->children)) continue;
                 foreach ($dbProduct->children as $product_variable) {
                     $tags = [];
 
                     if (str_contains($product_variable->name, '@NamePType')) { //Rule cu
                         $strIncTitle = $product_variable->name;
                     } else { // rule moi
-                        $strIncTitle = substr($dateData->name, 0, strpos($dateData->name, '^'));
-                        $strIncTitle = str_replace('@FileName', $product_variable->name, $strIncTitle);
+                        $strIncTitle = $dateData->name;
+                        if (str_contains($strIncTitle, '^')) {
+                            $strIncTitle = substr($strIncTitle, 0, strpos($strIncTitle, '^'));
+                        }
+                        $strIncTitle = str_ireplace('@FileName', $product_variable->name, $strIncTitle);
                     }
                     $namePTypes = explode('(', $strIncTitle);
+
+                    if ($dateData->name == 'Lovely Halloween @FIleName (tags_collection,name_@FileName)') {
+                        //dd($strIncTitle, $namePTypes, substr($dateData->name, 0, strpos($dateData->name, '^')));
+                    }
 
                     $title = $namePTypes[0];
                     $folderMk = $dbProduct->name;
 
-                    $title = str_replace(array('@NamePType', '@NamePtype'), $productTypeTable[$folderMk]->product_type_name ?? $folderMk, $title);
+                    $title = str_ireplace(array('@NamePType', '@NamePtype'), $productTypeTable[$folderMk]->product_type_name ?? $folderMk, $title);
                     $codePType = $productTypeTable[$folderMk]->product_type_name ?? $folderMk;
 
                     $vendor = "";

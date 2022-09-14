@@ -15,8 +15,6 @@ class TrackingController extends Controller
         $this->track17Service = $track17Service;
     }
 
-
-
     public function registerTrackingNumber(Request $request)
     {
         $response = [
@@ -49,8 +47,19 @@ class TrackingController extends Controller
             'error' => [],
             'message' => 'Get tracking success!'
         ];
+
         $id = $request->id;
         $dataTrack = $this->track17Service->getTrackInfo($id);
+        if (isset($dataTrack['error']['code']) &&  $dataTrack['error']['code'] == '-18019902') {
+            $register = $this->track17Service->registerTrackingNumber($id);
+            if (isset($register['error']) && count($register['error'])) {
+                $response['status'] = false;
+                $response['message'] = $register['error']['message'];
+                goto next;
+            }else{
+                $dataTrack = $this->track17Service->getTrackInfo($id);
+            }
+        }
 
         if (isset($dataTrack['error'])) {
             $response['status'] = false;
@@ -59,6 +68,7 @@ class TrackingController extends Controller
             $response['data'] = $dataTrack;
         }
 
+        next:
         return response()->json($response);
     }
 }

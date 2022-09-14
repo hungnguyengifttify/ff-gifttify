@@ -71,7 +71,7 @@ class Track17Service
             $body = $resTracking->getBody()->getContents();
             $body = json_decode($body, true);
 
-            if ($body['code'] == 0 && count($body['data']['rejected'][0])) {
+            if ($body['code'] == 0 && isset($body['data']['rejected'][0]) && count($body['data']['rejected'][0])) {
                 return $body['data']['rejected'][0];
             }
             return $body;

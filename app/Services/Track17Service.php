@@ -50,7 +50,7 @@ class Track17Service
 
     function __construct()
     {
-        $this->token = Config::get('track17.token_17');
+        $this->token = env('TRACK_17_TOKEN', '');
         $this->client = new \GuzzleHttp\Client();
     }
 

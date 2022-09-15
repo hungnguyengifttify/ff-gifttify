@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use App\Models\GoogleDriveFiles;
+use App\Models\ImportProductsCsv;
 use App\Services\OdooService;
 use App\Services\Spreadsheet;
 use Carbon\Carbon;
@@ -72,7 +73,7 @@ class ToolsController extends Controller {
 
             $excelData[] = $line;
         }
-        $fileName = "image_links_" . time() . '.xls';
+        $fileName = "image_links_" . time() . '.csv';
         return Spreadsheet::exportFromArray($excelData, $fileName);
     }
 
@@ -267,7 +268,7 @@ class ToolsController extends Controller {
                 }
             }
         }
-        $fileName = "image_links_" . time() . '_v2.xls';
+        $fileName = "image_links_" . time() . '_v2.csv';
         return Spreadsheet::exportFromArray($excelData, $fileName);
     }
 
@@ -513,7 +514,7 @@ class ToolsController extends Controller {
                 }
             }
         }
-        $fileName = "image_links_" . time() . '_v2.xls';
+        $fileName = "image_links_" . time() . '_v2.csv';
         return Spreadsheet::exportFromArray($excelData, $fileName);
     }
 
@@ -523,5 +524,142 @@ class ToolsController extends Controller {
         $spreadsheet_url="https://docs.google.com/spreadsheets/d/e/2PACX-1vR4zFgf2v83U8DmJO-p8P8xxdkW2z_fi0DPjZBxton_eUhWg-kUgEImGSUYY_YtH1ldcwyn93eISrSe/pub?gid=0&single=true&output=csv";
         $data = GoogleDriveFiles::getGoogleDriveCsvFile($spreadsheet_url);
         dd($data);
+    }
+
+    public function upload_products_csv(Request $request) {
+        return view('tools.upload_products_csv' );
+    }
+
+    public function post_products_csv(Request $request) {
+        $csvFile = $_FILES['csv_file']['tmp_name'];
+
+        $csvData = GoogleDriveFiles::getGoogleDriveCsvFile($csvFile);
+        $products = array();
+
+        $productTypeTable = array();
+        $productTypeTable = DB::table('product_type')->get()->keyBy('product_type_name')->toArray();
+
+        foreach ($csvData as $k => $variants) {
+            $id = uniqid('g_', true) . rand(1000,9999);
+
+            $prod = $variants[0];
+            if (count($prod) != 48) {
+                //dump($prod);
+                continue;
+            }
+
+            $products[$k] = array(
+                'shopifyId' => $id,
+                'slug' => $prod['Handle'],
+                'title' => $prod['Title'],
+                'productType' => $productTypeTable[$prod['Type']]->product_type_code ?? $prod['Type'],
+                'status' => 'publish',
+                'tags' => $prod['Tags'],
+                'tagsArr' => array_map('trim', explode(',', $prod['Tags'])),
+                'images' => array(),
+                'options' => array(),
+                'variants' => array(),
+                'seo' => array(
+                    'title' => $prod['Title'],
+                    'description' => $prod['Title']
+                )
+            );
+
+            $imagesArr = $option1Arr = $option2Arr = $option3Arr = $var_arr = array();
+            foreach ($variants as $variant) {
+                $img = $variant['Image Src'] ?? '';
+                if ($img) {
+                    $imagesArr[] = array(
+                        'src' => $img,
+                        'alt' => '',
+                    );
+                }
+
+                if ($variant['Variant Price'] > 0) {
+                    $varId = uniqid('gv_', true) . rand(1000,9999);
+                    $varValue = array(
+                        'id' => $varId,
+                        'sku' => $variant['Variant SKU'],
+                        'quantity' => 9999,
+                        'price' => $variant['Variant Price'],
+                        'option1' => $variant['Option1 Value'] != 'Default Title' ? $variant['Option1 Value'] : '',
+                        'option2' => $variant['Option2 Value'] != 'Default Title' ? $variant['Option2 Value'] : '',
+                        'option3' => $variant['Option3 Value'] != 'Default Title' ? $variant['Option3 Value'] : '',
+                        'image' => array(
+                            'src' => $prod['Image Src'] ?? '',
+                            'alt' => '',
+                            'position' => 1
+                        ),
+                    );
+                    if ($variant['Variant Compare At Price']) {
+                        $varValue['compareAtPrice'] = $variant['Variant Compare At Price'];
+                    }
+                    $var_arr[] = $varValue;
+                }
+
+                $opt1 = $variant['Option1 Value'];
+                if ($opt1) {
+                    $option1Arr[] = $opt1;
+                }
+
+                $opt2 = $variant['Option2 Value'];
+                if ($opt2) {
+                    $option2Arr[] = $opt2;
+                }
+
+                $opt3 = $variant['Option3 Value'];
+                if ($opt3) {
+                    $option3Arr[] = $opt3;
+                }
+            }
+            $products[$k]['images'] = $imagesArr;
+            $products[$k]['variants'] = $var_arr;
+
+            if ($prod['Option1 Name'] != 'Title' && $prod['Option1 Name'] != '' && !empty($option1Arr)) {
+                $products[$k]['options'][] = array(
+                    'name' => $prod['Option1 Name'],
+                    'type' => '',
+                    'values' => $option1Arr,
+                );
+            }
+
+            if ($prod['Option2 Name'] != 'Title' && $prod['Option2 Name'] != '' && !empty($option2Arr)) {
+                $products[$k]['options'][] = array(
+                    'name' => $prod['Option2 Name'],
+                    'type' => '',
+                    'values' => $option2Arr,
+                );
+            }
+
+            if ($prod['Option3 Name'] != 'Title' && $prod['Option3 Name'] != '' && !empty($option3Arr)) {
+                $products[$k]['options'][] = array(
+                    'name' => $prod['Option3 Name'],
+                    'type' => '',
+                    'values' => $option3Arr,
+                );
+            }
+        }
+
+        foreach ($products as $v) {
+            ImportProductsCsv::insertOrIgnore([
+                'slug' => $v['slug'] ?? '',
+            ], [
+                'shopifyId' => $v['shopifyId'] ?? '',
+                'title' => $v['title'] ?? '',
+                'productType' => $v['productType'] ?? '',
+                'status' => $v['status'] ?? '',
+                'tags' => $v['tags'] ?? '',
+                'tagsArr' => json_encode($v['tagsArr'] ?? '') ?? '',
+                'images' => json_encode($v['images'] ?? '') ?? '',
+                'options' => json_encode($v['options'] ?? '') ?? '',
+                'variants' => json_encode($v['variants'] ?? '') ?? '',
+                'seo' => json_encode($v['seo'] ?? '') ?? '',
+                'syncedStatus' => $v['syncedStatus'] ?? 0,
+                'syncedImage' => $v['syncedImage'] ?? 0,
+            ]);
+        }
+
+        return redirect('/upload_products_csv')->with('status', 'Uploaded products! Please check after 10 minutes!');
+
     }
 }

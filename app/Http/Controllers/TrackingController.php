@@ -69,6 +69,23 @@ class TrackingController extends Controller
         }
 
         next:
+
+        $getHtml = $request->getHtml ?? false;
+        if ($getHtml) {
+            $html = 'No information. We seem can\'t identify the number.';
+            if (isset($response['data']['tracking'])) {
+                $html .= "<h5>Shipping from {$response['data']['shipper_address']['country']} to {$response['data']['recipient_address']['country']}</h5>";
+                $html .= "<table>";
+                foreach ($response['data']['tracking'] as $k => $v) {
+                    $html .= "<tr>";
+                    $html .= "<td style='width:210px;'>{$v['time']}</td>";
+                    $html .= "<td>{$v['content']}</td>";
+                    $html .= "</tr>";
+                }
+                $html .= "<table>";
+            }
+            $response['html'] = $html;
+        }
         return response()->json($response);
     }
 }

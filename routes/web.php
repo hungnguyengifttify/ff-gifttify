@@ -43,6 +43,12 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/accounts_status/', [\App\Http\Controllers\DashboardController::class, 'accounts_status'])
         ->name('accounts_status');
+
+    Route::get('/upload_products_csv/', [\App\Http\Controllers\ToolsController::class, 'upload_products_csv'])
+        ->name('upload_products_csv');
+
+    Route::post('/post_products_csv/', [\App\Http\Controllers\ToolsController::class, 'post_products_csv'])
+        ->name('post_products_csv');
 });
 
 Route::get('/get_image_links', [\App\Http\Controllers\ToolsController::class, 'get_image_links'])

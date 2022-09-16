@@ -11,6 +11,7 @@ use App\Models\ImportProductsCsv;
 use App\Services\OdooService;
 use App\Services\Spreadsheet;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Artisan;
 
 class ToolsController extends Controller {
 
@@ -599,17 +600,17 @@ class ToolsController extends Controller {
 
                 $opt1 = $variant['Option1 Value'];
                 if ($opt1) {
-                    $option1Arr[] = $opt1;
+                    $option1Arr[$opt1] = $opt1;
                 }
 
                 $opt2 = $variant['Option2 Value'];
                 if ($opt2) {
-                    $option2Arr[] = $opt2;
+                    $option2Arr[$opt2] = $opt2;
                 }
 
                 $opt3 = $variant['Option3 Value'];
                 if ($opt3) {
-                    $option3Arr[] = $opt3;
+                    $option3Arr[$opt3] = $opt3;
                 }
             }
             $products[$k]['images'] = $imagesArr;
@@ -619,7 +620,7 @@ class ToolsController extends Controller {
                 $products[$k]['options'][] = array(
                     'name' => $prod['Option1 Name'],
                     'type' => '',
-                    'values' => $option1Arr,
+                    'values' => array_values($option1Arr),
                 );
             }
 
@@ -627,7 +628,7 @@ class ToolsController extends Controller {
                 $products[$k]['options'][] = array(
                     'name' => $prod['Option2 Name'],
                     'type' => '',
-                    'values' => $option2Arr,
+                    'values' => array_values($option2Arr),
                 );
             }
 
@@ -635,7 +636,7 @@ class ToolsController extends Controller {
                 $products[$k]['options'][] = array(
                     'name' => $prod['Option3 Name'],
                     'type' => '',
-                    'values' => $option3Arr,
+                    'values' => array_values($option3Arr),
                 );
             }
         }
@@ -643,7 +644,6 @@ class ToolsController extends Controller {
         foreach ($products as $v) {
             ImportProductsCsv::insertOrIgnore([
                 'slug' => $v['slug'] ?? '',
-            ], [
                 'shopifyId' => $v['shopifyId'] ?? '',
                 'title' => $v['title'] ?? '',
                 'productType' => $v['productType'] ?? '',
@@ -659,6 +659,7 @@ class ToolsController extends Controller {
             ]);
         }
 
+        Artisan::queue('products_csv:import');
         return redirect('/upload_products_csv')->with('status', 'Uploaded products! Please check after 10 minutes!');
 
     }

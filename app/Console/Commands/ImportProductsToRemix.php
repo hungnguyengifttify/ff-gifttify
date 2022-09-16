@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use App\Models\Products;
 use App\Models\ProductVariants;
@@ -26,7 +27,7 @@ class ImportProductsToRemix extends Command
      *
      * @var string
      */
-    protected $description = 'Import Remix Products';
+    protected $description = 'Push Queue Image to S3';
 
     /**
      * Execute the console command.
@@ -37,31 +38,82 @@ class ImportProductsToRemix extends Command
     {
         $this->info("Cron Job Push Remix Products running at ". now());
 
-        $limit = 1000;
-        DB::table('import_products_csv')
+        $limit = 10000;
+        $products = DB::table('import_products_csv')
             ->select("*")
             ->where('syncedStatus', '=', 0)
-            ->where('id', '=', 3)
+            //->where('id', '=', 3)
             ->orderBy('id', 'asc')
-            ->chunk($limit, function ($products) {
+            ->limit($limit)
+            ->get();
 
-            foreach ($products as $p) {
-                ImportProductsCsv::where('id',$p->id)->update(['syncedStatus'=>1]);
-            }
+        foreach ($products as $p) {
+            ImportProductsCsv::where('id',$p->id)->update(['syncedStatus'=>1]);
+        }
 
-            foreach ($products as $p) {
-                $this->pushProduct($p);
-            }
-        });
+        foreach ($products as $p) {
+            $p = $this->pushImagesToS3($p);
+            $this->pushProductToRemix($p);
+        }
 
         $this->info("Cron Job Push Remix Products DONE at ". now());
     }
 
-    public function pushProduct ($p) {
+    public function pushImagesToS3 ($p) {
+        $id = $p->id;
+        $images = json_decode($p->images);
+
+        $phpTimeZone = 'Asia/Ho_Chi_Minh';
+        $today = Carbon::now($phpTimeZone);
+
+        $newImages = array();
+        foreach ($images as $k => $img) {
+            $file = $img->src;
+            $fileName = $today->format('Y/m/d') . '/' . $id . '/' . ($k+1) . '.jpg';
+
+            $uploadDir = 'images/';
+            $fullpath = $uploadDir . $fileName;
+            $res = \Storage::disk('s3')->put($fullpath, file_get_contents($file), 'public');
+            if ($res) {
+                $url = Config::get('filesystems.disks.s3.url') . "/" . Config::get('filesystems.disks.s3.bucket') . "/{$fullpath}";
+                $newImages[] = array(
+                    'src' => $url,
+                    'alt' => '',
+                );
+            }
+        }
+
+        $variants = json_decode($p->variants);
+        foreach ($variants as $k => $variant) {
+            if (!empty($newImages[0]['src'])) {
+                $variant->image->src = $newImages[0]['src'];
+                $variants[$k] = $variant;
+            }
+        }
+
+        if (!empty($newImages)) {
+            ImportProductsCsv::where('id',$p->id)->update([
+                's3Images'=>json_encode($newImages),
+                'variants' => json_encode($variants),
+                'syncedImage' => 2
+            ]);
+            $p->images = json_encode($newImages);
+            $p->variants = json_encode($variants);
+        } else {
+            ImportProductsCsv::where('id',$p->id)->update([
+                'syncedImage' => -1
+            ]);
+        }
+        return $p;
+    }
+
+    public function pushProductToRemix ($p) {
         if (!$p->productType) {
             $this->info($p->shopifyId . ' ProductType is empty');
+            ImportProductsCsv::where('id',$p->id)->update(['syncedStatus'=>-1]);
             return false;
         }
+
         $body = array(
             'shopifyId' => $p->shopifyId,
             'slug' => $p->slug,
@@ -86,14 +138,13 @@ class ImportProductsToRemix extends Command
 
             $resApi = array();
             preg_match("/Variable product '(\w+)' created./", $res->message, $resApi);
-            $returnedId = $resApi[1] ?? '';
+            $returnedId = $resApi[1] ?? $p->returnedId;
 
             ImportProductsCsv::where('id',$p->id)->update(['syncedStatus'=>2, 'returnedId' => $returnedId]);
         } else {
             dump($body);
             $this->error('Can not created/updated');
-            ImportProductsCsv::where('id',$p->id)->update(['syncedStatus'=>-1]);
+            ImportProductsCsv::where('id',$p->id)->update(['syncedStatus'=>-2]);
         }
-
     }
 }

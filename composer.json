@@ -12,6 +12,7 @@
         "laravel/framework": "^9.11",
         "laravel/sanctum": "^2.14.1",
         "laravel/tinker": "^2.7",
+        "league/flysystem-aws-s3-v3": "^3.3",
         "phpoffice/phpspreadsheet": "^1.24",
         "psr/simple-cache": "2.0.0",
         "signifly/laravel-shopify": "^1.2"

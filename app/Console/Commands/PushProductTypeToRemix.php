@@ -20,7 +20,7 @@ class PushProductTypeToRemix extends Command
      * time ['all', 'today']
      * @var string
      */
-    protected $signature = 'producttype:remix {time_report?}';
+    protected $signature = 'producttype:remix';
 
     /**
      * The console command description.
@@ -68,11 +68,6 @@ class PushProductTypeToRemix extends Command
                         $this->error('Can not created');
                     }
 
-                }
-
-                $timeReport = $this->argument('time_report') ?? '';
-                if ($timeReport != 'all') {
-                    return false;
                 }
             });
 

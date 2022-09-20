@@ -32,7 +32,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/campaign_info', [\App\Http\Controllers\DashboardController::class, 'campaign_info'])
         ->name('campaign_info');
 
-    Route::get('/create_shopify_csv', [\App\Http\Controllers\ToolsController::class, 'create_shopify_csv'])
+    Route::match(array('GET', 'POST'),'/create_shopify_csv', [\App\Http\Controllers\ToolsController::class, 'create_shopify_csv'])
         ->name('create_shopify_csv');
 
     Route::get('/order_management/{store}', [\App\Http\Controllers\OrderManagementController::class, 'list'])

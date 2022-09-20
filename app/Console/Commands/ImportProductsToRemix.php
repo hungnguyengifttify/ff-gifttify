@@ -12,6 +12,7 @@ use Signifly\Shopify\Shopify;
 use Illuminate\Support\Facades\DB;
 use App\Services\RemixApi;
 use App\Models\Dashboard;
+use Illuminate\Support\Facades\Http;
 
 class ImportProductsToRemix extends Command
 {
@@ -52,7 +53,6 @@ class ImportProductsToRemix extends Command
         }
 
         foreach ($products as $p) {
-            $p = $this->pushImagesToS3($p);
             $this->pushProductToRemix($p);
         }
 
@@ -68,12 +68,33 @@ class ImportProductsToRemix extends Command
 
         $newImages = array();
         foreach ($images as $k => $img) {
-            $file = $img->src;
+            $file = $img->src . '&export=download';
             $fileName = $today->format('Y/m/d') . '/' . $id . '/' . ($k+1) . '.jpg';
 
             $uploadDir = 'images/';
             $fullpath = $uploadDir . $fileName;
-            $res = \Storage::disk('s3')->put($fullpath, file_get_contents($file), 'public');
+
+            $res = false;
+            try {
+                /*$response = Http::withHeaders([
+                    'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36'
+                ])->withOptions([
+                    //'debug' => true,
+                    'allow_redirects' => true,
+                    'stream' => true
+                ])->get( $file );
+                $res = \Storage::disk('s3')->put($fullpath, $response->getBody()->getContents(), 'public');*/
+
+                $res = \Storage::disk('s3')->put($fullpath, file_get_contents($file), 'public');
+            } catch (\Exception $e) {
+                dump($e->getMessage());
+                ImportProductsCsv::where('id',$p->id)->update([
+                    'syncedImage' => -1,
+                    'syncedStatus'=> -1
+                ]);
+                return false;
+            }
+
             if ($res) {
                 $url = Config::get('filesystems.disks.s3.url') . "/" . Config::get('filesystems.disks.s3.bucket') . "/{$fullpath}";
                 $newImages[] = array(
@@ -139,7 +160,6 @@ class ImportProductsToRemix extends Command
             $resApi = array();
             preg_match("/Variable product '(\w+)' created./", $res->message, $resApi);
             $returnedId = $resApi[1] ?? $p->returnedId;
-
             ImportProductsCsv::where('id',$p->id)->update(['syncedStatus'=>2, 'returnedId' => $returnedId]);
         } else {
             dump($body);

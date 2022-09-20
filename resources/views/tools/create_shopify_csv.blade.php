@@ -1,39 +1,38 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Create Shopify Csv
-        </h2>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="text-primary text-decoration-underline fw-bold nav-link active" aria-current="page" href="https://tools.gifttify.com/create_shopify_csv">Shopify CSV</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="text-primary text-decoration-underline nav-link" href="https://tools.gifttify.com/upload_products_csv">Push to Web</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <form class="row g-3">
+            <form method="post" enctype="multipart/form-data" class="row g-3">
+                @csrf
                 <div class="col-auto w-50">
-                    <input type="text" class="form-control" name="link" id="link" value="{{$link}}" placeholder="Link">
+                    <input type="file" required class="form-control" name="json_file" id="json_file" placeholder="Link">
                 </div>
                 <div class="col-auto">
-                    <button type="submit" class="btn btn-primary mb-3" name="action" value="get_links">Get links</button>
+                    <button type="submit" class="btn btn-primary mb-3" name="action" value="download_csv">Download Csv</button>
                 </div>
-                @if($link != '')
-                <div class="col-auto">
-                    <button type="submit" class="btn btn-info mb-3" name="action" value="download_csv">Download CSV</button>
-                </div>
-                @endif
             </form>
         </div>
     </div>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            @foreach($result as $k => $v)
-                {!! str_repeat("&nbsp", ($v['level'] - 1)*5 ) !!}
-                @if($v['type'] == 'folder')
-                    {{ "[{$v['name']}]" }}
-                @else
-                    <a href="{{$v['link']}}" target="_blank">{{$v['name']}}</a>
-                @endif
-                <br/>
-            @endforeach
+
         </div>
     </div>
 </x-app-layout>

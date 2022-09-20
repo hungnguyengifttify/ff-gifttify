@@ -150,13 +150,35 @@ class Dashboard extends Model
                     'viewId' => '272705190'
                 )
             ),
-        );
 
+            'demo' => array (
+                'storeType' => 'woocommerce',
+                'domain' => 'hippiesy.com',
+                'woocommerce' => array (
+                    'phpTimeZone' => 'America/Los_Angeles',
+                    'domain' => env('WOOCOMMERCE_DEMO_DOMAIN', ''),
+                    'consumerKey' => env('WOOCOMMERCE_DEMO_CONSUMER_KEY', ''),
+                    'consumerSecret' => env('WOOCOMMERCE_DEMO_CONSUMER_SECRET', ''),
+                    'dateTimeZone' => new \DateTimeZone('America/Los_Angeles'),
+                    'apiVersion' => 'wc/v3', // Enable the WP REST API integration
+                ),
+            ),
+        );
     }
 
     public static function getStoresList () {
         $allStore = Dashboard::getAllStoreConfig();
         return array_keys($allStore);
+    }
+
+    public static function getWooStoresList () {
+        $wooStore = [];
+        foreach(Dashboard::getAllStoreConfig() as $storeKey => $storeConfig){
+            if($storeConfig['storeType'] == 'woocommerce'){
+                $wooStore[] = $storeKey;
+            }
+        };
+        return $wooStore;
     }
 
     public static function getStoreFromAccountId ($accountId) {
@@ -178,6 +200,11 @@ class Dashboard extends Model
     public static function getShopifyConfig ($store) {
         $allStore = Dashboard::getAllStoreConfig();
         return isset($allStore[$store]['shopify']) ? $allStore[$store]['shopify'] : false;
+    }
+
+    public static function getWoocommerceConfig ($store) {
+        $allStore = Dashboard::getAllStoreConfig();
+        return isset($allStore[$store]['woocommerce']) ? $allStore[$store]['woocommerce'] : false;
     }
 
     public static function sort_result($a, $b)

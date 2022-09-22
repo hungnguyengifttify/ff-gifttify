@@ -26,6 +26,9 @@
                 <div class="col-auto">
                     <button type="submit" class="btn btn-primary mb-3" name="action" value="download_csv">Download Csv</button>
                 </div>
+                {{--<div class="col-auto">
+                    <button type="submit" class="btn btn-primary mb-3" name="action" value="download_csv_test">Test</button>
+                </div>--}}
             </form>
         </div>
     </div>

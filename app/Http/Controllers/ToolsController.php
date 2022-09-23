@@ -853,7 +853,7 @@ class ToolsController extends Controller {
         $checkKeyArr = array();
         $dateData = $data;
         $folderS3 = $dateData['folderS3'];
-        $colorArr = $dateData['color'];
+        $colorArr = $dateData['color'] ?? array();
 
         foreach ($dateData['pType'] as $pType => $dbProduct) {
             foreach ($dbProduct as $fileNameP => $product_variable) {

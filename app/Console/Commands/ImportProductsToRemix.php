@@ -135,6 +135,12 @@ class ImportProductsToRemix extends Command
             return false;
         }
 
+        if (empty(json_decode($p->variants))) {
+            $this->info($p->shopifyId . ' Variants is empty');
+            ImportProductsCsv::where('id',$p->id)->update(['syncedStatus'=>-1]);
+            return false;
+        }
+
         $body = array(
             'shopifyId' => $p->shopifyId,
             'slug' => $p->slug,

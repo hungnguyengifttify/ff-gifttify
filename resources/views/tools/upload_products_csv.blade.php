@@ -26,6 +26,10 @@
                 <div class="col-auto">
                     <button type="submit" class="btn btn-primary mb-3" name="upload" value="upload">Push to Web</button>
                 </div>
+
+                <div class="col-auto" style="display: none">
+                    <button type="submit" class="btn btn-danger mb-3" name="upload" value="delete">Delete Products</button>
+                </div>
             </form>
             @if (session('status'))
                 <div class="alert alert-success">

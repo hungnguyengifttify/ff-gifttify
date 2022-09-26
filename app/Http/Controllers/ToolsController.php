@@ -545,7 +545,8 @@ class ToolsController extends Controller {
 
     protected function export_image_links_local_template_test($data, $spreadsheet_url, $ignoreCheckDb = false)
     {
-        dd('Test_v5');
+        $csvData = GoogleDriveFiles::getGoogleDriveCsvFile($spreadsheet_url);
+        dd($spreadsheet_url, $csvData);
     }
 
     protected function export_image_links_local_template($data, $spreadsheet_url, $ignoreCheckDb = false)
@@ -855,6 +856,7 @@ class ToolsController extends Controller {
     }
 
     public function post_products_csv(Request $request) {
+        $shouldDelete = $request->input('upload') === 'delete' ? 1 : 0;
         $csvFile = $_FILES['csv_file']['tmp_name'];
 
         $csvData = GoogleDriveFiles::getGoogleDriveCsvFile($csvFile);
@@ -965,25 +967,33 @@ class ToolsController extends Controller {
         }
 
         foreach ($products as $v) {
-            ImportProductsCsv::insertOrIgnore([
-                'slug' => $v['slug'] ?? '',
-                'shopifyId' => $v['shopifyId'] ?? '',
-                'title' => $v['title'] ?? '',
-                'productType' => $v['productType'] ?? '',
-                'status' => $v['status'] ?? '',
-                'tags' => $v['tags'] ?? '',
-                'tagsArr' => json_encode($v['tagsArr'] ?? '') ?? '',
-                'images' => json_encode($v['images'] ?? '') ?? '',
-                'options' => json_encode($v['options'] ?? '') ?? '',
-                'variants' => json_encode($v['variants'] ?? '') ?? '',
-                'seo' => json_encode($v['seo'] ?? '') ?? '',
-                'syncedStatus' => $v['syncedStatus'] ?? 0,
-                'syncedImage' => $v['syncedImage'] ?? 0,
-            ]);
+            if ($shouldDelete) {
+                ImportProductsCsv::where('slug', $v['slug'] ?? '')->update(['syncedStatus' => -99]);
+            } else {
+                ImportProductsCsv::insertOrIgnore([
+                    'slug' => $v['slug'] ?? '',
+                    'shopifyId' => $v['shopifyId'] ?? '',
+                    'title' => $v['title'] ?? '',
+                    'productType' => $v['productType'] ?? '',
+                    'status' => $v['status'] ?? '',
+                    'tags' => $v['tags'] ?? '',
+                    'tagsArr' => json_encode($v['tagsArr'] ?? '') ?? '',
+                    'images' => json_encode($v['images'] ?? '') ?? '',
+                    'options' => json_encode($v['options'] ?? '') ?? '',
+                    'variants' => json_encode($v['variants'] ?? '') ?? '',
+                    'seo' => json_encode($v['seo'] ?? '') ?? '',
+                    'syncedStatus' => $v['syncedStatus'] ?? 0,
+                    'syncedImage' => $v['syncedImage'] ?? 0,
+                ]);
+            }
         }
 
-        Artisan::queue('products_csv:import');
-        return redirect('/upload_products_csv')->with('status', 'Uploaded products! Please check after 10 minutes!');
-
+        if ($shouldDelete) {
+            Artisan::queue('products_csv:delete');
+            return redirect('/upload_products_csv')->with('status', 'Deleted products! Please check after 10 minutes!');
+        } else {
+            Artisan::queue('products_csv:import');
+            return redirect('/upload_products_csv')->with('status', 'Uploaded products! Please check after 10 minutes!');
+        }
     }
 }

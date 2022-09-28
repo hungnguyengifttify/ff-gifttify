@@ -20,7 +20,7 @@ class ToolsController extends Controller {
             $file = $_FILES['json_file']['tmp_name'] ?? '';
             $content = file_get_contents($file);
             $data = json_decode($content, true);
-            $spreadsheet_url = Config::get('google.gtf_template_link');
+            $spreadsheet_url = Config::get('google.gtf_template_link_updated');
 
             if ($request->input('action') == 'download_csv_test') {
                 $this->export_image_links_local_template_test($data, $spreadsheet_url);

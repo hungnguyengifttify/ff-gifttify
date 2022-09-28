@@ -9,4 +9,5 @@ return [
     ],
     'hiep_template_link' => env('GOOGLE_HIEP_TEMPLATE_LINK', ''),
     'gtf_template_link' => env('GOOGLE_GTF_TEMPLATE_LINK', ''),
+    'gtf_template_link_updated' => env('GOOGLE_GTF_TEMPLATE_LINK_UPDATED', ''),
 ];

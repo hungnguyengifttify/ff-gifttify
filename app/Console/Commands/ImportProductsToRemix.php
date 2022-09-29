@@ -21,7 +21,7 @@ class ImportProductsToRemix extends Command
      * time ['all', 'today']
      * @var string
      */
-    protected $signature = 'products_csv:import';
+    protected $signature = 'products_csv:import {store?}';
 
     /**
      * The console command description.
@@ -39,14 +39,27 @@ class ImportProductsToRemix extends Command
     {
         $this->info("Cron Job Push Remix Products running at ". now());
 
+        $store = $this->argument('store') ?? '';
         $limit = 1000;
-        $products = DB::table('import_products_csv')
-            ->select("*")
-            ->where('syncedStatus', '=', 0)
-            //->where('id', '=', 3)
-            ->orderBy('id', 'asc')
-            ->limit($limit)
-            ->get();
+
+        if ($store) {
+            $products = DB::table('import_products_csv')
+                ->select("*")
+                ->where('syncedStatus', '=', 0)
+                ->where('store', '=', $store)
+                //->where('id', '=', 3)
+                ->orderBy('id', 'asc')
+                ->limit($limit)
+                ->get();
+        } else {
+            $products = DB::table('import_products_csv')
+                ->select("*")
+                ->where('syncedStatus', '=', 0)
+                //->where('id', '=', 3)
+                ->orderBy('id', 'asc')
+                ->limit($limit)
+                ->get();
+        }
 
         foreach ($products as $p) {
             ImportProductsCsv::where('id',$p->id)->update(['syncedStatus'=>1]);
@@ -155,13 +168,18 @@ class ImportProductsToRemix extends Command
             'seo' => json_decode($p->seo)
         );
 
+        $query = '';
+        if ($p->store != 'thecreattify.co') {
+            $query = "?db=" . ImportProductsCsv::$storeDb[$p->store];
+        }
+
         $remixApi = new RemixApi();
-        $response = $remixApi->request('POST', 'products/variable', null, $body);
+        $response = $remixApi->request('POST', 'products/variable' . $query, null, $body);
         if ($response && ($response->getStatusCode() == '201' || $response->getStatusCode() == '200')) {
             $res = $response->getBody()->getContents();
             $res = json_decode($res);
 
-            $this->info($res->message);
+            $this->info($res->message . " - Store {$p->store}");
 
             $resApi = array();
             preg_match("/Variable product '(\w+)' created./", $res->message, $resApi);

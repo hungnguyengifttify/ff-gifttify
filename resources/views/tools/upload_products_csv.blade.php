@@ -21,6 +21,13 @@
             <form action="/post_products_csv" method="post" enctype="multipart/form-data" class="row g-3">
                 @csrf <!-- {{ csrf_field() }} -->
                 <div class="col-auto w-50">
+                    <select name="store" class="form-select" aria-label="--- Chọn Store ---" required>
+                        <option value="" selected>--- Chọn Store ---</option>
+                        <option value="thecreattify.co">thecreattify.co</option>
+                        <option value="store.gifttify.com">store.gifttify.com</option>
+                    </select>
+                </div>
+                <div class="col-auto w-50">
                     <input type="file" class="form-control" name="csv_file" id="csv_file" value="" placeholder="Csv Products File">
                 </div>
                 <div class="col-auto">

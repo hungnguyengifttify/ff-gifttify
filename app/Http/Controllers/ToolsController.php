@@ -1179,6 +1179,7 @@ class ToolsController extends Controller {
     }
 
     public function post_products_csv(Request $request) {
+        $store = $request->input('store') ?? 'thecreattify.co';
         $shouldDelete = $request->input('upload') === 'delete' ? 1 : 0;
         $shouldUpdate = $request->input('upload') === 'update' ? 1 : 0;
         $csvFile = $_FILES['csv_file']['tmp_name'];
@@ -1292,7 +1293,7 @@ class ToolsController extends Controller {
 
         foreach ($products as $v) {
             if ($shouldUpdate) {
-                ImportProductsCsv::where('slug', $v['slug'] ?? '')->update([
+                ImportProductsCsv::where('slug', $v['slug'] ?? '')->where('store', $store)->update([
                     'title' => $v['title'] ?? '',
                     'productType' => $v['productType'] ?? '',
                     'status' => $v['status'] ?? '',
@@ -1305,7 +1306,7 @@ class ToolsController extends Controller {
                     'syncedStatus' => 0
                 ]);
             } else if ($shouldDelete) {
-                ImportProductsCsv::where('slug', $v['slug'] ?? '')->update(['syncedStatus' => -99]);
+                ImportProductsCsv::where('slug', $v['slug'] ?? '')->where('store', $store)->update(['syncedStatus' => -99]);
             } else {
                 ImportProductsCsv::insertOrIgnore([
                     'slug' => $v['slug'] ?? '',
@@ -1321,6 +1322,7 @@ class ToolsController extends Controller {
                     'seo' => json_encode($v['seo'] ?? '') ?? '',
                     'syncedStatus' => $v['syncedStatus'] ?? 0,
                     'syncedImage' => $v['syncedImage'] ?? 0,
+                    'store' => $store,
                 ]);
             }
         }

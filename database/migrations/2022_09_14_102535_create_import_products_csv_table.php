@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('productType');
             $table->string('status');
             $table->string('tags');
+            $table->string('store');
             $table->json('tagsArr');
             $table->json('images');
             $table->json('options');
@@ -34,7 +35,7 @@ return new class extends Migration
             $table->dateTime('syncedImageTime')->nullable(true);
 
             $table->timestamps();
-            $table->unique('slug');
+            $table->unique(['slug', 'store']);
         });
     }
 

@@ -9,6 +9,11 @@ class ImportProductsCsv extends Model
 {
     use HasFactory;
 
+    public static $storeDb = array(
+        'thecreattify.co' => 1,
+        'store.gifttify.com' => 2,
+    );
+
     protected $table = 'import_products_csv';
 
     protected $fillable = [

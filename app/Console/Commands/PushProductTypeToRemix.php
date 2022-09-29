@@ -42,6 +42,7 @@ class PushProductTypeToRemix extends Command
         $stores = array('thecreattify');
         foreach ($stores as $store) {
             DB::table('remix_product_type')
+                //->whereIn('id', array('WOSB', 'PH', 'CWM'))
                 ->orderBy('id', 'asc')
                 ->chunk($limit, function ($productTypes) {
 

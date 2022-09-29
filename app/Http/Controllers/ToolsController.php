@@ -1059,7 +1059,8 @@ class ToolsController extends Controller {
                 $rowData[array_search('SEO Title', $header)] =  $title;
                 $rowData[array_search('Type', $header)] =  $codePType;
                 $rowData[array_search('Handle', $header)] =  strtolower(str_replace([',',')','('], '', str_replace([' '], '_', $title))) . '_' . Carbon::now()->format('dmy') . '_p' . $p;
-                $rowData[array_search('Body (HTML)', $header)] = $bodyHtml;
+                //$rowData[array_search('Body (HTML)', $header)] = $bodyHtml;
+                $rowData[array_search('Body (HTML)', $header)] = '';
                 $rowData[array_search('Published', $header)] =  'TRUE';
                 $rowData[array_search('Gift Card', $header)] = 'FALSE';
                 $rowData[array_search('Variant Weight Unit', $header)] = $productTempate['weight_uom_name'] ?? 'kg';
@@ -1179,6 +1180,7 @@ class ToolsController extends Controller {
 
     public function post_products_csv(Request $request) {
         $shouldDelete = $request->input('upload') === 'delete' ? 1 : 0;
+        $shouldUpdate = $request->input('upload') === 'update' ? 1 : 0;
         $csvFile = $_FILES['csv_file']['tmp_name'];
 
         $csvData = GoogleDriveFiles::getGoogleDriveCsvFile($csvFile);
@@ -1289,7 +1291,20 @@ class ToolsController extends Controller {
         }
 
         foreach ($products as $v) {
-            if ($shouldDelete) {
+            if ($shouldUpdate) {
+                ImportProductsCsv::where('slug', $v['slug'] ?? '')->update([
+                    'title' => $v['title'] ?? '',
+                    'productType' => $v['productType'] ?? '',
+                    'status' => $v['status'] ?? '',
+                    'tags' => $v['tags'] ?? '',
+                    'tagsArr' => json_encode($v['tagsArr'] ?? '') ?? '',
+                    'images' => json_encode($v['images'] ?? '') ?? '',
+                    'options' => json_encode($v['options'] ?? '') ?? '',
+                    'variants' => json_encode($v['variants'] ?? '') ?? '',
+                    'seo' => json_encode($v['seo'] ?? '') ?? '',
+                    'syncedStatus' => 0
+                ]);
+            } else if ($shouldDelete) {
                 ImportProductsCsv::where('slug', $v['slug'] ?? '')->update(['syncedStatus' => -99]);
             } else {
                 ImportProductsCsv::insertOrIgnore([

@@ -27,6 +27,10 @@
                     <button type="submit" class="btn btn-primary mb-3" name="upload" value="upload">Push to Web</button>
                 </div>
 
+                <div class="col-auto" style="{!! isset($_REQUEST['update']) && $_REQUEST['update'] == 1 ? '' : 'display:none'; !!}">
+                    <button type="submit" class="btn btn-danger mb-3" name="upload" value="update">Update Products</button>
+                </div>
+
                 <div class="col-auto" style="{!! isset($_REQUEST['delete']) && $_REQUEST['delete'] == 1 ? '' : 'display:none'; !!}">
                     <button type="submit" class="btn btn-danger mb-3" name="upload" value="delete">Delete Products</button>
                 </div>

@@ -48,6 +48,13 @@ class DeleteProductsToRemix extends Command
             ->limit($limit)
             ->get();
 
+        /*$products = DB::select("
+            select *
+            from import_products_csv i
+            where syncedStatus = 2 and returnedId is not null and json_length(variants)=0
+            ;"
+        );*/
+
         foreach ($products as $p) {
             ImportProductsCsv::where('id',$p->id)->update(['syncedStatus'=>-98]);
         }

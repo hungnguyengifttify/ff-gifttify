@@ -39,7 +39,7 @@ class ImportProductsToRemix extends Command
     {
         $this->info("Cron Job Push Remix Products running at ". now());
 
-        $limit = 10000;
+        $limit = 1000;
         $products = DB::table('import_products_csv')
             ->select("*")
             ->where('syncedStatus', '=', 0)

@@ -18,15 +18,17 @@ class ToolsController extends Controller {
     public function create_shopify_csv(Request $request) {
         if ($request->getMethod() == 'POST') {
             $file = $_FILES['json_file']['tmp_name'] ?? '';
+            $nameDisplay = $_FILES['json_file']['name'] ?? '';
             $content = file_get_contents($file);
             $data = json_decode($content, true);
             $spreadsheet_url = Config::get('google.gtf_template_link_updated');
 
             if ($request->input('action') == 'download_csv_test') {
-                $this->export_image_links_local_template_test($data, $spreadsheet_url);
+                dump(    );
+                $this->export_image_links_local_template_test($data, $spreadsheet_url, false);
                 return true;
             }
-            $this->export_image_links_local_template($data, $spreadsheet_url);
+            $this->export_image_links_local_template($data, $spreadsheet_url, false, $nameDisplay);
             return true;
         }
         return view('tools.create_shopify_csv');
@@ -545,318 +547,10 @@ class ToolsController extends Controller {
 
     protected function export_image_links_local_template_test($data, $spreadsheet_url, $ignoreCheckDb = false)
     {
-        $csvData = GoogleDriveFiles::getGoogleDriveCsvFile($spreadsheet_url);
-        $header = [
-            'Handle',
-            'Title',
-            'Body (HTML)',
-            'Vendor',
-            'Type',
-            'Tags',
-            'Published',
-            'Option1 Name',
-            'Option1 Value',
-            'Option2 Name',
-            'Option2 Value',
-            'Option3 Name',
-            'Option3 Value',
-            'Variant SKU',
-            'Variant Grams',
-            'Variant Inventory Tracker',
-            'Variant Inventory Qty',
-            'Variant Inventory Policy',
-            'Variant Fulfillment Service',
-            'Variant Price',
-            'Variant Compare At Price',
-            'Variant Requires Shipping',
-            'Variant Taxable',
-            'Variant Barcode',
-            'Image Src',
-            'Image Position',
-            'Image Alt Text',
-            'Gift Card',
-            'SEO Title',
-            'SEO Description',
-            'Google Shopping / Google Product Category',
-            'Google Shopping / Gender',
-            'Google Shopping / Age Group',
-            'Google Shopping / MPN',
-            'Google Shopping / AdWords Grouping',
-            'Google Shopping / AdWords Labels',
-            'Google Shopping / Condition',
-            'Google Shopping / Custom Product',
-            'Google Shopping / Custom Label 0',
-            'Google Shopping / Custom Label 1',
-            'Google Shopping / Custom Label 2',
-            'Google Shopping / Custom Label 3',
-            'Google Shopping / Custom Label 4',
-            'Variant Image',
-            'Variant Weight Unit',
-            'Variant Tax Code',
-            'Cost per item',
-            'Status'
-        ];
-
-        $productTypeTable = array();
-        if ($ignoreCheckDb == false) {
-            $productTypeTable = DB::table('product_type')->get()->keyBy('folder_mk')->toArray();
-        }
-
-        $rowData = [];
-        $numberValue = count($header);
-        for ($i = 0; $i < $numberValue; $i++) {
-            $rowData[$i] = '';
-        }
-
-        $excelData = [];
-        $excelData[] = $header;
-        $p = 1;
-
-        $checkKeyArr = array();
-        $dateData = $data;
-        $folderS3 = $dateData['folderS3'];
-        $colorArr = $dateData['color'] ?? array();
-
-        foreach ($dateData['pType'] as $pType => $dbProduct) {
-            foreach ($dbProduct as $fileNameP => $product_variable) {
-                $csvProductTypeData = $csvData[$pType] ?? array();
-                if (count($csvProductTypeData) > 0) {
-                    $updatedCsvProductTypeData = $csvProductTypeData;
-                    foreach ($csvProductTypeData as $kCsv => $vCsv) {
-                        if (isset($colorArr[$pType][$fileNameP])) {
-                            foreach ($colorArr[$pType][$fileNameP] as $kColor => $color) {
-                                if ($kColor == 0) {
-                                    if ($csvProductTypeData[$kCsv]['Option1 Name'] == 'Title' || $csvProductTypeData[$kCsv]['Option1 Name'] == '') {
-                                        $updatedCsvProductTypeData[$kCsv]['Option1 Name'] = 'Color';
-                                        $updatedCsvProductTypeData[$kCsv]['Option1 Value'] = $color;
-                                    } elseif ($csvProductTypeData[$kCsv]['Option2 Name'] == '') {
-                                        $updatedCsvProductTypeData[$kCsv]['Option2 Name'] = 'Color';
-                                        $updatedCsvProductTypeData[$kCsv]['Option2 Value'] = $color;
-                                    } elseif ($csvProductTypeData[$kCsv]['Option3 Name'] == '') {
-                                        $updatedCsvProductTypeData[$kCsv]['Option3 Name'] = 'Color';
-                                        $updatedCsvProductTypeData[$kCsv]['Option3 Value'] = $color;
-                                    }
-                                    $updatedCsvProductTypeData[$kCsv]['Variant Image'] = $color;
-                                    foreach ($product_variable as $imgVariable) {
-                                        if (str_contains($imgVariable, $color)) {
-                                            $updatedCsvProductTypeData[$kCsv]['Variant Image'] = $imgVariable;
-                                            break;
-                                        }
-                                    }
-                                } else {
-                                    $newValue = $csvProductTypeData[$kCsv];
-                                    if ($newValue['Option1 Name'] == 'Title' || $newValue['Option1 Name'] == '') {
-                                        $newValue['Option1 Name'] = 'Color';
-                                        $newValue['Option1 Value'] = $color;
-                                    } elseif ($newValue['Option2 Name'] == '') {
-                                        $newValue['Option2 Name'] = 'Color';
-                                        $newValue['Option2 Value'] = $color;
-                                    } elseif ($newValue['Option3 Name'] == '') {
-                                        $newValue['Option3 Name'] = 'Color';
-                                        $newValue['Option3 Value'] = $color;
-                                    }
-                                    $newValue['Variant Image'] = $color;
-                                    foreach ($product_variable as $imgVariable) {
-                                        if (str_contains($imgVariable, $color)) {
-                                            $newValue['Variant Image'] = $imgVariable;
-                                            break;
-                                        }
-                                    }
-                                    $updatedCsvProductTypeData[] = $newValue;
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-            if (!empty($csvProductTypeData)) {
-                $csvData[$pType] = $updatedCsvProductTypeData;
-            }
-        }
-
-        foreach ($dateData['pType'] as $pType => $dbProduct) {
-            foreach ($dbProduct as $fileNameP => $product_variable) {
-                $tags = [];
-
-                $strIncTitle = $dateData['name'];
-                if (str_contains($strIncTitle, '^')) {
-                    $strIncTitle = substr($strIncTitle, 0, strpos($strIncTitle, '^'));
-                }
-                $strIncTitle = str_ireplace('@FileName', $fileNameP, $strIncTitle);
-                $namePTypes = explode('(', $strIncTitle);
-
-                $title = $namePTypes[0];
-                $folderMk = $pType;
-
-                $title = str_ireplace(array('@NamePType', '@NamePtype'), $productTypeTable[$folderMk]->product_type_name ?? $folderMk, $title);
-                if ($title !== 'Christmas Candy Cane Seamless Pattern Blue Background Bedding Set') {
-                    continue;
-                }
-                dump('$title', $title);
-                dump('$pType', $pType);
-
-                $codePType = $productTypeTable[$folderMk]->product_type_name ?? $folderMk;
-                $productTypeCode = $productTypeTable[$folderMk]->product_type_code ?? '';
-
-                $vendor = $sku = "";
-                if(isset($namePTypes[1])) {
-                    $namePTypes[1] = str_replace(['(', ')'], '', $namePTypes[1]);
-                    preg_match('/vendor_([^!]+)/', $namePTypes[1], $attData);
-                    $vendor = isset($attData[1]) ? trim($attData[1]) : '';
-                    $vendor = str_ireplace(array('@PCode'), $productTypeCode, $vendor);
-                    $vendor = strtoupper($vendor);
-
-                    $fName = strtoupper($fileNameP);
-                    $fName = str_replace(array(' ', '"', "'"),'', $fName);
-                    if ($vendor) {
-                        $sku = $vendor . "-$fName";
-                        if (isset($checkKeyArr[$sku])) {
-                            $checkKeyArr[$sku] = $checkKeyArr[$sku] + 1;
-                            $sku = $vendor . "-" . $checkKeyArr[$sku];
-                        } else {
-                            $checkKeyArr[$sku] = 1;
-                        }
-                    }
-
-                    $attData = null;
-                    preg_match('/tags_([^!]+)/', $namePTypes[1], $attData);
-                    if(isset($attData[1])) {
-                        $tags[] = trim($attData[1]);
-                    }
-                }
-
-                $rowData[array_search('Variant Inventory Policy', $header)] =  'deny';
-                $rowData[array_search('Variant Fulfillment Service', $header)] =  'manual';
-                $rowData[array_search('Variant Requires Shipping', $header)] =  'TRUE';
-                $rowData[array_search('Variant Taxable', $header)] = 'FALSE';
-                $rowData[array_search('Variant Grams', $header)] = 500;
-                $rowData[array_search('Variant Inventory Qty', $header)] = '0';
-                $rowData[array_search('Status', $header)] = 'active';
-                $rowData[array_search('Variant Image', $header)] = '';
-
-                $csvProductTypeData = $csvData[$folderMk] ?? array();
-                dump('$folderMk', $folderMk);
-                dump('$csvProductTypeData', $csvProductTypeData);
-                dump('$csvData', $csvData);
-
-                $bodyHtml = $csvProductTypeData[0]['Description'] ?? '';
-
-                $tags[] = $folderMk;
-
-                $rowData[array_search('Vendor', $header)] = $vendor;
-                $rowData[array_search('Tags', $header)] = implode(', ', $tags);
-                $rowData[array_search('Title', $header)] =  $title;
-                $rowData[array_search('SEO Title', $header)] =  $title;
-                $rowData[array_search('Type', $header)] =  $codePType;
-                $rowData[array_search('Handle', $header)] =  strtolower(str_replace([',',')','('], '', str_replace([' '], '_', $title))) . '_' . Carbon::now()->format('dmy') . '_p' . $p;
-                $rowData[array_search('Body (HTML)', $header)] = $bodyHtml;
-                $rowData[array_search('Published', $header)] =  'TRUE';
-                $rowData[array_search('Gift Card', $header)] = 'FALSE';
-                $rowData[array_search('Variant Weight Unit', $header)] = $productTempate['weight_uom_name'] ?? 'kg';
-
-                if (isset($csvProductTypeData)) {
-                    foreach ($csvProductTypeData as $indexKey => $product) {
-                        dump($product);
-                        if (count($product)) {
-                            $option1 = strtoupper($product['Option1 Value'] != 'Default Title' ? $product['Option1 Value'] : '');
-                            $option1 = str_replace(array(' ', '"', "'"),'', $option1);
-                            $option1 = $option1 != '' ? '-' . $option1 : '';
-
-                            $option2 = strtoupper($product['Option2 Value'] != 'Default Title' ? $product['Option2 Value'] : '');
-                            $option2 = str_replace(array(' ', '"', "'"),'', $option2);
-                            $option2 = $option2 != '' ? '-' . $option2 : '';
-
-                            $option3 = strtoupper($product['Option3 Value'] != 'Default Title' ? $product['Option3 Value'] : '');
-                            $option3 = str_replace(array(' ', '"', "'"),'', $option3);
-                            $option3 = $option3 != '' ? '-' . $option3 : '';
-
-                            $varSku = $sku != '' ? $sku . $option1 . $option2 . $option3 : '';
-
-                            $rowData[array_search('Option1 Name', $header)] = $product['Option1 Name'] ?? '';
-                            $rowData[array_search('Option1 Value', $header)] = $product['Option1 Value'] ?? '';
-                            $rowData[array_search('Option2 Name', $header)] = $product['Option2 Name'] ?? '';
-                            $rowData[array_search('Option2 Value', $header)] = $product['Option2 Value'] ?? '';
-                            $rowData[array_search('Option3 Name', $header)] = $product['Option3 Name'] ?? '';
-                            $rowData[array_search('Option3 Value', $header)] = $product['Option3 Value'] ?? '';
-                            $rowData[array_search('Variant Price', $header)] = $product['Price'] ?? '';
-                            $rowData[array_search('Variant Compare At Price', $header)] = $product['Compare Price'] ?? '';
-                            $rowData[array_search('Variant SKU', $header)] = $varSku;
-                            $rowData[array_search('Variant Image', $header)] = isset($product['Variant Image']) ? "{$folderS3}{$product['Variant Image']}" : '';;
-                        }
-                        if ($indexKey > 0) {
-                            $rowData[array_search('Title', $header)] = '';
-                            $rowData[array_search('Option1 Name', $header)] = '';
-                            $rowData[array_search('Option2 Name', $header)] = '';
-                            $rowData[array_search('Option3 Name', $header)] = '';
-                            $rowData[array_search('SEO Title', $header)] =  '';
-                            $rowData[array_search('Published', $header)] =  '';
-                            $rowData[array_search('Gift Card', $header)] = '';
-                            $rowData[array_search('Vendor', $header)] = '';
-                            $rowData[array_search('Type', $header)] =  '';
-                            $rowData[array_search('Tags', $header)] =  '';
-                            $rowData[array_search('Body (HTML)', $header)] = '';
-                        }
-
-                        $rowData[array_search('Image Src', $header)] = isset($product_variable[$indexKey]) ? "{$folderS3}{$product_variable[$indexKey]}" : '';
-                        $rowData[array_search('Image Position', $header)] =  isset($product_variable[$indexKey]) ? ($indexKey + 1) : '';
-                        $rowData[array_search('Image Alt Text', $header)] = '';
-                        if (isset($product_variable[$indexKey])) {
-                            unset($product_variable[$indexKey]);
-                        }
-                        $excelData[] = $rowData;
-                    }
-                }
-
-                if (isset($product_variable) && count($product_variable)) {
-                    $rowData[array_search('Option1 Name', $header)] = '';
-                    $rowData[array_search('Option1 Value', $header)] = '';
-                    $rowData[array_search('Option2 Name', $header)] = '';
-                    $rowData[array_search('Option2 Value', $header)] = '';
-                    $rowData[array_search('Option3 Name', $header)] = '';
-                    $rowData[array_search('Option3 Value', $header)] = '';
-                    $rowData[array_search('Variant Price', $header)] = '';//$csvProductTypeData[0]['Price'] ?? 0;
-                    $rowData[array_search('Variant Compare At Price', $header)] = '';//$csvProductTypeData[0]['Compare Price'] ?? 0;
-                    $rowData[array_search('Variant SKU', $header)] = '';
-                    $rowData[array_search('Variant Image', $header)] = '';
-                    $rowData[array_search('Body (HTML)', $header)] = '';
-
-                    $rowData[array_search('Variant Inventory Policy', $header)] = '';
-                    $rowData[array_search('Variant Fulfillment Service', $header)] = '';
-                    $rowData[array_search('Variant Requires Shipping', $header)] = '';
-                    $rowData[array_search('Variant Taxable', $header)] = '';
-                    $rowData[array_search('Variant Grams', $header)] = '';
-                    $rowData[array_search('Variant Inventory Qty', $header)] = '';
-                    $rowData[array_search('Status', $header)] = '';
-                    $rowData[array_search('Variant Weight Unit', $header)] = '';
-
-                    foreach ($product_variable as $keyPrv => $image) {
-                        if ($keyPrv > 0) {
-                            $rowData[array_search('Title', $header)] = '';
-                            $rowData[array_search('SEO Title', $header)] =  '';
-                            $rowData[array_search('Published', $header)] =  '';
-                            $rowData[array_search('Gift Card', $header)] = '';
-                            $rowData[array_search('Vendor', $header)] = '';
-                            $rowData[array_search('Type', $header)] =  '';
-                            $rowData[array_search('Tags', $header)] =  '';
-                        }
-
-                        $rowData[array_search('Image Src', $header)] = $image ? "{$folderS3}{$image}" : '';
-                        $rowData[array_search('Image Position', $header)] = ($keyPrv + 1);
-                        $rowData[array_search('Image Alt Text', $header)] = '';
-                        $excelData[] = $rowData;
-                    }
-                }
-
-                $p++;
-            }
-        }
-        dd('Test2');
-        $fileName = "image_links_" . time() . '_v5.csv';
-        return Spreadsheet::exportFromArray($excelData, $fileName);
+        dd('Test');
     }
 
-    protected function export_image_links_local_template($data, $spreadsheet_url, $ignoreCheckDb = false)
+    protected function export_image_links_local_template($data, $spreadsheet_url, $ignoreCheckDb = false, $fileNameDisplay = '')
     {
         $errorArr = array();
         $csvData = GoogleDriveFiles::getGoogleDriveCsvFile($spreadsheet_url);
@@ -1170,7 +864,7 @@ class ToolsController extends Controller {
             dd(array_values($errorArr));
         }
 
-        $fileName = "image_links_" . time() . '_v5.csv';
+        $fileName = "Csv_file_{$fileNameDisplay}.csv";
         return Spreadsheet::exportFromArray($excelData, $fileName);
     }
 
@@ -1327,12 +1021,13 @@ class ToolsController extends Controller {
             }
         }
 
+        $totalProducts = count($csvData) ?? 0;
         if ($shouldDelete) {
-            Artisan::queue('products_csv:delete');
-            return redirect('/upload_products_csv')->with('status', 'Deleted products! Please check after 10 minutes!');
+            Artisan::queue("products_csv:delete");
+            return redirect('/upload_products_csv')->with('status', $totalProducts . ' Deleted products! Please check after 10 minutes!');
         } else {
-            Artisan::queue('products_csv:import');
-            return redirect('/upload_products_csv')->with('status', 'Uploaded products! Please check after 10 minutes!');
+            Artisan::queue("products_csv:import $store");
+            return redirect('/upload_products_csv')->with('status', $totalProducts . ' Uploaded products! Please check after 10 minutes!');
         }
     }
 }

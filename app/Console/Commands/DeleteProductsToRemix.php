@@ -80,7 +80,7 @@ class DeleteProductsToRemix extends Command
             $res = $response->getBody()->getContents();
             $res = json_decode($res);
 
-            $this->info($res->message);
+            $this->info($res->message . " {$p->returnedId} - {$p->id}");
 
             ImportProductsCsv::where('id',$p->id)->delete();
         } else {

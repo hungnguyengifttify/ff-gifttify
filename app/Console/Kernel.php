@@ -28,7 +28,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('googledrive:trashed_files')->everyTwoHours();
         $schedule->command('fbacc:update')->everyMinute();
         $schedule->command('ga:crawl_google_analytic_campaigns')->everyMinute();
-        $schedule->command('products_csv:import')->everyMinute();
+        $schedule->command('products_csv:import store.gifttify.com')->everyMinute();
+        $schedule->command('products_csv:import thecreattify.co')->everyMinute();
     }
 
     /**

@@ -40,7 +40,7 @@ class ImportProductsToRemix extends Command
         $this->info("Cron Job Push Remix Products running at ". now());
 
         $store = $this->argument('store') ?? '';
-        $limit = 1000;
+        $limit = 2000;
 
         if ($store) {
             $products = DB::table('import_products_csv')

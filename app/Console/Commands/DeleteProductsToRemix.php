@@ -75,7 +75,14 @@ class DeleteProductsToRemix extends Command
         $body = array(
             'ids' => $ids
         );
-        $response = $remixApi->request('PUT', "products/variable/batch/delete", null, $body);
+
+        if (empty(ImportProductsCsv::$storeDb[$p->store])) {
+            dump($id);
+            $this->error('Can not deleted');
+            ImportProductsCsv::where('id',$p->id)->update(['syncedStatus'=>-97]);
+        }
+
+        $response = $remixApi->request('PUT', "products/variable/batch/delete?db=" . ImportProductsCsv::$storeDb[$p->store], null, $body);
         if ($response && ($response->getStatusCode() == '201' || $response->getStatusCode() == '200')) {
             $res = $response->getBody()->getContents();
             $res = json_decode($res);

@@ -912,6 +912,9 @@ class ToolsController extends Controller {
 
             $imagesArr = $option1Arr = $option2Arr = $option3Arr = $var_arr = array();
             foreach ($variants as $variant) {
+                if (!isset($variant['Variant Price'])) {
+                    continue;
+                }
                 $img = $variant['Image Src'] ?? '';
                 if ($img) {
                     $imagesArr[] = array(
@@ -920,7 +923,7 @@ class ToolsController extends Controller {
                     );
                 }
 
-                if ($variant['Variant Price'] > 0) {
+                if (isset($variant['Variant Price']) && $variant['Variant Price'] > 0) {
                     $varId = uniqid('gv_', true) . rand(1000,9999);
                     $varValue = array(
                         'id' => $varId,

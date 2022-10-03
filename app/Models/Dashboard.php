@@ -1121,13 +1121,13 @@ class Dashboard extends Model
             $result[$v]['budget'] = $adsResult[$v]['budget'] ?? 0;
             $result[$v]['totalUniqueClicks'] = $adsResult[$v]['totalUniqueClicks'] ?? 0;
             $result[$v]['impressions'] = $adsResult[$v]['impressions'] ?? 0;
-            $result[$v]['mo'] = ($result[$v]['total_order_amount']) > 0 ? 100*($result[$v]['totalSpend'] / $result[$v]['total_order_amount']) : 0;
             $result[$v]['account_name'] = $adsResult[$v]['account_name'] ?? '';
             $result[$v]['status'] = $adsResult[$v]['status'] ?? '';
             $result[$v]['account_status'] = $adsResult[$v]['account_status'] ?? '';
             $result[$v]['ga_total_order'] = $adsResult[$v]['ga_total_order'] ?? 0;
             $result[$v]['ga_total_order_amount'] = $adsResult[$v]['ga_total_order_amount'] ?? 0;
             $result[$v]['ga_ad_cost'] = $adsResult[$v]['ga_ad_cost'] ?? 0;
+            $result[$v]['mo'] = ($result[$v]['total_order_amount']) > 0 ? 100*(($result[$v]['totalSpend']+$result[$v]['ga_ad_cost']) / $result[$v]['total_order_amount']) : 0;
         }
         usort($result, [self::class, 'sort_result_by_ads_cost']);
 

@@ -252,7 +252,7 @@
 
                             $sum_cpc = array_sum(array_column($campaigns,'totalUniqueClicks')) != 0 ? array_sum(array_column($campaigns,'totalSpend')) / array_sum(array_column($campaigns,'totalUniqueClicks')) : 0;
                             $sum_cpm = array_sum(array_column($campaigns,'impressions')) != 0 ? 1000 * array_sum(array_column($campaigns,'totalSpend')) / array_sum(array_column($campaigns,'impressions')) : 0;
-                            $sum_mo = $sum_total_order_amount > 0 ? 100 * ($sum_totalSpend / $sum_total_order_amount) : 0;
+                            $sum_mo = $sum_total_order_amount > 0 ? 100 * (($sum_totalSpend+$sum_ga_ad_cost) / $sum_total_order_amount) : 0;
 
                             $sum_total_order = array_sum(array_column($campaigns,'total_order'));
                             $sum_ga_total_order = array_sum(array_column($campaigns,'ga_total_order'));

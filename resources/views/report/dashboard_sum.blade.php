@@ -21,7 +21,9 @@
                             <th></th>
                             <th>Orders</th>
                             <th>Rev</th>
-                            <th>AdCost</th>
+                            <th>FbAdCost</th>
+                            <th>GoogleAdCost</th>
+                            <th>SumAdCost</th>
                             <th>OtherCost</th>
                             <th>Profit/Loss</th>
                         </tr>
@@ -33,6 +35,8 @@
                             <td><?php echo $v['orders']['total']; ?></td>
                             <td><?php echo gifttify_price_format($v['orders']['totalAmount']); ?></td>
                             <td><?php echo gifttify_price_format($v['fbAds']['totalSpend']); ?></td>
+                            <td><?php echo gifttify_price_format($v['ggAds']['ga_ad_cost']); ?></td>
+                            <td><?php echo gifttify_price_format($v['fbAds']['totalSpend'] + $v['ggAds']['ga_ad_cost']); ?></td>
                             <td><?php echo gifttify_price_format($v['productCost']); ?></td>
                             <td><?php echo gifttify_price_format($v['profitLoss']); ?></td>
                         </tr>
@@ -48,13 +52,15 @@
                                 <th></th>
                                 <th>Orders</th>
                                 <th>Rev</th>
-                                <th>AdCost</th>
+                                <th>FbAdCost</th>
+                                <th>GoogleAdCost</th>
+                                <th>SumAdCost</th>
                                 <th>OtherCost</th>
                                 <th>Profit/Loss</th>
                                 <th>MO</th>
                                 <th>CPC</th>
                                 <th>AOV</th>
-                                <th>Budget</th>
+                                <th>FbBudget</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -64,6 +70,8 @@
                                 <td><?php echo $v['orders']['total']; ?></td>
                                 <td><?php echo gifttify_price_format($v['orders']['totalAmount']); ?></td>
                                 <td><?php echo gifttify_price_format($v['fbAds']['totalSpend']); ?></td>
+                                <td><?php echo gifttify_price_format($v['ggAds']['ga_ad_cost']); ?></td>
+                                <td><?php echo gifttify_price_format($v['fbAds']['totalSpend'] + $v['ggAds']['ga_ad_cost']); ?></td>
                                 <td><?php echo gifttify_price_format($v['productCost']); ?></td>
                                 <td><?php echo gifttify_price_format($v['profitLoss']); ?></td>
                                 <td><?php echo round($v['mo']) . '%'; ?></td>

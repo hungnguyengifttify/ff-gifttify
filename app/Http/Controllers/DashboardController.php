@@ -29,6 +29,7 @@ class DashboardController extends Controller {
                     $reports['all'][$v]['title'] = $value['title'];
                     $reports['all'][$v]['dateDisplay'] = $value['dateDisplay'];
                     $reports['all'][$v]['fbAds']['totalSpend'] = 0;
+                    $reports['all'][$v]['ggAds']['ga_ad_cost'] = 0;
                     $reports['all'][$v]['fbAds']['totalUniqueClicks'] = 0;
                     $reports['all'][$v]['orders']['total'] = 0;
                     $reports['all'][$v]['orders']['totalAmount'] = 0;
@@ -36,6 +37,7 @@ class DashboardController extends Controller {
                     $reports['all'][$v]['profitLoss'] = 0;
                     $reports['all'][$v]['mo'] = 0;
                 }
+                $reports['all'][$v]['ggAds']['ga_ad_cost'] += $value['ggAds']['ga_ad_cost'] ?? 0;
                 $reports['all'][$v]['fbAds']['totalSpend'] += $value['fbAds']['totalSpend'] ?? 0;
                 $reports['all'][$v]['fbAds']['totalUniqueClicks'] += $value['fbAds']['totalUniqueClicks'] ?? 0;
                 $reports['all'][$v]['orders']['total'] += $value['orders']['total'] ?? 0;

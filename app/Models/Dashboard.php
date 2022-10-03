@@ -209,11 +209,23 @@ class Dashboard extends Model
         $toDate = $dateTimeRange['toDate'];
 
         $fbAds = DB::table('fb_campaign_insights')
-            ->select(DB::raw('sum(fb_campaign_insights.spend) as totalSpend, sum(fb_campaign_insights.inline_link_clicks) as totalUniqueClicks, sum(fb_campaigns.daily_budget)/100 as dailyBudget'))
+            ->select(DB::raw('sum(fb_campaign_insights.spend) as totalSpend,
+                sum(fb_campaign_insights.inline_link_clicks) as totalUniqueClicks,
+                sum(fb_campaigns.daily_budget)/100 as dailyBudget'))
             ->leftJoin('fb_campaigns', 'fb_campaign_insights.campaign_id', '=', 'fb_campaigns.fb_campaign_id')
             ->whereIn('fb_campaign_insights.account_id', $fbAccountIds)
             ->where('fb_campaign_insights.date_record', '>=', $fromDate)
             ->where('fb_campaign_insights.date_record', '<=', $toDate)
+            ->first();
+
+        $gaAds = DB::table('ga_campaign_reports')
+            ->select(DB::raw('SUM(transactions) as ga_total_order,
+                SUM(transaction_revenue) as ga_total_order_amount,
+                SUM(ad_cost) as ga_ad_cost'))
+            ->where('ga_campaign_reports.store', $store)
+            ->where('ga_campaign_reports.date_record', '>=', $fromDate)
+            ->where('ga_campaign_reports.date_record', '<=', $toDate)
+            ->where('ga_campaign_reports.transactions', '>', 0)
             ->first();
 
         $fbAdsets = DB::selectOne("
@@ -236,14 +248,17 @@ class Dashboard extends Model
                 'totalUniqueClicks' => $fbAds->totalUniqueClicks ?? 0,
                 'dailyBudget' => ($fbAds->dailyBudget ?? 0) + ($fbAdsets->dailyBudget ?? 0),
             ),
+            'ggAds' => array (
+                'ga_ad_cost' => $gaAds->ga_ad_cost ?? 0,
+            ),
             'orders' => array(
                 'total' => $orders->total ?? 0,
                 'totalAmount' => $totalAmount->total ?? 0,
             ),
             'productCost' => $totalAmount->total * 0.38,
-            'profitLoss' => $totalAmount->total - $fbAds->totalSpend - $totalAmount->total * 0.38,
-            'mo' => $totalAmount->total > 0 ? 100*($fbAds->totalSpend / $totalAmount->total) : 0,
-            'cpc' => $fbAds->totalUniqueClicks != 0 ? $fbAds->totalSpend / $fbAds->totalUniqueClicks : 0,
+            'profitLoss' => $totalAmount->total - ($fbAds->totalSpend + $gaAds->ga_ad_cost) - $totalAmount->total * 0.38,
+            'mo' => $totalAmount->total > 0 ? 100*(($fbAds->totalSpend + $gaAds->ga_ad_cost) / $totalAmount->total) : 0,
+            'cpc' => $fbAds->totalUniqueClicks != 0 ? ($fbAds->totalSpend + $gaAds->ga_ad_cost) / $fbAds->totalUniqueClicks : 0,
             'aov' => $orders->total != 0 ? $totalAmount->total / $orders->total : 0,
         );
     }

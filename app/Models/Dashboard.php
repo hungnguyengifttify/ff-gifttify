@@ -342,6 +342,16 @@ class Dashboard extends Model
             ->where('date_record', '<=', $toDate)
             ->groupBy('account_name')->get();
 
+        $gaAds = DB::table('ga_campaign_reports')
+            ->select(DB::raw('SUM(transactions) as ga_total_order,
+                SUM(transaction_revenue) as ga_total_order_amount,
+                SUM(ad_cost) as ga_ad_cost'))
+            ->where('ga_campaign_reports.store', $store)
+            ->where('ga_campaign_reports.date_record', '>=', $fromDate)
+            ->where('ga_campaign_reports.date_record', '<=', $toDate)
+            ->where('ga_campaign_reports.transactions', '>', 0)
+            ->first();
+
         $result = array();
         foreach ($fbAds->all() as $acc) {
             $result[] = array(
@@ -351,6 +361,12 @@ class Dashboard extends Model
                 'cpc' => $acc->totalUniqueClicks != 0 ? $acc->totalSpend / $acc->totalUniqueClicks : 0,
             );
         }
+        $result[] = array(
+            'account_status' => 'ACTIVE',
+            'account_name' => 'Google Ads',
+            'totalSpend' => $gaAds->ga_ad_cost,
+            'cpc' => 0,
+        );
         usort($result, [self::class, 'sort_result_by_ads_cost']);
 
         return $result;

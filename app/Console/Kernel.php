@@ -30,6 +30,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('ga:crawl_google_analytic_campaigns')->everyMinute();
         $schedule->command('products_csv:import store.gifttify.com')->everyMinute();
         $schedule->command('products_csv:import thecreattify.co')->everyMinute();
+        $schedule->command('products_csv:import 66circle.com')->everyMinute();
     }
 
     /**

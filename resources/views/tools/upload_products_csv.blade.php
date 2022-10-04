@@ -23,8 +23,9 @@
                 <div class="col-auto w-50">
                     <select name="store" class="form-select" aria-label="--- Chọn Store ---" required>
                         <option value="" selected>--- Chọn Store ---</option>
-                        <option value="thecreattify.co">thecreattify.co</option>
-                        <option value="store.gifttify.com">store.gifttify.com</option>
+                        @foreach($listStore as $store)
+                            <option value="{{$store}}">{{$store}}</option>
+                        @endforeach
                     </select>
                 </div>
                 <div class="col-auto w-50">

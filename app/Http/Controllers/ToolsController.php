@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Http;
 class ToolsController extends Controller {
     public function create_shopify_csv(Request $request) {
         if ($request->getMethod() == 'POST') {
+            $exportForShopify = $request->input('export_for_shopify') ?? false;
             $file = $_FILES['json_file']['tmp_name'] ?? '';
             $nameDisplay = $_FILES['json_file']['name'] ?? '';
             $content = file_get_contents($file);
@@ -24,11 +25,10 @@ class ToolsController extends Controller {
             $spreadsheet_url = Config::get('google.gtf_template_link_updated');
 
             if ($request->input('action') == 'download_csv_test') {
-                dump(    );
                 $this->export_image_links_local_template_test($data, $spreadsheet_url, false);
                 return true;
             }
-            $this->export_image_links_local_template($data, $spreadsheet_url, false, $nameDisplay);
+            $this->export_image_links_local_template($data, $spreadsheet_url, false, $nameDisplay, $exportForShopify);
             return true;
         }
         return view('tools.create_shopify_csv');
@@ -550,7 +550,7 @@ class ToolsController extends Controller {
         dd('Test');
     }
 
-    protected function export_image_links_local_template($data, $spreadsheet_url, $ignoreCheckDb = false, $fileNameDisplay = '')
+    protected function export_image_links_local_template($data, $spreadsheet_url, $ignoreCheckDb = false, $fileNameDisplay = '', $exportForShopify = false)
     {
         $errorArr = array();
         $csvData = GoogleDriveFiles::getGoogleDriveCsvFile($spreadsheet_url);
@@ -753,8 +753,11 @@ class ToolsController extends Controller {
                 $rowData[array_search('SEO Title', $header)] =  $title;
                 $rowData[array_search('Type', $header)] =  $codePType;
                 $rowData[array_search('Handle', $header)] =  strtolower(str_replace([',',')','('], '', str_replace([' '], '_', $title))) . '_' . Carbon::now()->format('dmy') . '_p' . $p;
-                //$rowData[array_search('Body (HTML)', $header)] = $bodyHtml;
-                $rowData[array_search('Body (HTML)', $header)] = '';
+                if ($exportForShopify) {
+                    $rowData[array_search('Body (HTML)', $header)] = $bodyHtml;
+                } else {
+                    $rowData[array_search('Body (HTML)', $header)] = '';
+                }
                 $rowData[array_search('Published', $header)] =  'TRUE';
                 $rowData[array_search('Gift Card', $header)] = 'FALSE';
                 $rowData[array_search('Variant Weight Unit', $header)] = $productTempate['weight_uom_name'] ?? 'kg';
@@ -869,11 +872,16 @@ class ToolsController extends Controller {
     }
 
     public function upload_products_csv(Request $request) {
-        return view('tools.upload_products_csv' );
+        $listStore = array_keys(ImportProductsCsv::$storeDb);
+        return view('tools.upload_products_csv' , compact('listStore'));
     }
 
     public function post_products_csv(Request $request) {
-        $store = $request->input('store') ?? 'thecreattify.co';
+        $store = $request->input('store') ?? '';
+        if (empty($store)) {
+            dd('Store should not empty');
+        }
+
         $shouldDelete = $request->input('upload') === 'delete' ? 1 : 0;
         $shouldUpdate = $request->input('upload') === 'update' ? 1 : 0;
         $csvFile = $_FILES['csv_file']['tmp_name'];

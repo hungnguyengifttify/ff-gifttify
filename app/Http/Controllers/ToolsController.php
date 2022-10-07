@@ -22,7 +22,11 @@ class ToolsController extends Controller {
             $nameDisplay = $_FILES['json_file']['name'] ?? '';
             $content = file_get_contents($file);
             $data = json_decode($content, true);
-            $spreadsheet_url = Config::get('google.gtf_template_link_updated');
+            if (isset($data['store']) && $data['store'] == '66circle.com') {
+                $spreadsheet_url = Config::get('google.hiep_template_link');
+            } else {
+                $spreadsheet_url = Config::get('google.gtf_template_link_updated');
+            }
 
             if ($request->input('action') == 'download_csv_test') {
                 $this->export_image_links_local_template_test($data, $spreadsheet_url, false);
@@ -885,6 +889,12 @@ class ToolsController extends Controller {
         $shouldDelete = $request->input('upload') === 'delete' ? 1 : 0;
         $shouldUpdate = $request->input('upload') === 'update' ? 1 : 0;
         $csvFile = $_FILES['csv_file']['tmp_name'];
+
+        $fileCsvName = $_FILES['csv_file']['name'] ?? '';
+        if (!str_contains($fileCsvName, $store)) {
+            dump($fileCsvName, $store);
+            dd('Selected store is not correct.');
+        }
 
         $csvData = GoogleDriveFiles::getGoogleDriveCsvFile($csvFile);
         $products = array();

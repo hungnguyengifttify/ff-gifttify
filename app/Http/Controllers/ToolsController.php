@@ -13,6 +13,7 @@ use App\Services\Spreadsheet;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class ToolsController extends Controller {
     public function create_shopify_csv(Request $request) {
@@ -29,7 +30,7 @@ class ToolsController extends Controller {
             }
 
             if ($request->input('action') == 'download_csv_test') {
-                $this->export_image_links_local_template_test($data, $spreadsheet_url, false);
+                $this->export_image_links_local_template_test($data, $spreadsheet_url, false, $nameDisplay, $exportForShopify);
                 return true;
             }
             $this->export_image_links_local_template($data, $spreadsheet_url, false, $nameDisplay, $exportForShopify);
@@ -549,7 +550,7 @@ class ToolsController extends Controller {
         return Spreadsheet::exportFromArray($excelData, $fileName);
     }
 
-    protected function export_image_links_local_template_test($data, $spreadsheet_url, $ignoreCheckDb = false)
+    protected function export_image_links_local_template_test($data, $spreadsheet_url, $ignoreCheckDb = false, $fileNameDisplay = '', $exportForShopify = false)
     {
         dd('Test');
     }
@@ -750,6 +751,7 @@ class ToolsController extends Controller {
                 $bodyHtml = $csvProductTypeData[0]['Description'] ?? '';
 
                 $tags[] = $folderMk;
+                $tags[] = 'des-' . Str::slug($fileNameP) . '-' . date('dmy');
 
                 $rowData[array_search('Vendor', $header)] = $vendor;
                 $rowData[array_search('Tags', $header)] = implode(', ', $tags);

@@ -8,6 +8,7 @@ use App\Models\Products;
 use App\Models\ProductVariants;
 use App\Models\ImportProductsCsv;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Str;
 use Signifly\Shopify\Shopify;
 use Illuminate\Support\Facades\DB;
 use App\Services\RemixApi;
@@ -30,6 +31,8 @@ class ImportProductsToRemix extends Command
      */
     protected $description = 'Push Queue Image to S3';
 
+    public $productType = array();
+
     /**
      * Execute the console command.
      *
@@ -42,6 +45,7 @@ class ImportProductsToRemix extends Command
         $store = $this->argument('store') ?? '';
         $limit = 2000;
 
+        $this->productType = DB::table('product_type')->get()->keyBy('product_type_code')->toArray();
         if ($store) {
             $products = DB::table('import_products_csv')
                 ->select("*")
@@ -152,6 +156,14 @@ class ImportProductsToRemix extends Command
             $this->info($p->shopifyId . ' Variants is empty');
             ImportProductsCsv::where('id',$p->id)->update(['syncedStatus'=>-1]);
             return false;
+        }
+
+        $pTypeReplaced = $this->productType[$p->productType]->product_type_name ?? '';
+        if (str_contains($p->tags, 'des-') == false && $pTypeReplaced != '') {
+            $newTag = trim(str_replace($pTypeReplaced,'', $p->title));
+            $newTag = 'des-' . Str::slug($newTag) . '-' . date('dmy');
+            $p->tags = $p->tags . ', ' . $newTag;
+            $p->tagsArr = json_encode(array_map('trim', explode(',', $p->tags)));
         }
 
         $body = array(

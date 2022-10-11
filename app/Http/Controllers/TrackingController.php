@@ -66,6 +66,27 @@ class TrackingController extends Controller
             $response['message'] = $dataTrack['error']['message'];
         } else {
             $response['data'] = $dataTrack;
+            $shouldRemove = false;
+            foreach ($response['data']['tracking'] as $k => $v) {
+                if ( strtoupper($v['content']) == strtoupper('CHINA - Arrive at international airport to abroad')) {
+                    $v['content'] = 'Mexico - Arrive at international airport to abroad';
+                    $response['data']['tracking'][$k] = $v;
+                    $shouldRemove = true;
+                    continue;
+                }
+
+                if ($shouldRemove == false) {
+                    $v['content'] = trim($v['content'], ' - ');
+                    $response['data']['tracking'][$k] = $v;
+                } else {
+                    if ($k !== count($response['data']['tracking']) - 1) {
+                        unset($response['data']['tracking'][$k]);
+                    } else {
+                        $v['content'] = 'In processing center';
+                        $response['data']['tracking'][$k] = $v;
+                    }
+                }
+            }
         }
 
         next:
@@ -74,8 +95,7 @@ class TrackingController extends Controller
         if ($getHtml) {
             $html = 'No information. We seem can\'t identify the number.';
             if (isset($response['data']['tracking'])) {
-                $html .= "<h5>Shipping from {$response['data']['shipper_address']['country']} to {$response['data']['recipient_address']['country']}</h5>";
-                $html .= "<table>";
+                $html = "<table>";
                 foreach ($response['data']['tracking'] as $k => $v) {
                     $html .= "<tr>";
                     $html .= "<td style='width:210px;'>{$v['time']}</td>";

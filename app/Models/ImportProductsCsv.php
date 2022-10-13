@@ -13,6 +13,9 @@ class ImportProductsCsv extends Model
         'thecreattify.co' => 1,
         'store.gifttify.com' => 2,
         '66circle.com' => 3,
+        'owllify.com' => 4,
+        'vanoba.com' => 5,
+        'whelands.com' => 6,
     );
 
     protected $table = 'import_products_csv';

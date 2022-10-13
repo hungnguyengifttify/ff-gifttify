@@ -31,6 +31,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('products_csv:import store.gifttify.com')->everyMinute();
         $schedule->command('products_csv:import thecreattify.co')->everyMinute();
         $schedule->command('products_csv:import 66circle.com')->everyMinute();
+        $schedule->command('products_csv:import owllify.com')->everyMinute();
+        $schedule->command('products_csv:import vanoba.com')->everyMinute();
+        $schedule->command('products_csv:import whelands.com')->everyMinute();
     }
 
     /**

@@ -166,6 +166,32 @@ class ImportProductsToRemix extends Command
             $p->tagsArr = json_encode(array_map('trim', explode(',', $p->tags)));
         }
 
+        $productImages = json_decode($p->images);
+        if (empty(json_decode($p->images))) {
+            $this->info($p->shopifyId . ' Images is empty');
+            ImportProductsCsv::where('id',$p->id)->update(['syncedStatus'=>-1]);
+            return false;
+        }
+        $pImage = $productImages[0];
+        $variantsUpdated = json_decode($p->variants);
+        foreach ($variantsUpdated as $k => $v) {
+            $src = '';
+            $alt = '';
+            $position = $image->position ?? 0;
+            foreach ($productImages as $img) {
+                if ($v['image']['src'] == $img['src']) {
+                    $src = $img->src;
+                    $alt = $img->alt;
+                    $position = $img->position;
+                    break;
+                }
+            }
+
+            if ($v['image']['src']) {
+
+            }
+        }
+
         $body = array(
             'shopifyId' => $p->shopifyId,
             'slug' => $p->slug,

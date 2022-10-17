@@ -62,7 +62,8 @@ class PushProductsToRemix extends Command
                 ->where('store', $store)
                 ->where('status', 'active')
                 ->where('id', '>', 0)
-                ->where('shopify_id', '=', 7339148673183)
+                ->where('shopify_id', '=', 7515646197919)
+                //->where('shopify_id', '=', 7339148673183)
                 ->where('variants', 'not like', '"gid://shopify/Product/%')
                 ->orderBy('id', 'desc')
                 ->chunk($limit, function ($products) {
@@ -116,8 +117,8 @@ class PushProductsToRemix extends Command
 
         $var_arr = array();
         foreach ($variants as $var) {
-            $src = $image->src ?? '';
-            $alt = $image->alt ?? '';
+            $src = '';
+            $alt = '';
             $position = $image->position ?? 0;
             if ($var->image_id != '') {
                 foreach ($images as $img) {

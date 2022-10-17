@@ -954,7 +954,7 @@ class ToolsController extends Controller {
                         'option2' => $variant['Option2 Value'] != 'Default Title' ? $variant['Option2 Value'] : '',
                         'option3' => $variant['Option3 Value'] != 'Default Title' ? $variant['Option3 Value'] : '',
                         'image' => array(
-                            'src' => $variant['Variant Image'] != '' ? $variant['Variant Image'] : $prod['Image Src'] ?? '',
+                            'src' => $variant['Variant Image'] != '' ? $variant['Variant Image'] : '',
                             'alt' => '',
                             'position' => 1
                         ),

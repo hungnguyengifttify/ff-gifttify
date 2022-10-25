@@ -111,7 +111,7 @@ class Dashboard extends Model
             ),
 
             'owllify' => array (
-                'storeType' => 'shopify',
+                'storeType' => 'gtf',
                 'domain' => 'owllify.com',
                 'common' => array (
                     'phpTimeZone' => 'America/Los_Angeles',
@@ -263,20 +263,19 @@ class Dashboard extends Model
                 i.date_record >= '$fromDate' and i.date_record <= '$toDate');"
         );
 
+        $orders = DB::selectOne("select count(*) as total from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
+        $totalAmount = DB::selectOne("select sum(total_price)/$radioCurrency as total from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
+
         $storeType = self::getStoreType($store);
         if ($storeType == 'gtf') {
-
             $dateTimeRangeTs = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq, true);
             $redisOrder = RedisGtf::getTotalOrderByDate($store, $dateTimeRangeTs['fromDate'], $dateTimeRangeTs['toDate']);
-            $orders = (object)array("total" => $redisOrder['total'] ?? 0);
-            $totalAmount = (object)array("total" => $redisOrder['totalAmount'] ?? 0);
+            $orders = (object)array("total" => $redisOrder['total'] + $orders->total);
+            $totalAmount = (object)array("total" => $redisOrder['totalAmount'] + $totalAmount->total);
 
             if ($debug) {
                 dump($rangeDate, $dateTimeRangeTs, $orders, $totalAmount);
             }
-        } else {
-            $orders = DB::selectOne("select count(*) as total from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
-            $totalAmount = DB::selectOne("select sum(total_price)/$radioCurrency as total from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
         }
 
         return array(
@@ -1165,6 +1164,10 @@ class Dashboard extends Model
             $adsResult[$v->campaign_name]['ga_ad_cost'] += $v->ga_ad_cost;
         }
 
+        $orders = DB::select("select name, note_attributes,1 as total_order, (total_price)/$radioCurrency as total_order_amount from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate;"
+            , ['fromDate' => $fromDate, 'toDate' => $toDate]
+        );
+
         $storeType = self::getStoreType($store);
         if ($storeType == 'gtf') {
             $dateTimeRangeTs = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq, true);
@@ -1174,10 +1177,6 @@ class Dashboard extends Model
                 "total_order_amount" => $redisOrder['totalAmount'] ?? 0,
                 "note_attributes" => '',
                 "name" => 'gft',
-            );
-        } else {
-            $orders = DB::select("select name, note_attributes,1 as total_order, (total_price)/$radioCurrency as total_order_amount from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate;"
-                , ['fromDate' => $fromDate, 'toDate' => $toDate]
             );
         }
 

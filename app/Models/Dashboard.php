@@ -222,7 +222,7 @@ class Dashboard extends Model
         return ($a['totalSpend'] > $b['totalSpend']) ? -1 : 1;
     }
 
-    public static function getReportByDate($store = 'thecreattify', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '') {
+    public static function getReportByDate($store = 'thecreattify', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '', $debug = false) {
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 
@@ -265,10 +265,15 @@ class Dashboard extends Model
         );
 
         if ($storeType == 'gtf') {
+
             $dateTimeRangeTs = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq, true);
             $redisOrder = RedisGtf::getTotalOrderByDate($store, $dateTimeRangeTs['fromDate'], $dateTimeRangeTs['toDate']);
             $orders = (object)array("total" => $redisOrder['total'] ?? 0);
             $totalAmount = (object)array("total" => $redisOrder['totalAmount'] ?? 0);
+
+            if ($debug) {
+                dump($rangeDate, $dateTimeRangeTs, $orders, $totalAmount);
+            }
         } else {
             $orders = DB::selectOne("select count(*) as total from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
             $totalAmount = DB::selectOne("select sum(total_price)/$radioCurrency as total from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
@@ -356,9 +361,12 @@ class Dashboard extends Model
         }
 
         if ($returnTimestamp) {
+            $newDateTimeStart = Carbon::createFromFormat('Y-m-d H:i:s', "$fromDate 00:00:00", $phpTimeZone);
+            $newDateTimeEnd = Carbon::createFromFormat('Y-m-d H:i:s', $toDate, $phpTimeZone);
+
             return array (
-                'fromDate' => $dateTimeStart->getTimestampMs(),
-                'toDate' => $dateTimeEnd->getTimestampMs(),
+                'fromDate' => $newDateTimeStart->getTimestampMs(),
+                'toDate' => $newDateTimeEnd->getTimestampMs(),
             );
         } else {
             return array (

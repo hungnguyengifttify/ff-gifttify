@@ -16,38 +16,43 @@ use Illuminate\Support\Facades\Redis;
 
 
 class DashboardTestController extends Controller {
-    public function index (Request $request) {
-        $redisConfig = Config::get('database.redis.thecreattify');
-        $client = Setup::connect( $redisConfig['host'], $redisConfig['port'], $redisConfig['password'], 0 );
-        $search = new Query( $client, 'idx:order' );
+    public function index(Request $request)
+    {
+        $rangeDates = Dashboard::$rangeDate;
+        unset($rangeDates['custom_range']);
+        $rangeDates = array_keys($rangeDates);
 
-        $query = new QueryBuilder();
-        $query->setTokenize()
-            ->setFuzzyMatching()
-            ->addCondition('status', ['completed'], 'AND', TRUE);
-        $condition = $query->buildRedisearchQuery();
-        dump($condition);
+        $stores = Dashboard::getStoresList();
+        $storesConfig = Dashboard::getAllStoreConfig();
+        $reports = array();
+        foreach ($rangeDates as $v) {
+            foreach ($stores as $store) {
+                $value = Dashboard::getReportByDate($store, $v, '', '', true);
+                $reports[$store][] = $value;
 
-        $results = $search
-            ->sortBy( 'paidAt', $order = 'DESC' )
-            ->numericFilter( 'paidAt', 1666569600000, 1666656000000 )
-            ->limit( 0, $pageSize = 100000 ) // If set, we limit the results to the offset and number of results given. The default is 0 10
-            ->search( $query, $documentsAsArray = true );
-
-        if ($results->getCount() == 0) {
-            dd($results);
+                if (!isset($reports['all'][$v])) {
+                    $reports['all'][$v]['title'] = $value['title'];
+                    $reports['all'][$v]['dateDisplay'] = $value['dateDisplay'];
+                    $reports['all'][$v]['fbAds']['totalSpend'] = 0;
+                    $reports['all'][$v]['ggAds']['ga_ad_cost'] = 0;
+                    $reports['all'][$v]['fbAds']['totalUniqueClicks'] = 0;
+                    $reports['all'][$v]['orders']['total'] = 0;
+                    $reports['all'][$v]['orders']['totalAmount'] = 0;
+                    $reports['all'][$v]['productCost'] = 0;
+                    $reports['all'][$v]['profitLoss'] = 0;
+                    $reports['all'][$v]['mo'] = 0;
+                }
+                $reports['all'][$v]['ggAds']['ga_ad_cost'] += $value['ggAds']['ga_ad_cost'] ?? 0;
+                $reports['all'][$v]['fbAds']['totalSpend'] += $value['fbAds']['totalSpend'] ?? 0;
+                $reports['all'][$v]['fbAds']['totalUniqueClicks'] += $value['fbAds']['totalUniqueClicks'] ?? 0;
+                $reports['all'][$v]['orders']['total'] += $value['orders']['total'] ?? 0;
+                $reports['all'][$v]['orders']['totalAmount'] += $value['orders']['totalAmount'] ?? 0;
+                $reports['all'][$v]['productCost'] += $value['productCost'] ?? 0;
+                $reports['all'][$v]['profitLoss'] += $value['profitLoss'] ?? 0;
+                $reports['all'][$v]['mo'] += $value['mo'] ?? 0;
+            }
         }
 
-        $totalAmount = 0;
-        foreach ($results->getDocuments() as $k => $v) {
-            $order = json_decode($v['$']);
-            dump($order);
-            $totalAmount += $order->total;
-        }
-
-        dump($results->getCount(), $totalAmount);
-        //dump($redis->set('test', 'abc'));
-        //dump($redis->hgetall('json'));
-        dd('Test');
+        return view('report.dashboard_sum', array('reports' => $reports, 'storesConfig' => $storesConfig));
     }
 }

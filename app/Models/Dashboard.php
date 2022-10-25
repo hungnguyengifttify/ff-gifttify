@@ -358,7 +358,7 @@ class Dashboard extends Model
         if ($returnTimestamp) {
             return array (
                 'fromDate' => $dateTimeStart->timestamp(),
-                'toDate' => $toDate->timestamp(),
+                'toDate' => $dateTimeEnd->timestamp(),
             );
         } else {
             return array (

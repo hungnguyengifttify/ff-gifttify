@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use App\Models\FbAds;
 use App\Models\FbAccount;
+use App\Models\RedisGtf;
 use Carbon\Carbon;
 
 class Dashboard extends Model
@@ -26,7 +27,7 @@ class Dashboard extends Model
     public static function getAllStoreConfig () {
         return array(
             'thecreattify' => array (
-                'storeType' => 'shopify',
+                'storeType' => 'gtf',
                 'domain' => 'thecreattify.com',
                 'common' => array (
                     'phpTimeZone' => 'America/Los_Angeles',
@@ -193,7 +194,11 @@ class Dashboard extends Model
     public static function getStoreConfig ($store) {
         $allStore = Dashboard::getAllStoreConfig();
         return isset($allStore[$store]['common']) ? $allStore[$store]['common'] : false;
+    }
 
+    public static function getStoreType ($store) {
+        $allStore = Dashboard::getAllStoreConfig();
+        return isset($allStore[$store]['storeType']) ? $allStore[$store]['storeType'] : false;
     }
 
     public static function getShopifyConfig ($store) {
@@ -221,6 +226,7 @@ class Dashboard extends Model
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 
+        $storeType = self::getStoreType($store);
         $fbAccountIds = $storeConfig['fbAccountIds'];
         $mysqlTimeZone = $storeConfig['mysqlTimeZone'];
         $radioCurrency = $storeConfig['radioCurrency'];
@@ -258,8 +264,15 @@ class Dashboard extends Model
                 i.date_record >= '$fromDate' and i.date_record <= '$toDate');"
         );
 
-        $orders = DB::selectOne("select count(*) as total from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
-        $totalAmount = DB::selectOne("select sum(total_price)/$radioCurrency as total from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
+        if ($storeType == 'gtf') {
+            $dateTimeRangeTs = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq, true);
+            $redisOrder = RedisGtf::getTotalOrderByDate($store, $dateTimeRangeTs['fromDate'], $dateTimeRangeTs['toDate']);
+            $orders = (object)array("total" => $redisOrder['total'] ?? 0);
+            $totalAmount = (object)array("total" => $redisOrder['totalAmount'] ?? 0);
+        } else {
+            $orders = DB::selectOne("select count(*) as total from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
+            $totalAmount = DB::selectOne("select sum(total_price)/$radioCurrency as total from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
+        }
 
         return array(
             'title' => self::$rangeDate[$rangeDate] ?? '',
@@ -293,7 +306,7 @@ class Dashboard extends Model
             . Carbon::createFromFormat('Y-m-d H:i:s', $dateTimeEnd)->format('d/m');
     }
 
-    public static function getDatesByRangeDateLabel ($store = 'thecreattify', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '') {
+    public static function getDatesByRangeDateLabel ($store = 'thecreattify', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '', $returnTimestamp = false) {
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 
@@ -334,15 +347,26 @@ class Dashboard extends Model
                 $fromDate = $dateTimeStart->format('Y-m-d');
                 $toDate = $dateTimeEnd->format('Y-m-d 23:59:59');
             } else {
-                $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateReq, $phpTimeZone)->format('Y-m-d');
-                $toDate = Carbon::createFromFormat('Y-m-d', $toDateReq, $phpTimeZone)->format('Y-m-d 23:59:59');
+                $dateTimeStart = Carbon::createFromFormat('Y-m-d', $fromDateReq, $phpTimeZone);
+                $dateTimeEnd = Carbon::createFromFormat('Y-m-d', $toDateReq, $phpTimeZone);
+
+                $fromDate = $dateTimeStart->format('Y-m-d');
+                $toDate = $dateTimeEnd->format('Y-m-d 23:59:59');
             }
         }
 
-        return array (
-            'fromDate' => $fromDate,
-            'toDate' => $toDate,
-        );
+        if ($returnTimestamp) {
+            return array (
+                'fromDate' => $dateTimeStart->timestamp(),
+                'toDate' => $toDate->timestamp(),
+            );
+        } else {
+            return array (
+                'fromDate' => $fromDate,
+                'toDate' => $toDate,
+            );
+        }
+
     }
 
     public static function getAccountsAdsReportByDate($store = 'thecreattify', $rangeDate = 'today', $fromDateReq = '', $toDateReq = '') {

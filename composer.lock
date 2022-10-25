@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1d5f3f69967b41d1dae827d268d3b47c",
+    "content-hash": "d419852fefb31634b076a9bdfd6bb313",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -733,6 +733,62 @@
                 "source": "https://github.com/firebase/php-jwt/tree/v6.3.0"
             },
             "time": "2022-07-15T16:48:45+00:00"
+        },
+        {
+            "name": "front/redisearch",
+            "version": "2.0.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/front/redisearch.git",
+                "reference": "ea5dc3474fc520534d9bcd9f4185058ea8f34bb3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/front/redisearch/zipball/ea5dc3474fc520534d9bcd9f4185058ea8f34bb3",
+                "reference": "ea5dc3474fc520534d9bcd9f4185058ea8f34bb3",
+                "shasum": ""
+            },
+            "require": {
+                "predis/predis": "^1.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "FKRediSearch\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Foad Yousefi",
+                    "email": "foadyousefi@gmail.com",
+                    "homepage": "https://frontkom.no"
+                },
+                {
+                    "name": "Fábio Neves",
+                    "email": "fabio@frontkom.com",
+                    "homepage": "https://frontkom.com"
+                },
+                {
+                    "name": "Bartosz Jarzyna",
+                    "email": "bartosz@netkata.com",
+                    "homepage": "https://netkata.com"
+                }
+            ],
+            "description": "CMS/Framework agnostic RediSearch client",
+            "homepage": "http://github.com/front/redisearch",
+            "keywords": [
+                "redis",
+                "redisearch"
+            ],
+            "support": {
+                "issues": "https://github.com/front/redisearch/issues",
+                "source": "https://github.com/front/redisearch/tree/2.0.4"
+            },
+            "time": "2021-05-04T17:47:17+00:00"
         },
         {
             "name": "fruitcake/php-cors",
@@ -3339,6 +3395,72 @@
                 }
             ],
             "time": "2022-04-04T05:15:45+00:00"
+        },
+        {
+            "name": "predis/predis",
+            "version": "v1.1.10",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/predis/predis.git",
+                "reference": "a2fb02d738bedadcffdbb07efa3a5e7bd57f8d6e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/predis/predis/zipball/a2fb02d738bedadcffdbb07efa3a5e7bd57f8d6e",
+                "reference": "a2fb02d738bedadcffdbb07efa3a5e7bd57f8d6e",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.9"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4.8"
+            },
+            "suggest": {
+                "ext-curl": "Allows access to Webdis when paired with phpiredis",
+                "ext-phpiredis": "Allows faster serialization and deserialization of the Redis protocol"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Predis\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Daniele Alessandri",
+                    "email": "suppakilla@gmail.com",
+                    "homepage": "http://clorophilla.net",
+                    "role": "Creator & Maintainer"
+                },
+                {
+                    "name": "Till Krüss",
+                    "homepage": "https://till.im",
+                    "role": "Maintainer"
+                }
+            ],
+            "description": "Flexible and feature-complete Redis client for PHP and HHVM",
+            "homepage": "http://github.com/predis/predis",
+            "keywords": [
+                "nosql",
+                "predis",
+                "redis"
+            ],
+            "support": {
+                "issues": "https://github.com/predis/predis/issues",
+                "source": "https://github.com/predis/predis/tree/v1.1.10"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/tillkruss",
+                    "type": "github"
+                }
+            ],
+            "time": "2022-01-05T17:46:08+00:00"
         },
         {
             "name": "psr/cache",

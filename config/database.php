@@ -146,6 +146,24 @@ return [
             'database' => env('REDIS_CACHE_DB', '1'),
         ],
 
+        'owllify' => [
+            'url' => env('REDIS_OWLLIFY_URL'),
+            'host' => env('REDIS_OWLLIFY_HOST', '127.0.0.1'),
+            'username' => env('REDIS_OWLLIFY_USERNAME'),
+            'password' => env('REDIS_OWLLIFY_PASSWORD'),
+            'port' => env('REDIS_OWLLIFY_PORT', '6379'),
+            'database' => env('REDIS_OWLLIFY_CACHE_DB', '0'),
+        ],
+
+        'thecreattify' => [
+            'url' => env('REDIS_THECREATTIFY_URL'),
+            'host' => env('REDIS_THECREATTIFY_HOST', '127.0.0.1'),
+            'username' => env('REDIS_THECREATTIFY_USERNAME'),
+            'password' => env('REDIS_THECREATTIFY_PASSWORD'),
+            'port' => env('REDIS_THECREATTIFY_PORT', '6379'),
+            'database' => env('REDIS_THECREATTIFY_CACHE_DB', '0'),
+        ],
+
     ],
 
 ];

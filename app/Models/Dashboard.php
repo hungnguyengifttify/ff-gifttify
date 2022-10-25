@@ -226,7 +226,6 @@ class Dashboard extends Model
         $storeConfig = self::getStoreConfig($store);
         if (!$storeConfig) return false;
 
-        $storeType = self::getStoreType($store);
         $fbAccountIds = $storeConfig['fbAccountIds'];
         $mysqlTimeZone = $storeConfig['mysqlTimeZone'];
         $radioCurrency = $storeConfig['radioCurrency'];
@@ -264,6 +263,7 @@ class Dashboard extends Model
                 i.date_record >= '$fromDate' and i.date_record <= '$toDate');"
         );
 
+        $storeType = self::getStoreType($store);
         if ($storeType == 'gtf') {
 
             $dateTimeRangeTs = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq, true);
@@ -1165,17 +1165,32 @@ class Dashboard extends Model
             $adsResult[$v->campaign_name]['ga_ad_cost'] += $v->ga_ad_cost;
         }
 
-        $orders = DB::select("select name, note_attributes,1 as total_order, (total_price)/$radioCurrency as total_order_amount from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate;"
-            , ['fromDate' => $fromDate, 'toDate' => $toDate]
-        );
+        $storeType = self::getStoreType($store);
+        if ($storeType == 'gtf') {
+            $dateTimeRangeTs = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq, true);
+            $redisOrder = RedisGtf::getTotalOrderByDate($store, $dateTimeRangeTs['fromDate'], $dateTimeRangeTs['toDate']);
+            $orders[] = (object)array(
+                "total_order" => $redisOrder['total'] ?? 0,
+                "total_order_amount" => $redisOrder['totalAmount'] ?? 0,
+                "note_attributes" => '',
+                "name" => 'gft',
+            );
+        } else {
+            $orders = DB::select("select name, note_attributes,1 as total_order, (total_price)/$radioCurrency as total_order_amount from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate;"
+                , ['fromDate' => $fromDate, 'toDate' => $toDate]
+            );
+        }
+
         $ordersResult = array();
         foreach ($orders as $o) {
             $note_attributes = json_decode($o->note_attributes);
             $campaign_name = 'UNKNOWN';
-            foreach ($note_attributes as $note) {
-                if ($note->name == 'utm_campaign') {
-                    $campaign_name = $note->value;
-                    break;
+            if ($note_attributes) {
+                foreach ($note_attributes as $note) {
+                    if ($note->name == 'utm_campaign') {
+                        $campaign_name = $note->value;
+                        break;
+                    }
                 }
             }
             if ($debug == 1 && $campaign_name == 'UNKNOWN') {

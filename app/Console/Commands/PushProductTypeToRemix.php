@@ -66,7 +66,7 @@ class PushProductTypeToRemix extends Command
 
                         $this->info($res->message);
                     } else {
-                        $this->error('Can not created');
+                        //$this->error('Can not created');
                     }
 
                 }

@@ -150,6 +150,27 @@ class Dashboard extends Model
                     'viewId' => '272705190'
                 )
             ),
+
+            'getcus' => array (
+                'storeType' => 'shopify',
+                'domain' => 'getcus.gifttify.com',
+                'common' => array (
+                    'phpTimeZone' => 'America/Los_Angeles',
+                    'fbAccountIds' => FbAds::$getcusAccountIds,
+                    'mysqlTimeZone' => 'US/Pacific',
+                    'radioCurrency' => 1
+                ),
+                'shopify' => array (
+                    'apiKey' => env('SHOPIFY_GETCUS_API_KEY', ''),
+                    'password' => env('SHOPIFY_GETCUS_PASSWORD', ''),
+                    'domain' => env('SHOPIFY_GETCUS_DOMAIN', ''),
+                    'apiVersion' => env('SHOPIFY_GETCUS_API_VERSION', ''),
+                    'dateTimeZone' => new \DateTimeZone('America/Los_Angeles'),
+                ),
+                'google' => array (
+                    'viewId' => '275497496'
+                )
+            ),
         );
 
     }

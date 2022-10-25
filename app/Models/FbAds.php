@@ -76,6 +76,11 @@ class FbAds extends Model
         '1660860257624794',
     );
 
+    static $getcusAccountIds = array(
+        '821019145735527',
+        '798400701180976',
+    );
+
     public static function getAllRunningAccountIds() {
         return array_merge(
             FbAds::$thecreattifyAccountIds,
@@ -84,6 +89,7 @@ class FbAds extends Model
             FbAds::$gifttifyusAccountIds,
             //FbAds::$owllifyAccountIds,
             FbAds::$hippiesyAccountIds,
+            FbAds::$getcusAccountIds,
         );
     }
 

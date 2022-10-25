@@ -22,8 +22,8 @@ class RedisGtf extends Model
             ->setFuzzyMatching()
             ->addCondition('status', ['completed'], 'AND', TRUE);
 
-        $fromDate = $fromDateTs * 1000;
-        $toDate = $toDateTs * 1000;
+        $fromDate = $fromDateTs * 1;
+        $toDate = $toDateTs * 1;
 
         $results = $search
             ->sortBy( 'paidAt', $order = 'DESC' )

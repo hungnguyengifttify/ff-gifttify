@@ -65,11 +65,14 @@ class FbAds extends Model
     );
 
     static $owllifyAccountIds = array(
-        '0'
+        '756641988792285'
+    );
+
+    static $storeGifttifyAccountIds = array(
+        '1320735945000228'
     );
 
     static $hippiesyAccountIds = array(
-        '1320735945000228',
         '1103239003626786',
         '412049937660963',
         '783889102810922',
@@ -84,10 +87,11 @@ class FbAds extends Model
     public static function getAllRunningAccountIds() {
         return array_merge(
             FbAds::$thecreattifyAccountIds,
-            FbAds::$auThecreattifyAccountIds,
+            //FbAds::$auThecreattifyAccountIds,
             FbAds::$singlecloudyAccountIds,
             FbAds::$gifttifyusAccountIds,
-            //FbAds::$owllifyAccountIds,
+            FbAds::$owllifyAccountIds,
+            FbAds::$storeGifttifyAccountIds,
             FbAds::$hippiesyAccountIds,
             FbAds::$getcusAccountIds,
         );

@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use App\Models\FbAds;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use App\Models\FbAds;
 use App\Models\FbAccount;
 use App\Models\RedisGtf;
 use Carbon\Carbon;
@@ -47,7 +47,28 @@ class Dashboard extends Model
                 )
             ),
 
-            'au-thecreattify' => array (
+            'store-gifttify' => array (
+                'storeType' => 'gtf',
+                'domain' => 'store.gifttify.com',
+                'common' => array (
+                    'phpTimeZone' => 'America/Los_Angeles',
+                    'fbAccountIds' => FbAds::$storeGifttifyAccountIds,
+                    'mysqlTimeZone' => 'US/Pacific',
+                    'radioCurrency' => 1
+                ),
+                'shopify' => array (
+                    'apiKey' => env('SHOPIFY_STORE_GIFTTIFY_API_KEY', ''),
+                    'password' => env('SHOPIFY_STORE_GIFTTIFY_PASSWORD', ''),
+                    'domain' => env('SHOPIFY_STORE_GIFTTIFY_DOMAIN', ''),
+                    'apiVersion' => env('SHOPIFY_STORE_GIFTTIFY_API_VERSION', ''),
+                    'dateTimeZone' => new \DateTimeZone('America/Los_Angeles'),
+                ),
+                'google' => array (
+                    'viewId' => ''
+                )
+            ),
+
+            /*'au-thecreattify' => array (
                 'storeType' => 'shopify',
                 'domain' => 'au.thecreattify.com',
                 'common' => array (
@@ -66,7 +87,7 @@ class Dashboard extends Model
                 'google' => array (
                     'viewId' => '269048495'
                 )
-            ),
+            ),*/
 
             'singlecloudy' => array (
                 'storeType' => 'shopify',

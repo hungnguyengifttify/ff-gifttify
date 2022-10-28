@@ -164,6 +164,15 @@ return [
             'database' => env('REDIS_THECREATTIFY_CACHE_DB', '0'),
         ],
 
+        'store-gifttify' => [
+            'url' => env('REDIS_STOREGIFTTIFY_URL'),
+            'host' => env('REDIS_STOREGIFTTIFY_HOST', '127.0.0.1'),
+            'username' => env('REDIS_STOREGIFTTIFY_USERNAME'),
+            'password' => env('REDIS_STOREGIFTTIFY_PASSWORD'),
+            'port' => env('REDIS_STOREGIFTTIFY_PORT', '6379'),
+            'database' => env('REDIS_STOREGIFTTIFY_CACHE_DB', '0'),
+        ],
+
     ],
 
 ];

@@ -908,8 +908,8 @@ class ToolsController extends Controller {
             $id = uniqid('g_', true) . rand(1000,9999);
 
             $prod = $variants[0];
-            if (count($prod) != 48) {
-                //dump($prod);
+            if (count($prod) < 48) {
+                dd($prod);
                 continue;
             }
 
@@ -933,6 +933,8 @@ class ToolsController extends Controller {
             $imagesArr = $option1Arr = $option2Arr = $option3Arr = $var_arr = array();
             foreach ($variants as $variant) {
                 if (!isset($variant['Variant Price'])) {
+                    dump("Empty Variant Price");
+                    dd($prod);
                     continue;
                 }
                 $img = $variant['Image Src'] ?? '';

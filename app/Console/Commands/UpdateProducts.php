@@ -32,7 +32,7 @@ class UpdateProducts extends Command
     public function handle()
     {
         $storeRequest = $this->argument('store') ?? '';
-        $stores = Dashboard::getStoresList();
+        $stores = Dashboard::getShopifyStoresList();
         if ($storeRequest) {
             $stores = array($storeRequest);
         }

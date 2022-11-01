@@ -27,7 +27,7 @@ class Dashboard extends Model
     public static function getAllStoreConfig () {
         return array(
             'thecreattify' => array (
-                'storeType' => 'gtf',
+                'storeType' => array('gtf', 'shopify'),
                 'domain' => 'thecreattify.com',
                 'common' => array (
                     'phpTimeZone' => 'America/Los_Angeles',
@@ -48,7 +48,7 @@ class Dashboard extends Model
             ),
 
             'store-gifttify' => array (
-                'storeType' => 'gtf',
+                'storeType' => array('gtf'),
                 'domain' => 'store.gifttify.com',
                 'common' => array (
                     'phpTimeZone' => 'America/Los_Angeles',
@@ -69,7 +69,7 @@ class Dashboard extends Model
             ),
 
             /*'au-thecreattify' => array (
-                'storeType' => 'shopify',
+                'storeType' => array('shopify'),
                 'domain' => 'au.thecreattify.com',
                 'common' => array (
                     'phpTimeZone' => 'Australia/Sydney',
@@ -90,7 +90,7 @@ class Dashboard extends Model
             ),*/
 
             'singlecloudy' => array (
-                'storeType' => 'shopify',
+                'storeType' => array('shopify'),
                 'domain' => 'singlecloudy.com',
                 'common' => array (
                     'phpTimeZone' => 'America/Los_Angeles',
@@ -111,7 +111,7 @@ class Dashboard extends Model
             ),
 
             'gifttifyus' => array (
-                'storeType' => 'shopify',
+                'storeType' => array('shopify'),
                 'domain' => 'gifttifyus.com',
                 'common' => array (
                     'phpTimeZone' => 'America/Los_Angeles',
@@ -132,7 +132,7 @@ class Dashboard extends Model
             ),
 
             'owllify' => array (
-                'storeType' => 'gtf',
+                'storeType' => array('gtf', 'shopify'),
                 'domain' => 'owllify.com',
                 'common' => array (
                     'phpTimeZone' => 'America/Los_Angeles',
@@ -153,7 +153,7 @@ class Dashboard extends Model
             ),
 
             'hippiesy' => array (
-                'storeType' => 'shopify',
+                'storeType' => array('shopify'),
                 'domain' => 'hippiesy.com',
                 'common' => array (
                     'phpTimeZone' => 'America/Los_Angeles',
@@ -174,7 +174,7 @@ class Dashboard extends Model
             ),
 
             'getcus' => array (
-                'storeType' => 'shopify',
+                'storeType' => array('shopify'),
                 'domain' => 'getcus.gifttify.com',
                 'common' => array (
                     'phpTimeZone' => 'America/Los_Angeles',
@@ -200,6 +200,17 @@ class Dashboard extends Model
     public static function getStoresList () {
         $allStore = Dashboard::getAllStoreConfig();
         return array_keys($allStore);
+    }
+
+    public static function getShopifyStoresList () {
+        $allStore = Dashboard::getAllStoreConfig();
+        $shopifyStoreList = array();
+        foreach ($allStore as $store => $value) {
+            if (in_array('shopify', $value['storeType'])) {
+                $shopifyStoreList[] = $store;
+            }
+        }
+        return $shopifyStoreList;
     }
 
     public static function getStoreFromAccountId ($accountId) {
@@ -288,7 +299,7 @@ class Dashboard extends Model
         $totalAmount = DB::selectOne("select sum(total_price)/$radioCurrency as total from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
 
         $storeType = self::getStoreType($store);
-        if ($storeType == 'gtf') {
+        if (in_array('gtf', $storeType)) {
             $dateTimeRangeTs = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq, true);
             $redisOrder = RedisGtf::getTotalOrderByDate($store, $dateTimeRangeTs['fromDate'], $dateTimeRangeTs['toDate']);
             $orders = (object)array("total" => $redisOrder['total'] + $orders->total);
@@ -1190,7 +1201,7 @@ class Dashboard extends Model
         );
 
         $storeType = self::getStoreType($store);
-        if ($storeType == 'gtf') {
+        if (in_array('gtf', $storeType)) {
             $dateTimeRangeTs = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq, true);
             $redisOrder = RedisGtf::getTotalOrderByDate($store, $dateTimeRangeTs['fromDate'], $dateTimeRangeTs['toDate']);
             $orders[] = (object)array(

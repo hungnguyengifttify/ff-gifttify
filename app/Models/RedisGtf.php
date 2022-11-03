@@ -39,7 +39,7 @@ class RedisGtf extends Model
         $totalAmount = 0;
         foreach ($results->getDocuments() as $k => $v) {
             $order = json_decode($v['$']);
-            $totalAmount += $order->total;
+            $totalAmount += ($order->total / $order->currency->rate);
         }
         return array('total' => $total, 'totalAmount' => $totalAmount);
     }

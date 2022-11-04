@@ -286,14 +286,19 @@ class Dashboard extends Model
             ->where('ga_campaign_reports.transactions', '>', 0)
             ->first();
 
-        $fbAdsets = DB::selectOne("
+        if ($fbAccountIds) {
+            $fbAdsets = DB::selectOne("
             select SUM(daily_budget/100) as dailyBudget
             from fb_ad_sets
             where
                 daily_budget > 0 and effective_status = 'ACTIVE'
                 and campaign_id in (select i.campaign_id from fb_campaign_insights i where i.account_id in (". implode(',', $fbAccountIds) .") and
                 i.date_record >= '$fromDate' and i.date_record <= '$toDate');"
-        );
+            );
+        } else {
+            $fbAdsets = array();
+        }
+
 
         $orders = DB::selectOne("select count(*) as total from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);
         $totalAmount = DB::selectOne("select sum(total_price)/$radioCurrency as total from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate;", ['fromDate' => $fromDate, 'toDate' => $toDate]);

@@ -178,6 +178,9 @@ class ImportProductsToRemix extends Command
             'variants' => json_decode($p->variants),
             'seo' => json_decode($p->seo)
         );
+        if ($p->productType == 'PRO') {
+            $body['description'] = $p->description;
+        }
 
         $query = '';
         if ($p->store != 'thecreattify.co') {

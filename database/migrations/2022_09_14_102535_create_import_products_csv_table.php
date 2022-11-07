@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('returnedId')->nullable(true);
             $table->string('slug');
             $table->string('title');
+            $table->text('description');
             $table->string('productType');
             $table->string('status');
             $table->string('tags');

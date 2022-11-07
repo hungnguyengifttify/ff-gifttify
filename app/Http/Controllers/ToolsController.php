@@ -917,6 +917,7 @@ class ToolsController extends Controller {
                 'shopifyId' => $id,
                 'slug' => $prod['Handle'],
                 'title' => $prod['Title'],
+                'description' => $prod['Body (HTML)'],
                 'productType' => $productTypeTable[$prod['Type']]->product_type_code ?? $prod['Type'],
                 'status' => 'publish',
                 'tags' => $prod['Tags'],
@@ -1014,6 +1015,7 @@ class ToolsController extends Controller {
             if ($shouldUpdate) {
                 ImportProductsCsv::where('slug', $v['slug'] ?? '')->where('store', $store)->update([
                     'title' => $v['title'] ?? '',
+                    'description' => $v['description'] ?? '',
                     'productType' => $v['productType'] ?? '',
                     'status' => $v['status'] ?? '',
                     'tags' => $v['tags'] ?? '',
@@ -1031,6 +1033,7 @@ class ToolsController extends Controller {
                     'slug' => $v['slug'] ?? '',
                     'shopifyId' => $v['shopifyId'] ?? '',
                     'title' => $v['title'] ?? '',
+                    'description' => $v['description'] ?? '',
                     'productType' => $v['productType'] ?? '',
                     'status' => $v['status'] ?? '',
                     'tags' => $v['tags'] ?? '',

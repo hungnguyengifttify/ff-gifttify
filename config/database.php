@@ -173,6 +173,15 @@ return [
             'database' => env('REDIS_STOREGIFTTIFY_CACHE_DB', '0'),
         ],
 
+        'whelands' => [
+            'url' => env('REDIS_WHELANDS_URL'),
+            'host' => env('REDIS_WHELANDS_HOST', '127.0.0.1'),
+            'username' => env('REDIS_WHELANDS_USERNAME'),
+            'password' => env('REDIS_WHELANDS_PASSWORD'),
+            'port' => env('REDIS_WHELANDS_PORT', '6379'),
+            'database' => env('REDIS_WHELANDS_CACHE_DB', '0'),
+        ],
+
     ],
 
 ];

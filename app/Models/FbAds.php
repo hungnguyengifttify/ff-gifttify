@@ -85,22 +85,28 @@ class FbAds extends Model
         '298584852478230',
     );
 
+    static $whelandsAccountIds = array(
+        '811680439961950',
+        '1131310947769505',
+    );
+
     public static function getAllRunningAccountIds() {
         return array_merge(
             FbAds::$thecreattifyAccountIds,
             //FbAds::$auThecreattifyAccountIds,
-            FbAds::$singlecloudyAccountIds,
+            //FbAds::$singlecloudyAccountIds,
             FbAds::$gifttifyusAccountIds,
             FbAds::$owllifyAccountIds,
             FbAds::$storeGifttifyAccountIds,
             FbAds::$hippiesyAccountIds,
             FbAds::$getcusAccountIds,
+            FbAds::$whelandsAccountIds
         );
     }
 
     public static function getPhpDateTimeZoneByAccountId($accountId) {
         $dateTimeZone = new \DateTimeZone('America/Los_Angeles');
-        if (in_array($accountId, FbAds::$auThecreattifyAccountIds)) {
+        if (in_array($accountId, FbAds::$whelandsAccountIds)) {
             $dateTimeZone = new \DateTimeZone('Australia/Sydney');
         }
         return $dateTimeZone;

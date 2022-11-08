@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\FbAds;
+use App\Models\FbAds;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -89,7 +90,7 @@ class Dashboard extends Model
                 )
             ),*/
 
-            'singlecloudy' => array (
+            /*'singlecloudy' => array (
                 'storeType' => array('shopify'),
                 'domain' => 'singlecloudy.com',
                 'common' => array (
@@ -108,7 +109,7 @@ class Dashboard extends Model
                 'google' => array (
                     'viewId' => '272196026'
                 )
-            ),
+            ),*/
 
             'gifttifyus' => array (
                 'storeType' => array('shopify'),
@@ -191,6 +192,27 @@ class Dashboard extends Model
                 ),
                 'google' => array (
                     'viewId' => '275497496'
+                )
+            ),
+
+            'whelands' => array (
+                'storeType' => array('gtf'),
+                'domain' => 'whelands.com',
+                'common' => array (
+                    'phpTimeZone' => 'Australia/Sydney',
+                    'fbAccountIds' => FbAds::$whelandsAccountIds,
+                    'mysqlTimeZone' => 'Australia/Sydney',
+                    'radioCurrency' => 1
+                ),
+                'shopify' => array (
+                    'apiKey' => env('SHOPIFY_WHELANDS_API_KEY', ''),
+                    'password' => env('SHOPIFY_WHELANDS_PASSWORD', ''),
+                    'domain' => env('SHOPIFY_WHELANDS_DOMAIN', ''),
+                    'apiVersion' => env('SHOPIFY_WHELANDS_API_VERSION', ''),
+                    'dateTimeZone' => new \DateTimeZone('Australia/Sydney'),
+                ),
+                'google' => array (
+                    'viewId' => ''
                 )
             ),
         );

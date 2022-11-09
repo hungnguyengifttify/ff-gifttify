@@ -904,6 +904,7 @@ class ToolsController extends Controller {
         $productTypeTable = array();
         $productTypeTable = DB::table('product_type')->get()->keyBy('product_type_name')->toArray();
 
+        $isUtf8Valid = true;
         foreach ($csvData as $k => $variants) {
             $id = uniqid('g_', true) . rand(1000,9999);
 
@@ -911,6 +912,12 @@ class ToolsController extends Controller {
             if (count($prod) < 48) {
                 dd($prod);
                 continue;
+            }
+
+            if (preg_match('~[^\x20-\x7E\t\r\n]~', $prod['Title']) > 0) {
+                //$prod['Title'] = utf8_encode($prod['Title']);
+                dump($prod['Title']);
+                $isUtf8Valid = false;
             }
 
             $products[$k] = array(
@@ -1009,6 +1016,10 @@ class ToolsController extends Controller {
                     'values' => array_values($option3Arr),
                 );
             }
+        }
+
+        if ($isUtf8Valid === false) {
+            dd('Please check UTF valid');
         }
 
         foreach ($products as $v) {

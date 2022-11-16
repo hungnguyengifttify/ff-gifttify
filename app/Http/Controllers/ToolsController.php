@@ -924,6 +924,10 @@ class ToolsController extends Controller {
             }
 
             if (empty($prod['Handle'])) {
+                dump( array_key_exists('Handle', $prod) );
+                dump('Handle is empty');
+                dump($prod['Title']);
+                dd($prod);
                 continue;
             }
 

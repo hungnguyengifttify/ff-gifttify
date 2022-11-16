@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Services\MailChimpService;
+use Exception;
 
 class UploadOrderToMailChimp extends Command
 {
@@ -122,7 +123,7 @@ class UploadOrderToMailChimp extends Command
         "expressShipping": false,
         "transactionId": "7F2585833G861140A"
     }]';
-
+    
     /**
      * The console command description.
      *
@@ -138,46 +139,101 @@ class UploadOrderToMailChimp extends Command
 
     public function handle()
     {
+        $storeID = 'store_k6gosw5gwhooezt3i61m';
+
         $mailchimp = new MailChimpService();
         $listOrdersForImport = json_decode($this->json_order, true);
      
-        // $mailchimp->service->ecommerce->getStoreCustomer("Store_ID", "ID"));
-        // $customer = $mailchimp->service->ecommerce->getStoreCustomer("store_k6gosw5gwhooezt3i61m", "Jeramie_Padberg@hotmail.com");
-
         foreach ($listOrdersForImport as $orderInfo) {
+            $listProduct = $this->getOrderItems($orderInfo);
+            foreach($listProduct as $productInfo){
+                try {
+                    
+                    $mailchimp->service->ecommerce->getStoreProduct($storeID, $productInfo['product']["id"]);
+                    $variantInfo = [
+                        "title" => $productInfo['product']['title'], // REQUIRE
+                        "url" => 'https://thecreattify.com/' . $productInfo['product']['slug'] . '-' .  $productInfo['product']['id'],
+                        "sku" => $productInfo['variant']['sku'], //The handle of a product.
+                        "price" => $productInfo['variant']['price'],
+                        "image_url" => $productInfo['product']['images'][0]['src'] ?? ''
+                    ];
+
+                    $mailchimp->service->ecommerce->updateProductVariant(
+                        $storeID,
+                        $productInfo['product']['id'],
+                        $productInfo['variant']['id'],
+                        $variantInfo
+                    );
+                }catch (Exception $e) {
+                    if($e->getResponse()->getStatusCode() == 404){
+                        try {
+                            $infoProduct = [
+                                "id" => $productInfo['product']['id'],  // REQUIRE
+                                "title" => $productInfo['product']['title'], // REQUIRE
+                                "variants" => [
+                                    [
+                                    'id' =>  $productInfo['variant']['id'],
+                                    'title' => $productInfo['product']['title'],  
+                                    'url' => 'https://thecreattify.com/' . $productInfo['product']['slug'] . '-' .  $productInfo['product']['id'],
+                                    'sku' => $productInfo['variant']['sku'],
+                                    'price' => $productInfo['variant']['price'],
+                                    'inventory_quantity' => $productInfo['variant']['quantity'],
+                                    'image_url' => $productInfo['product']['images'][0]['src'] ?? '',  
+                                    ]
+                                ], // REQUIRE
+                                "handle" =>  "API_PUSH", //The handle of a product.
+                                "url" => 'https://thecreattify.com/' . $productInfo['product']['slug'] . '-' .  $productInfo['product']['id'],
+                                "description" => "",
+                                "type" => $productInfo['product']['productType'],
+                                // "published_at_foreign" =>  $productInfo['product']['createdAt'], //The date and time the product was published.
+                            ];
+                            // dd($infoProduct);
+                            $importProduct = $mailchimp->service->ecommerce->addStoreProduct(
+                                $storeID,
+                                 $infoProduct
+                            );
+                        }catch (Exception $e) {
+                            dump($e);
+                        };
+                    };
+                }
+            }
+
+            // Update customer
+            $updateCustomer = $mailchimp->service->ecommerce->setStoreCustomer($storeID, $orderInfo["email"], [
+                "id" => $orderInfo["email"],
+                "email_address" => $orderInfo["email"],
+                "opt_in_status" => true,
+                 "address" => [
+                    'address1' => $orderInfo["address"]["address1"] ?? '',
+                    'city' => $orderInfo["address"]["city"] ?? '',
+                    'postal_code' => $orderInfo["address"]["postcode"] ?? '',
+                    'country_code' => $orderInfo["address"]["country"] ?? '',
+                ]
+            ]);
+
+            // Delete Order
+            $a = $mailchimp->service->ecommerce->deleteOrder($storeID, $orderInfo["id"]);
+
+            // Insert Order
             $dataInsert = [
                 "id" => $orderInfo["id"],
                 "customer" => [
                     "id" => $orderInfo["email"], //A unique identifier for the customer. Limited to 50 characters.
-                    "email_address" => $orderInfo["email"],
-                    "opt_in_status" => false,
-                    "company" => '',
-                    "first_name" => $orderInfo["address"]["firstName"],
-                    "last_name" => $orderInfo["address"]["lastName"],
-                    "address" => [
-                        'address1' => $orderInfo["address"]["address1"] ?? '',
-                        'city' => $orderInfo["address"]["city"] ?? '',
-                        'postal_code' => $orderInfo["address"]["postcode"] ?? '',
-                        'country_code' => $orderInfo["address"]["country"] ?? '',
-                    ]
                 ], //Information about a specific customer. For existing customers include only the id parameter in the customer object body.
                 "currency_code" => $orderInfo["currency"]["code"],
-                "order_total" =>  0, // The total for the order.
+                "order_total" =>  $orderInfo["total"], // The total for the order.
                 "lines" => $this->getLines($orderInfo),
 
                 // "campaign_id" // A string that uniquely identifies the campaign for an order.
                 // "landing_site" // The URL for the page where the buyer landed when entering the shop.
                
-                "financial_status" => $orderInfo["status"], //paid, pending, refunded, cancelled
+                // "financial_status" => $orderInfo["status"], //paid, pending, refunded, cancelled
                 "fulfillment_status" => $orderInfo["status"],
                
-                // "order_url" //
-              
                 "discount_total" => $orderInfo["discount"],
-                // "tax_total" //
-              
                 "shipping_total" => $orderInfo["shippingTotal"],
-                "tracking_code" => $orderInfo["transactionId"],
+                // "tracking_code" => $orderInfo["transactionId"],
                 // "processed_at_foreign" //
                 // "cancelled_at_foreign" 
                 // "updated_at_foreign"
@@ -189,12 +245,33 @@ class UploadOrderToMailChimp extends Command
                 // "tracking_carrier"
                 // "tracking_url"
             ];
+            try {
+                // Insert Order
+                $addOrder = $mailchimp->service->ecommerce->addStoreOrder(
+                    $storeID,
+                    $dataInsert
+                );
 
-            $addOrder = $mailchimp->service->ecommerce->addStoreOrder(
-                "store_k6gosw5gwhooezt3i61m",
-                 $dataInsert
-            );
+                if($addOrder){
+                    dump('Insert đơn hàng ID: "'. $orderInfo["id"] .'" Thành công cho email:' . $orderInfo["email"]);
+                }
+            }catch (Exception $e) {
+                if($e->getResponse()->getStatusCode() == 400){
+                    dump('Order đã tồn tại vui lòng xóa hoăc bật xóa order để cập nhâp');
+                };
+            }
         }
+    }
+
+
+    public function getOrderItems($order){
+        $items = [];
+        if(count($order['items'])){
+            foreach($order['items'] as $key => $item){
+                $items[] = $item;
+            }
+        }
+        return $items;
     }
 
     public function getLines($order){

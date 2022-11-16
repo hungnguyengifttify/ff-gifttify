@@ -2,8 +2,13 @@
 
 namespace App\Services;
 
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Psr7\MultipartStream;
+use GuzzleHttp\Psr7\Query;
+use GuzzleHttp\Psr7\Request;
 use Illuminate\Support\Facades\Config;
 use MailchimpMarketing\ApiClient;
+use MailchimpMarketing\ObjectSerializer;
 
 class MailChimpService
 {
@@ -114,7 +119,8 @@ class MailChimpService
     //     "variants" => [["id" => "id", "title" => "Cat Hat"]],
     // ]);
 
-     function addProduct($store_id, $body){
+    public function addStoreProduct($store_id, $body)
+    {
         $response = $this->service->ecommerce->addStoreProductWithHttpInfo($store_id,$body);
         return $response;
     }

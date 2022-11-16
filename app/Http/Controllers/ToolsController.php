@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use function PHPUnit\Framework\isEmpty;
 
 class ToolsController extends Controller {
     public function create_shopify_csv(Request $request) {
@@ -910,6 +911,8 @@ class ToolsController extends Controller {
 
             $prod = $variants[0];
             if (count($prod) < 48) {
+                if (count($prod) == 1) continue;
+                dump('Check total Column');
                 dd($prod);
                 continue;
             }
@@ -918,6 +921,14 @@ class ToolsController extends Controller {
                 //$prod['Title'] = utf8_encode($prod['Title']);
                 dump($prod['Title']);
                 $isUtf8Valid = false;
+            }
+
+            if (empty($prod['Handle'])) {
+                dump( array_key_exists('Handle', $prod) );
+                dump('Handle is empty');
+                dump($prod['Title']);
+                dd($prod);
+                continue;
             }
 
             $products[$k] = array(

@@ -14,113 +14,96 @@ class UploadProductToMailChimp extends Command
      */
     protected $signature = 'mailchimp:push_product';
 
-    protected $json_order = '[{
-        "id": "c3cotpsUd",
-        "email": "michaelargent887@gmail.com",
-        "cartId": "o5uLwFHD2Fx",
-        "consentsAdvertising": true,
-        "address": {
-            "phone": "+61418471581",
-            "state": "VIC",
-            "country": "AU",
-            "firstName": "Michael",
-            "lastName": "Argent",
-            "address1": "11 Bendigo avenue elwood",
-            "city": "Melbourne",
-            "postcode": "3184"
-        },
-        "paymentMethod": "paypal",
-        "status": "completed",
-        "createdAt": 1666846770014,
-        "updatedAt": 1666847438128,
-        "billingAddress": {},
-        "sameBillingAddress": true,
-        "items": [
+    public $json_product = '[{
+        "id": "gU47IVX32g",
+        "type": "variable",
+        "author": "admin",
+        "slug": "pine-tree-christmas-tree-on-snowflake-background-duffle-bag",
+        "shopifyId": "g_633a73850db2a1.018684573666",
+        "title": "Pine Tree, Christmas Tree On Snowflake Background Duffle Bag",
+        "productType": "DBA",
+        "status": "publish",
+        "tags": "uni-ID1205, xmas, Duffle Bag, des-pine-tree-christmas-tree-on-snowflake-background-111022",
+        "tagsArr": [
+            "uni-ID1205",
+            "xmas",
+            "Duffle Bag",
+            "des-pine-tree-christmas-tree-on-snowflake-background-111022"
+        ],
+        "images": [
             {
-                "id": "IudD3cVaDn",
-                "product": {
-                    "id": "ZYoqBKd9W5",
-                    "type": "variable",
-                    "author": "admin",
-                    "slug": "sheep-floral-pattern-casual-shirt",
-                    "shopifyId": "g_634fa3523a7937.805474708258",
-                    "title": "Sheep Floral Pattern Casual Shirt",
-                    "productType": "CS",
-                    "status": "publish",
-                    "tags": "Casual Shirt, uni-TR2491, des-sheep-floral-pattern-191022",
-                    "tagsArr": [
-                        "Casual Shirt",
-                        "uni-TR2491",
-                        "des-sheep-floral-pattern-191022"
-                    ],
-                    "images": [
-                        {
-                            "alt": "",
-                            "src": "https://cdn.shopify.com/s/files/1/0516/6730/4607/products/Mockms.jpg?v=1662433284"
-                        },
-                        {
-                            "alt": "",
-                            "src": "https://cdn.shopify.com/s/files/1/0516/6730/4607/products/14_5fcf2ca3-6fb0-4876-9a4d-749b704f5b4f.jpg?v=1662432103"
-                        }
-                    ],
-                    "seo": {
-                        "title": "Sheep Floral Pattern Casual Shirt",
-                        "description": "Sheep Floral Pattern Casual Shirt"
-                    },
-                    "category": "Clothing",
-                    "gender": "women",
-                    "createdAt": 1666163542154,
-                    "updatedAt": 1666163542154
-                },
-                "variant": {
-                    "id": "gv_634fa3523a7a09.307022406173",
-                    "sku": "220405-i102-03-FARM-CS-14-DES1157",
-                    "image": {
-                        "alt": "",
-                        "src": ""
-                    },
-                    "price": 34.95,
-                    "option1": "Casual Shirt",
-                    "option2": "",
-                    "option3": "",
-                    "quantity": 9999,
-                    "fulfilment": "manual"
-                },
-                "options": {
-                    "Size Casual Shirt": "S"
-                },
-                "viewOptions": [
-                    {
-                        "name": "Type",
-                        "value": "Casual Shirt"
-                    },
-                    {
-                        "name": "Size Casual Shirt",
-                        "value": "S"
-                    }
-                ],
-                "price": 34.95,
-                "delivery": [],
-                "quantity": 2,
-                "subTotal": 69.9
+                "alt": "",
+                "src": "https://s3.amazonaws.com/thecreattify.co/images/2022_Sep/30/ChristmasID1205_49078_U/Duffle Bag/Pine Tree, Christmas Tree On Snowflake Background/MK_1.jpg"
+            },
+            {
+                "alt": "",
+                "src": "https://s3.amazonaws.com/thecreattify.co/images/2022_Sep/30/ChristmasID1205_49078_U/Duffle Bag/Pine Tree, Christmas Tree On Snowflake Background/MK_2.jpg"
             }
         ],
-        "cartTotal": 66.4,
-        "shippingTotal": 7.99,
-        "discount": 3.5,
-        "couponCode": "",
-        "total": 74.39,
-        "currency": {
-            "code": "USD",
-            "symbol": "US$",
-            "rate": 1
+        "options": [
+            {
+                "name": "Size",
+                "type": "",
+                "values": [
+                    "S",
+                    "M",
+                    "L"
+                ]
+            }
+        ],
+        "variants": [
+            {
+                "id": "gv_633a73850db2e2.708869766698",
+                "sku": "ID1205DBA-PINETREE,CHRISTMASTREEONSNOWFLAKEBACKGROUND-S",
+                "image": {
+                    "alt": "",
+                    "src": ""
+                },
+                "price": 42.95,
+                "option1": "S",
+                "option2": "",
+                "option3": "",
+                "quantity": 9999,
+                "fulfilment": "manual"
+            },
+            {
+                "id": "gv_633a73850db322.109299489463",
+                "sku": "ID1205DBA-PINETREE,CHRISTMASTREEONSNOWFLAKEBACKGROUND-M",
+                "image": {
+                    "alt": "",
+                    "src": ""
+                },
+                "price": 42.95,
+                "option1": "M",
+                "option2": "",
+                "option3": "",
+                "quantity": 9999,
+                "fulfilment": "manual"
+            },
+            {
+                "id": "gv_633a73850db365.254890777891",
+                "sku": "ID1205DBA-PINETREE,CHRISTMASTREEONSNOWFLAKEBACKGROUND-L",
+                "image": {
+                    "alt": "",
+                    "src": ""
+                },
+                "price": 42.95,
+                "option1": "L",
+                "option2": "",
+                "option3": "",
+                "quantity": 9999,
+                "fulfilment": "manual"
+            }
+        ],
+        "seo": {
+            "title": "Pine Tree, Christmas Tree On Snowflake Background Duffle Bag",
+            "description": "Pine Tree, Christmas Tree On Snowflake Background Duffle Bag"
         },
-        "shippingMethod": "Standard Shipping",
-        "sandbox": false,
-        "paypalOrderId": "0PN267367D687992Y",
-        "paidAt": 1666847437672,
-        "expressShipping": false,
-        "transactionId": "7F2585833G861140A"
+        "category": "Handbag & Wallet Accessories",
+        "gender": "unisex",
+        "createdAt": 1664775081763,
+        "updatedAt": 1664775081763,
+        "lastEditAuthor": "admin"
     }]';
 
     /**
@@ -140,98 +123,56 @@ class UploadProductToMailChimp extends Command
     {
         $mailchimp = new MailChimpService();
         $products = json_decode($this->json_product, true);
-        $orders = json_decode($this->json_order, true);
-        foreach($products as $productInfo){
-            $variantsInfo = $this->getVariantsInfo($products);
-            $importProduct = $mailchimp->updateStoreProduct("store_k6gosw5gwhooezt3i61m", $productInfo['id'], 
-            [
-                "id" => $productInfo['id'],  // REQUIRE
-                "title" => $productInfo['title'], // REQUIRE
-                "variants" => $variantsInfo['variantsItems'], // REQUIRE
-                "handle" =>  "API_PUSH", //The handle of a product.
-                "url" => $productInfo['slug'], 
-                "description" =>$productInfo['slug'], 
-                "type" => $productInfo['productType'],
-                // "vendor" // Chưa có
-                "image_url" => $productInfo['images'][0]['src'] ?? '',
-                // "images" => [
-                //     "variant_ids" => $variantsInfo['listVariantId'] // Danh sách ID nhân ảnh
-                // ], 
-                "published_at_foreign" =>  date('Y-m-d h:i:s',$productInfo['createdAt']), //The date and time the product was published.
-            ]);
-                dd( $importProduct);
-            }
-        }
-        // $import = $mailchimp->getStoreProduct("ID_STORE","ID_PRODUCT") ;
-        
-        
-        // $mailchimp->addStoreOrder("store_id", [
-        //         "id" => $orderInfo["id"],
-        //         "customer" => [
-        //             "id" => $orderInfo["id"], //A unique identifier for the customer. Limited to 50 characters.
-        //             "email_address" => $orderInfo["email"],
-        //             "opt_in_status" => $orderInfo["id"],
-        //             "company" => $orderInfo["id"],
-        //             "first_name" => $orderInfo["id"],
-        //             "last_name" => $orderInfo["id"],
-        //             "address" => $orderInfo["id"]
-        //         ], //Information about a specific customer. For existing customers include only the id parameter in the customer object body.
-        //         "currency_code" => $orderInfo["id"],
-        //         "order_total" => 75895, // The total for the order.
-        //         "lines" => [
-        //             [
-        //                 "id" => "id",
-        //                 "product_id" => "product_id",
-        //                 "product_variant_id" => "product_variant_id",
-        //                 "quantity" => 990,
-        //                 "price" => 43106,
-        //                 "discount" => 0
-        //             ],
-        //         ],
-        //         // "campaign_id" // A string that uniquely identifies the campaign for an order.
-        //         // "landing_site" // The URL for the page where the buyer landed when entering the shop.
-        //         // "financial_status" //paid, pending, refunded, cancelled
-        //         // "fulfillment_status" //
-        //         // "order_url" //
-        //         // "discount_total" //
-        //         // "tax_total" //
-        //         // "shipping_total" //
-        //         // "tracking_code" //
-        //         // "processed_at_foreign" //
-        //         // "cancelled_at_foreign" 
-        //         // "updated_at_foreign"
-        //         // "shipping_address"
-        //         // "billing_address"
-        //         // "promos"
-        //         // "outreach"
-        //         // "tracking_number"
-        //         // "tracking_carrier"
-        //         // "tracking_url"
-        //     ]);
-    // }
 
-    public function getVariantsInfo($product){
+        //$import = $mailchimp->getStoreProduct("store_k6gosw5gwhooezt3i61m", $productInfo['id']) ;
+
+        foreach ($products as $productInfo) {
+            $variantsInfo = $this->getVariantsInfo($productInfo);
+            // dd($variantsInfo);
+            $importProduct = $mailchimp->addProduct(
+                "store_k6gosw5gwhooezt3i61m",
+                [
+                    "id" => $productInfo['id'],  // REQUIRE
+                    "title" => $productInfo['title'], // REQUIRE
+                    "variants" => $variantsInfo['variantsItems'], // REQUIRE
+                    "handle" =>  "API_PUSH", //The handle of a product.
+                    "url" => 'https://thecreattify.com/' . $productInfo['slug'] . '-' .  $productInfo['id'],
+                    "description" => "",
+                    "type" => $productInfo['productType'],
+                    // "vendor" // Chưa có
+                    "image_url" => $productInfo['images'][0]['src'] ?? '',
+                    // "images" => [
+                    //     "variant_ids" => $variantsInfo['listVariantId'] // Danh sách ID nhân ảnh
+                    // ], 
+                    "published_at_foreign" =>  date('Y-m-d h:i:s', $productInfo['createdAt']), //The date and time the product was published.
+                ]
+            );
+        }
+    }
+    public function getVariantsInfo($product)
+    {
         $variantsItems = [];
         $listVariantId = [];
-        if(isset($product['variants']) && count($product['variants'])){
-            foreach($product['variants'] as $val){
-               $vItem = [];
-               $vItem['id'] = $val['id'];           
-               $vItem['title'] = $product['title'];  // Không có tên cho từng option   
-               $vItem['url'] = $product['slug'] ?? '';    
-               $vItem['sku'] = $val['sku'];         
-               $vItem['price'] = $val['price'];     
-               $vItem['inventory_quantity'] = $val['quantity'];
-               $vItem['image_url'] = $product['image'][0]['src'] ?? '';  // Dùng ảnh mặc định của sản phẩm gốc
-            //    $vItem['backorders'] = $val['backorders'];   // Không có thông tin
-            //    $vItem['visibility'] = $val['visibility'];   // Không có thông tin
-               $variantsItems[] = $vItem;
-               $listVariantId[] = $val['id'];
+        if (isset($product['variants']) && count($product['variants'])) {
+            foreach ($product['variants'] as $val) {
+                $vItem = [];
+                $vItem['id'] = $val['id'];
+                $vItem['title'] = $product['title'] . '-' .  $val['id'];  // Không có tên cho từng option   
+                $vItem['url'] = $product['slug'] ?? '';
+                $vItem['sku'] = $val['sku'];
+                $vItem['price'] = $val['price'];
+                $vItem['inventory_quantity'] = $val['quantity'];
+                $vItem['image_url'] = $product['image'][0]['src'] ?? '';  // Dùng ảnh mặc định của sản phẩm gốc
+                //    $vItem['backorders'] = $val['backorders'];   // Không có thông tin
+                //    $vItem['visibility'] = $val['visibility'];   // Không có thông tin
+                $variantsItems[] = $vItem;
+                $listVariantId[] = $val['id'];
             }
         }
+
         return [
             'variantsItems' => $variantsItems,
-            'listVariantId'=> $listVariantId
+            'listVariantId' => $listVariantId
         ];
     }
 }

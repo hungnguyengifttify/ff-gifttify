@@ -139,51 +139,78 @@ class UploadOrderToMailChimp extends Command
     public function handle()
     {
         $mailchimp = new MailChimpService();
-        $products = json_decode($this->json_product, true);
-        foreach($products as $productInfo){
-            $variantsInfo = $this->getVariantsInfo($products);
-            $importProduct = $mailchimp->addProduct("store_k6gosw5gwhooezt3i61m", 
-            [
-                "id" => $productInfo['id'],  // REQUIRE
-                "title" => $productInfo['title'], // REQUIRE
-                "variants" => $variantsInfo['variantsItems'], // REQUIRE
-                "handle" =>  "API_PUSH", //The handle of a product.
-                "url" => $productInfo['slug'], 
-                "description" =>$productInfo['slug'], 
-                "type" => $productInfo['productType'],
-                // "vendor" // Chưa có
-                "image_url" => $productInfo['images'][0]['src'] ?? '',
-                // "images" => [
-                //     "variant_ids" => $variantsInfo['listVariantId'] // Danh sách ID nhân ảnh
-                // ], 
-                "published_at_foreign" =>  date('Y-m-d h:i:s',$productInfo['createdAt']), //The date and time the product was published.
-            ]);
-            }
-        dd($importProduct);
+        $listOrdersForImport = json_decode($this->json_order, true);
+     
+        // $mailchimp->service->ecommerce->getStoreCustomer("Store_ID", "ID"));
+        // $customer = $mailchimp->service->ecommerce->getStoreCustomer("store_k6gosw5gwhooezt3i61m", "Jeramie_Padberg@hotmail.com");
+
+        foreach ($listOrdersForImport as $orderInfo) {
+            $dataInsert = [
+                "id" => $orderInfo["id"],
+                "customer" => [
+                    "id" => $orderInfo["email"], //A unique identifier for the customer. Limited to 50 characters.
+                    "email_address" => $orderInfo["email"],
+                    "opt_in_status" => false,
+                    "company" => '',
+                    "first_name" => $orderInfo["address"]["firstName"],
+                    "last_name" => $orderInfo["address"]["lastName"],
+                    "address" => [
+                        'address1' => $orderInfo["address"]["address1"] ?? '',
+                        'city' => $orderInfo["address"]["city"] ?? '',
+                        'postal_code' => $orderInfo["address"]["postcode"] ?? '',
+                        'country_code' => $orderInfo["address"]["country"] ?? '',
+                    ]
+                ], //Information about a specific customer. For existing customers include only the id parameter in the customer object body.
+                "currency_code" => $orderInfo["currency"]["code"],
+                "order_total" =>  0, // The total for the order.
+                "lines" => $this->getLines($orderInfo),
+
+                // "campaign_id" // A string that uniquely identifies the campaign for an order.
+                // "landing_site" // The URL for the page where the buyer landed when entering the shop.
+               
+                "financial_status" => $orderInfo["status"], //paid, pending, refunded, cancelled
+                "fulfillment_status" => $orderInfo["status"],
+               
+                // "order_url" //
+              
+                "discount_total" => $orderInfo["discount"],
+                // "tax_total" //
+              
+                "shipping_total" => $orderInfo["shippingTotal"],
+                "tracking_code" => $orderInfo["transactionId"],
+                // "processed_at_foreign" //
+                // "cancelled_at_foreign" 
+                // "updated_at_foreign"
+                // "shipping_address"
+                // "billing_address"
+                // "promos"
+                // "outreach"
+                // "tracking_number"
+                // "tracking_carrier"
+                // "tracking_url"
+            ];
+
+            $addOrder = $mailchimp->service->ecommerce->addStoreOrder(
+                "store_k6gosw5gwhooezt3i61m",
+                 $dataInsert
+            );
+        }
     }
 
-    public function getVariantsInfo($product){
-        $variantsItems = [];
-        $listVariantId = [];
-        if(isset($product['variants']) && count($product['variants'])){
-            foreach($product['variants'] as $val){
-               $vItem = [];
-               $vItem['id'] = $val['id'];           
-               $vItem['title'] = $product['title'];  // Không có tên cho từng option   
-               $vItem['url'] = $product['slug'] ?? '';    
-               $vItem['sku'] = $val['sku'];         
-               $vItem['price'] = $val['price'];     
-               $vItem['inventory_quantity'] = $val['quantity'];
-               $vItem['image_url'] = $product['image'][0]['src'] ?? '';  // Dùng ảnh mặc định của sản phẩm gốc
-            //    $vItem['backorders'] = $val['backorders'];   // Không có thông tin
-            //    $vItem['visibility'] = $val['visibility'];   // Không có thông tin
-               $variantsItems[] = $vItem;
-               $listVariantId[] = $val['id'];
+    public function getLines($order){
+        $line = [];
+        if(count($order['items'])){
+            foreach($order['items'] as $key => $item){
+                $tempItem = [];
+                $tempItem['id'] = $item['id'];
+                $tempItem['product_id'] = $item['product']['id'];
+                $tempItem['product_variant_id'] = $item['variant']['id'];
+                $tempItem['quantity'] = $item['quantity'];
+                $tempItem['price'] = $item['subTotal']; // $item['subTotal']
+                $tempItem['discount'] = 0;
+                $line[] = $tempItem;
             }
         }
-        return [
-            'variantsItems' => $variantsItems,
-            'listVariantId'=> $listVariantId
-        ];
+        return $line;
     }
 }

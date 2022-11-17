@@ -40,13 +40,19 @@ class UploadOrderToMailChimp extends Command
         $mailchimp = new MailChimpService();
         // $response = $mailchimp->service->ecommerce->stores();
         // $a = $mailchimp->service->ecommerce->deleteStoreCart($storeID, 'TC_JWYIcY1Zq');
-        // $b = $mailchimp->service->ecommerce->getStoreCart($storeID, 'TC_JWYIcY1Zq');
+        // $b = $mailchimp->service->ecommerce->getStoreCart($storeID, 'TC_nEPoTH2oT');
+        // $b = $mailchimp->service->ecommerce->getOrder($storeID, 'TC_xQn9pCuYV');
+        // $b = $mailchimp->service->ecommerce->getStoreCarts($storeID);
         // dd($b);
         do {
             $pageOrder++;
-            $data = RedisGtf::getRedisOrdersList(1, array('2022-11-01', '2022-11-16'), 'complete', $pageOrder, 20);
+            $data = RedisGtf::getRedisOrdersList(1, array('2022-11-01', '2022-11-16'), 'draft', $pageOrder, 100);
             foreach ($data['results'] as $v) {
-                // Import order
+               
+                // if($v['email'] != 'hatv1592@gmail.com'){
+                //     continue;
+                // }
+              
                 $listProduct = $this->getOrderItems($v);
                 foreach($listProduct as $productInfo){
                     try {
@@ -167,74 +173,74 @@ class UploadOrderToMailChimp extends Command
                         }
                     }catch (Exception $e) {
                         if($e->getResponse()->getStatusCode() == 400){
-                            dump('Cart '.$v["id"]. ''. $v["email"].' tồn tại.');
-                            Log::notice('Cart '.$v["id"]. ''. $v["email"].' tồn tại.');
+                            dump('Cart '.$v["id"]. ' - '. $v["email"].' tồn tại.');
+                            Log::notice('Cart '.$v["id"]. ' - '. $v["email"].' tồn tại.');
                         }else{
                             Log::notice($e);
                         };
                     }
-                }else{
-                    // Get order and check exits
-                    try {
-                        $isExitsOrder = $mailchimp->service->ecommerce->getOrder($storeID, $v["id"]);
-                    }catch (Exception $e) {
-                        $isExitsOrder = false;
+                }
+
+                // Get order and check exits
+                try {
+                    $isExitsOrder = $mailchimp->service->ecommerce->getOrder($storeID, $v["id"]);
+                }catch (Exception $e) {
+                    $isExitsOrder = false;
+                }
+                //
+                $dataInsert = [
+                    "id" => $v["id"],
+                    "customer" => [
+                        "id" => $v["email"], //A unique identifier for the customer. Limited to 50 characters.
+                    ], //Information about a specific customer. For existing customers include only the id parameter in the customer object body.
+                    "currency_code" => $v["currency"]["code"] ?? 'USD',
+                    "order_total" =>  $v["total"] ?? $this->totalPriceDraft($v), // The total for the order.
+                    "lines" => $this->getLines($v),
+    
+                    // "campaign_id" // A string that uniquely identifies the campaign for an order.
+                    // "landing_site" // The URL for the page where the buyer landed when entering the shop.
+                    
+                    "financial_status" => (isset($v['paidAt']) && $v['paidAt'] != null) ? 'paid' : 'pending', //paid, pending, refunded, cancelled
+                    "fulfillment_status" => $v["status"],
+                    
+                    "discount_total" => $v["discount"] ?? 0,
+                    "shipping_total" => $v["shippingTotal"] ?? 0,
+                    "processed_at_foreign" => Carbon::createFromTimestamp($v['createdAt']/1000)->toDateTimeString(),
+                    "updated_at_foreign" => Carbon::createFromTimestamp($v['updatedAt']/1000)->toDateTimeString(),
+                    // "tracking_code" => $v["transactionId"],
+                    // "processed_at_foreign" //
+                    // "cancelled_at_foreign" 
+                    // "cancelled_at_foreign" 
+                    // "updated_at_foreign"
+                    // "shipping_address"
+                    // "billing_address"
+                    // "promos"
+                    // "outreach"
+                    // "tracking_number"
+                    // "tracking_carrier"
+                    // "tracking_url"
+                ];
+                try {
+                    // Insert Order
+                    if(!$isExitsOrder){
+                        $response =  $mailchimp->service->ecommerce->addStoreOrder(
+                            $storeID,
+                            $dataInsert
+                        );
+                        dump('Insert đơn hàng ID: "'. $v["id"] .'" Thành công cho email: ' . $v["email"]);
+                        Log::notice('Insert đơn hàng ID: "'. $v["id"] .'" Thành công cho email: ' . $v["email"]);
+                    }else{
+                        $response = $mailchimp->service->ecommerce->updateOrder(
+                            $storeID,
+                            $v["id"],
+                            $dataInsert
+                        );
+                        dump('Update đơn hàng ID: "'. $v["id"] .'" Thành công cho email: ' . $v["email"]);
+                        Log::notice('Update đơn hàng ID: "'. $v["id"] .'" Thành công cho email: ' . $v["email"]);
                     }
-                    //
-                    $dataInsert = [
-                        "id" => $v["id"],
-                        "customer" => [
-                            "id" => $v["email"], //A unique identifier for the customer. Limited to 50 characters.
-                        ], //Information about a specific customer. For existing customers include only the id parameter in the customer object body.
-                        "currency_code" => $v["currency"]["code"],
-                        "order_total" =>  $v["total"], // The total for the order.
-                        "lines" => $this->getLines($v),
-        
-                        // "campaign_id" // A string that uniquely identifies the campaign for an order.
-                        // "landing_site" // The URL for the page where the buyer landed when entering the shop.
-                       
-                        "financial_status" => 'paid', //paid, pending, refunded, cancelled
-                        "fulfillment_status" => $v["status"],
-                       
-                        "discount_total" => $v["discount"],
-                        "shipping_total" => $v["shippingTotal"],
-                        "processed_at_foreign" => Carbon::createFromTimestamp($v['updatedAt'])->toDateTimeString(),
-                        "updated_at_foreign" => Carbon::createFromTimestamp($v['updatedAt'])->toDateTimeString(),
-                        // "tracking_code" => $v["transactionId"],
-                        // "processed_at_foreign" //
-                        // "cancelled_at_foreign" 
-                        // "cancelled_at_foreign" 
-                        // "updated_at_foreign"
-                        // "shipping_address"
-                        // "billing_address"
-                        // "promos"
-                        // "outreach"
-                        // "tracking_number"
-                        // "tracking_carrier"
-                        // "tracking_url"
-                    ];
-                    try {
-                        // Insert Order
-                        if(!$isExitsOrder){
-                            $response =  $mailchimp->service->ecommerce->addStoreOrder(
-                                $storeID,
-                                $dataInsert
-                            );
-                            dump('Insert đơn hàng ID: "'. $v["id"] .'" Thành công cho email: ' . $v["email"]);
-                            Log::notice('Insert đơn hàng ID: "'. $v["id"] .'" Thành công cho email: ' . $v["email"]);
-                        }else{
-                            $response = $mailchimp->service->ecommerce->updateOrder(
-                                $storeID,
-                                $v["id"],
-                                $dataInsert
-                            );
-                            dump('Update đơn hàng ID: "'. $v["id"] .'" Thành công cho email: ' . $v["email"]);
-                            Log::notice('Update đơn hàng ID: "'. $v["id"] .'" Thành công cho email: ' . $v["email"]);
-                        }
-                    }catch (Exception $e) {     
-                        dump('Insert/update order '.$v["id"].' email: ' . $v["email"].' thất bại');
-                        Log::notice('Insert/update  order '.$v["id"].' email: ' . $v["email"].' thất bại');
-                    }
+                }catch (Exception $e) {     
+                    dump('Insert/update order '.$v["id"].' email: ' . $v["email"].' thất bại');
+                    Log::notice('Insert/update  order '.$v["id"].' email: ' . $v["email"].' thất bại');
                 }
             }
             break;

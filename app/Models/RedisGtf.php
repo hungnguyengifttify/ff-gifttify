@@ -45,7 +45,7 @@ class RedisGtf extends Model
         return array('total' => $total, 'totalAmount' => $totalAmount);
     }
 
-    public static function getRedisOrdersList($db = 1, $dateRanges = array(), $status = '', $page = 1, $limit = 10) {
+    public static function getRedisOrdersList($db = 1, $dateRanges = array(), $status = '', $page = 1, $limit = 10, $isArray = false) {
         $queryArr = array(
             'db' => $db,
             'dateRanges' => $dateRanges,
@@ -60,7 +60,7 @@ class RedisGtf extends Model
         $response = $remixApi->request('GET', 'orders?' . $query, null, null);
         if ($response && $response->getStatusCode() == '200') {
             $res = $response->getBody()->getContents();
-            return json_decode($res);
+            return json_decode($res, $isArray);
         }
         return false;
     }

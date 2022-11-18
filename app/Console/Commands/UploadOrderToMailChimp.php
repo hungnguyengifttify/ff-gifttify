@@ -49,20 +49,20 @@ class UploadOrderToMailChimp extends Command
 
         do {
             $pageOrder++;
-            $data = RedisGtf::getRedisOrdersList(1, array('2022-11-01', '2022-11-16'), '', $pageOrder, 5, true);
+            $data = RedisGtf::getRedisOrdersList(1, array(), '', $pageOrder, 80, true);
             foreach ($data['results'] as $v) {
-               
+
                 // Code check
                 // if($v['email'] != 'hatv1592@gmail.com'){
                 //     continue;
                 // }
-              
+
                 $listProduct = $this->getOrderItems($v);
                 foreach($listProduct as $productInfo){
                     try {
                         // try {
                         $mailchimp->service->ecommerce->updateStoreProduct(
-                            $storeID, 
+                            $storeID,
                             $productInfo['product']["id"],
                             [
                                 "title" => $productInfo['product']['title'], // REQUIRE
@@ -97,12 +97,12 @@ class UploadOrderToMailChimp extends Command
                                     "variants" => [
                                         [
                                         'id' =>  $productInfo['variant']['id'],
-                                        'title' => $productInfo['product']['title'],  
+                                        'title' => $productInfo['product']['title'],
                                         'url' => $siteDomain.'/products/' . $productInfo['product']['slug'] . '-' .  $productInfo['product']['id'],
                                         'sku' => $productInfo['variant']['sku'],
                                         'price' => $productInfo['variant']['price'],
-                                        'inventory_quantity' => $productInfo['variant']['quantity'],                              
-                                        'image_url' => $productInfo['product']['images'][0]['src'] ?? '',  
+                                        'inventory_quantity' => $productInfo['variant']['quantity'],
+                                        'image_url' => $productInfo['product']['images'][0]['src'] ?? '',
                                         ]
                                     ], // REQUIRE
                                     "handle" =>  "API_PUSH", //The handle of a product.
@@ -155,7 +155,7 @@ class UploadOrderToMailChimp extends Command
 
                     // Show all cart
                     // $mailchimp->service->ecommerce->getStoreCarts($storeID);
-                    
+
                     $dataInsert = [
                         "id" => $v["id"],
                         "customer" => [
@@ -202,21 +202,21 @@ class UploadOrderToMailChimp extends Command
                     "currency_code" => $v["currency"]["code"] ?? 'USD',
                     "order_total" =>  $v["total"] ?? $this->totalPriceDraft($v), // The total for the order.
                     "lines" => $this->getLines($v),
-    
+
                     // "campaign_id" // A string that uniquely identifies the campaign for an order.
                     // "landing_site" // The URL for the page where the buyer landed when entering the shop.
-                    
+
                     "financial_status" => (isset($v['paidAt']) && $v['paidAt'] != null) ? 'paid' : 'pending', //paid, pending, refunded, cancelled
                     "fulfillment_status" => $v["status"],
-                    
+
                     "discount_total" => $v["discount"] ?? 0,
                     "shipping_total" => $v["shippingTotal"] ?? 0,
                     "processed_at_foreign" => Carbon::createFromTimestamp($v['createdAt']/1000)->toDateTimeString(),
                     "updated_at_foreign" => Carbon::createFromTimestamp($v['updatedAt']/1000)->toDateTimeString(),
                     // "tracking_code" => $v["transactionId"],
                     // "processed_at_foreign" //
-                    // "cancelled_at_foreign" 
-                    // "cancelled_at_foreign" 
+                    // "cancelled_at_foreign"
+                    // "cancelled_at_foreign"
                     // "updated_at_foreign"
                     // "shipping_address"
                     // "billing_address"
@@ -243,11 +243,11 @@ class UploadOrderToMailChimp extends Command
                         );
                         dump('Update đơn hàng ID: "'. $v["id"] .'" Thành công cho email: ' . $v["email"]);
                     }
-                }catch (Exception $e) {     
+                }catch (Exception $e) {
                     dump('Insert/update order '.$v["id"].' email: ' . $v["email"].' thất bại');
                 }
             }
-            break; 
+            break;
         } while (empty($data) === false);
         // sleep(10);
     }

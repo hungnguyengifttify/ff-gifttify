@@ -90,7 +90,7 @@ class MailChimpService
     // Update a specific order.
     public function updateOrder($store_id, $order_id, $body)
     {
-        $$response = $this->service->ecommerce->updateOrderWithHttpInfo($store_id, $order_id, $body);
+        $response = $this->service->ecommerce->updateOrderWithHttpInfo($store_id, $order_id, $body);
         return $response;
     }
 
@@ -124,7 +124,7 @@ class MailChimpService
         $response = $this->service->ecommerce->addStoreProductWithHttpInfo($store_id,$body);
         return $response;
     }
-    
+
     //Update a specific product.
     public function updateStoreProduct($store_id, $product_id, $body)
     {

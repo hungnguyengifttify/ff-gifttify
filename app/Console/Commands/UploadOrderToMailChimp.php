@@ -49,9 +49,9 @@ class UploadOrderToMailChimp extends Command
 
         do {
             $pageOrder++;
-            $data = RedisGtf::getRedisOrdersList(1, array(), '', $pageOrder, 80, true);
+            $data = RedisGtf::getRedisOrdersList(1, [], '', $pageOrder, 80, true);
             foreach ($data['results'] as $v) {
-
+               
                 // Code check
                 // if($v['email'] != 'hatv1592@gmail.com'){
                 //     continue;
@@ -183,6 +183,7 @@ class UploadOrderToMailChimp extends Command
                             dump('Update cart ID: "'. $v["id"] .'" Thành công cho email: ' . $v["email"]);
                         }
                     }catch (Exception $e) {
+                        Log::info('Import/Upate cart ID: '.$v["id"]. ' - '. $v["email"].' thất bại.');
                         dump('Import/Upate cart ID: '.$v["id"]. ' - '. $v["email"].' thất bại.');
                     }
                 }
@@ -230,20 +231,31 @@ class UploadOrderToMailChimp extends Command
                 try {
                     // Insert Order
                     if(!$isExitsOrder){
-                        $response =  $mailchimp->service->ecommerce->addStoreOrder(
+                        $mailchimp->service->ecommerce->addStoreOrder(
                             $storeID,
                             $dataInsert
                         );
                         dump('Insert đơn hàng ID: "'. $v["id"] .'" Thành công cho email: ' . $v["email"]);
                     }else{
-                        $response = $mailchimp->service->ecommerce->updateOrder(
+                        $mailchimp->service->ecommerce->updateOrder(
                             $storeID,
                             $v["id"],
                             $dataInsert
                         );
+
+                        if(isset($isExitsOrder->fulfillment_status) && $isExitsOrder->fulfillment_status == 'draft' && $v["status"] == 'complete') {
+                            try {
+                            $mailchimp->service->ecommerce->deleteStoreCart($storeID, $v["id"]);
+                            dump('Xóa cart ID (Đơn draft -> complete): "'. $v["id"] .'" Thành công cho email: ' . $v["email"]);
+                            }catch (Exception $e) {
+
+                            }
+                        };
+
                         dump('Update đơn hàng ID: "'. $v["id"] .'" Thành công cho email: ' . $v["email"]);
                     }
-                }catch (Exception $e) {
+                }catch (Exception $e) {     
+                    Log::info('Import/Upate cart ID: '.$v["id"]. ' - '. $v["email"].' thất bại.');
                     dump('Insert/update order '.$v["id"].' email: ' . $v["email"].' thất bại');
                 }
             }

@@ -148,7 +148,7 @@ class UploadOrderToMailChimp extends Command
                 // Import/Update Cart
                 if($v["status"] == 'draft'){
                     try {
-                        $isExitsCart = $mailchimp->service->ecommerce->getOrder($storeID, $v["id"]);
+                        $isExitsCart = $mailchimp->service->ecommerce->getStoreCart($storeID, $v["id"]);
                     }catch (Exception $e) {
                         $isExitsCart = false;
                     }
@@ -243,10 +243,10 @@ class UploadOrderToMailChimp extends Command
                             $dataInsert
                         );
 
-                        if(isset($isExitsOrder->fulfillment_status) && $isExitsOrder->fulfillment_status == 'draft' && $v["status"] == 'complete') {
+                        if(isset($isExitsOrder->fulfillment_status) && $isExitsOrder->fulfillment_status == 'draft' && $v["status"] == 'completed') {
                             try {
                             $mailchimp->service->ecommerce->deleteStoreCart($storeID, $v["id"]);
-                            dump('Xóa cart ID (Đơn draft -> complete): "'. $v["id"] .'" Thành công cho email: ' . $v["email"]);
+                            dump('Xóa cart ID (Đơn draft -> completed): "'. $v["id"] .'" Thành công cho email: ' . $v["email"]);
                             }catch (Exception $e) {
 
                             }

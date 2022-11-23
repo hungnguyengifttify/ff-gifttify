@@ -36,6 +36,7 @@ class UploadOrderToMailChimp extends Command
         $siteDomain = 'https://thecreattify.com';
         $storeID = 'store_k6gosw5gwhooezt3i61m';
         $pageOrder = 0;
+        $listId = '6fe56ad500'; // ID list member
 
         $mailchimp = new MailChimpService();
 
@@ -126,23 +127,58 @@ class UploadOrderToMailChimp extends Command
 
                 // Import or update Customer
                 try{
-                $updateCustomer = $mailchimp->service->ecommerce->setStoreCustomer($storeID, $v["email"], [
-                    "id" => $v["email"],
-                    "email_address" => $v["email"],
-                    "opt_in_status" => true,
-                    "first_name" => $v["address"]["firstName"],
-                    "last_name" => $v["address"]["lastName"],
-                    "phone" => $v["address"]["phone"],
-                    "address" => [
-                        'address1' => $v["address"]["address1"] ?? '',
-                        'city' => $v["address"]["city"] ?? '',
-                        'postal_code' => $v["address"]["postcode"] ?? '',
-                        'country_code' => $v["address"]["country"] ?? '',
-                        'province' => $v["address"]["state"] ?? ''
-                    ]
-                ]);
+                    $mailchimp->service->ecommerce->setStoreCustomer($storeID, $v["email"], [
+                        "id" => $v["email"],
+                        "email_address" => $v["email"],
+                        "opt_in_status" => true,
+                        "first_name" => $v["address"]["firstName"],
+                        "last_name" => $v["address"]["lastName"],
+                        "phone" => $v["address"]["phone"],
+                        "address" => [
+                            'address1' => $v["address"]["address1"] ?? '',
+                            'city' => $v["address"]["city"] ?? '',
+                            'postal_code' => $v["address"]["postcode"] ?? '',
+                            'country_code' => $v["address"]["country"] ?? '',
+                            'province' => $v["address"]["state"] ?? ''
+                        ]
+                    ]);
+                    // dump('Insert/update sucsess customer: "'. $v["id"] .'" email: ' . $v["email"]);
                 }catch(Exception $e){
-                    dump('Insert/update : "'. $v["id"] .'" không thành công email: ' . $v["email"]);
+                    dump('Insert/update false customer: "'. $v["id"] .'" email: ' . $v["email"]);
+                }
+
+                // Update member info
+                try{
+                    $customerInfo = [
+                        "id" => $v["email"],
+                        "email_address" => $v["email"],
+                        "status"=> "subscribed", //Possible values : "subscribed", "unsubscribed", "cleaned", "pending", or "transactional".
+                        "address" => [
+                            'address1' => $v["address"]["address1"] ?? '',
+                            'city' => $v["address"]["city"] ?? '',
+                            'postal_code' => $v["address"]["postcode"] ?? '',
+                            'country_code' => $v["address"]["country"] ?? '',
+                            'province' => $v["address"]["state"] ?? ''
+                        ],
+                        "merge_fields" => [
+                            "FNAME" => $v["address"]["firstName"] ?? '',
+                            "LNAME" => $v["address"]["lastName"] ?? '',
+                            "ADDRESS" => [
+                                'addr1' => $v["address"]["address1"] ?? '',
+                                'city' => $v["address"]["city"] ?? '',
+                                'zip' => $v["address"]["postcode"] ?? '',
+                                'country' => $v["address"]["country"] ?? '',
+                                'state' => $v["address"]["state"] ?? ''
+                            ],
+                            "PHONE"=> $v["address"]["phone"] ?? '',
+                            "MMERGE5"=> $v["address"]["country"] ?? '',
+                            "MMERGE6"=> $v["address"]["postcode"] ?? '',
+                        ]
+                    ];
+                    $mailchimp->service->lists->setListMember($listId, md5($v["email"]), $customerInfo);
+                    // dump('Insert/update sucsess member: "'. $v["id"] .'" email: ' . $v["email"]);
+                }catch(Exception $e){
+                    dump('Insert/update false member: "'. $v["id"] .'" email: ' . $v["email"]);
                 }
 
                 // Import/Update Cart

@@ -170,7 +170,9 @@ class UploadOrderToMailChimp extends Command
                                 'country' => $v["address"]["country"] ?? '',
                                 'state' => $v["address"]["state"] ?? ''
                             ],
-                            "PHONE"=> $v["address"]["phone"] ?? ''
+                            "PHONE"=> $v["address"]["phone"] ?? '',
+                            "MMERGE5"=> $v["address"]["country"] ?? '',
+                            "MMERGE6"=> $v["address"]["postcode"] ?? '',
                         ]
                     ];
                     $mailchimp->service->lists->setListMember($listId, md5($v["email"]), $customerInfo);

@@ -41,8 +41,8 @@ class UploadMemberToMailChimp extends Command
         $mailchimp = new MailChimpService();
 
         // $b = $mailchimp->service->lists->getAllLists(); //6fe56ad500
-        $b = $mailchimp->service->lists->getListMembersInfo('6fe56ad500'); //6fe56ad500
-        // $b = $mailchimp->service->lists->getListMember('6fe56ad500', md5('hatv1592@gmail.com')); //6fe56ad500
+        // $b = $mailchimp->service->lists->getListMembersInfo('6fe56ad500'); //6fe56ad500
+        // $b = $mailchimp->service->lists->getListMember('6fe56ad500', md5('bevwascher@gmail.com')); //6fe56ad500
         // $b = $mailchimp->service->lists->setListMember('6fe56ad500', md5('hatv1592@gmail.com'), [
         //     "email_address" => "hatv1592@gmail.com",
         //     "status" => "pending",
@@ -59,11 +59,11 @@ class UploadMemberToMailChimp extends Command
         //       "PHONE"=> "0376874179"
         //     ]
         // ]);
-        dd($b);
+        // dd($b);
 
         do {
             $pageOrder++;
-            $data = RedisGtf::getRedisOrdersList(1, [], 'completed', $pageOrder, 1000, true);
+            $data = RedisGtf::getRedisOrdersList(1, [], '', $pageOrder, 10, true);
             foreach ($data['results'] as $v) {
                 // Import or update Customer
                 try{
@@ -111,7 +111,9 @@ class UploadMemberToMailChimp extends Command
                                 'country' => $v["address"]["country"] ?? '',
                                 'state' => $v["address"]["state"] ?? ''
                             ],
-                            "PHONE"=> $v["address"]["phone"] ?? ''
+                            "PHONE"=> $v["address"]["phone"] ?? '',
+                            "MMERGE5"=> $v["address"]["country"] ?? '',
+                            "MMERGE6"=> $v["address"]["postcode"] ?? '',
                         ]
                     ];
                     $mailchimp->service->lists->setListMember($listId, md5($v["email"]), $customerInfo);

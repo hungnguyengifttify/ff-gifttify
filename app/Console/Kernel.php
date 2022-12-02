@@ -34,6 +34,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('products_csv:import owllify.com')->everyMinute();
         $schedule->command('products_csv:import vanoba.com')->everyMinute();
         $schedule->command('products_csv:import whelands.com')->everyMinute();
+        $schedule->command('mailchimp:push_order')->everyFiveMinutes();
+        $schedule->command('remix:scheduleproduct')->everyMinute();
     }
 
     /**

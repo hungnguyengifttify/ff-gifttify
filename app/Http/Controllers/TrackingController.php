@@ -49,6 +49,7 @@ class TrackingController extends Controller
         ];
 
         $id = $request->id;
+        file_get_contents('https://t.17track.net/en#nums=' . $id);
         $dataTrack = $this->track17Service->getTrackInfo($id);
         if (isset($dataTrack['error']['code']) &&  $dataTrack['error']['code'] == '-18019902') {
             $register = $this->track17Service->registerTrackingNumber($id);
@@ -67,23 +68,25 @@ class TrackingController extends Controller
         } else {
             $response['data'] = $dataTrack;
             $shouldRemove = false;
-            foreach ($response['data']['tracking'] as $k => $v) {
-                if ( strtoupper($v['content']) == strtoupper('CHINA - Arrive at international airport to abroad')) {
-                    $v['content'] = 'Mexico - Arrive at international airport to abroad';
-                    $response['data']['tracking'][$k] = $v;
-                    $shouldRemove = true;
-                    continue;
-                }
-
-                if ($shouldRemove == false) {
-                    $v['content'] = trim($v['content'], ' - ');
-                    $response['data']['tracking'][$k] = $v;
-                } else {
-                    if ($k !== count($response['data']['tracking']) - 1) {
-                        unset($response['data']['tracking'][$k]);
-                    } else {
-                        $v['content'] = 'In processing center';
+            if (isset($response['data']['tracking'])) {
+                foreach ($response['data']['tracking'] as $k => $v) {
+                    if ( strtoupper($v['content']) == strtoupper('CHINA - Arrive at international airport to abroad')) {
+                        $v['content'] = 'Mexico - Arrive at international airport to abroad';
                         $response['data']['tracking'][$k] = $v;
+                        $shouldRemove = true;
+                        continue;
+                    }
+
+                    if ($shouldRemove == false) {
+                        $v['content'] = trim($v['content'], ' - ');
+                        $response['data']['tracking'][$k] = $v;
+                    } else {
+                        if ($k !== count($response['data']['tracking']) - 1) {
+                            unset($response['data']['tracking'][$k]);
+                        } else {
+                            $v['content'] = 'In processing center';
+                            $response['data']['tracking'][$k] = $v;
+                        }
                     }
                 }
             }

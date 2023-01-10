@@ -498,11 +498,24 @@ class Dashboard extends Model
         $orders = DB::select("select shipping_address->>\"$.country_code\" as country_code,count(*) as total_order, sum(total_price)/$radioCurrency as total_order_amount from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate group by shipping_address->>\"$.country_code\";"
             , ['fromDate' => $fromDate, 'toDate' => $toDate]
         );
+
+        $storeType = self::getStoreType($store);
+        if (in_array('gtf', $storeType)) {
+            $dateTimeRangeTs = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq, true);
+            $redisOrder = RedisGtf::getAllOrderByDate($store, $dateTimeRangeTs['fromDate'], $dateTimeRangeTs['toDate']);
+            $orders = array_merge($orders, $redisOrder);
+        }
+
         $ordersResult = array();
         foreach ($orders as $o) {
             $o->country_code = $o->country_code ?? 'UNKNOWN';
-            $ordersResult[$o->country_code]['total_order'] = $o->total_order;
-            $ordersResult[$o->country_code]['total_order_amount'] = $o->total_order_amount;
+            if (!isset($ordersResult[$o->country_code])) {
+                $ordersResult[$o->country_code]['total_order'] = $o->total_order;
+                $ordersResult[$o->country_code]['total_order_amount'] = $o->total_order_amount;
+            }
+
+            $ordersResult[$o->country_code]['total_order'] += $o->total_order;
+            $ordersResult[$o->country_code]['total_order_amount'] += $o->total_order_amount;
         }
 
         $fbAds = DB::table('fb_campaign_insights')
@@ -563,6 +576,13 @@ class Dashboard extends Model
             ;"
             , ['fromDate' => $fromDate, 'toDate' => $toDate]
         );
+
+        $storeType = self::getStoreType($store);
+        if (in_array('gtf', $storeType)) {
+            $dateTimeRangeTs = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq, true);
+            $redisOrder = RedisGtf::getAllOrderLinesByDate($store, $dateTimeRangeTs['fromDate'], $dateTimeRangeTs['toDate']);
+            $orders = array_merge($orders, $redisOrder);
+        }
 
         $ordersTips = DB::select("
             select count(Distinct ol.order_id) as total_order, 'TIP' as product_type_name, 'TIP' as product_type_code, sum((ol.price*ol.quantity) - ol.total_discount)/$radioCurrency as total_order_amount, sum(ol.quantity) as total_quantity
@@ -801,6 +821,13 @@ class Dashboard extends Model
             , ['fromDate' => $fromDate, 'toDate' => $toDate]
         );
 
+        $storeType = self::getStoreType($store);
+        if (in_array('gtf', $storeType)) {
+            $dateTimeRangeTs = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq, true);
+            $redisOrder = RedisGtf::getAllOrderLinesByDate($store, $dateTimeRangeTs['fromDate'], $dateTimeRangeTs['toDate']);
+            $orders = array_merge($orders, $redisOrder);
+        }
+
         $ordersResult = array();
         foreach ($orders as $o) {
             $designerCode = self::getDesignerFromSku ($o->sku);
@@ -923,6 +950,13 @@ class Dashboard extends Model
             ;"
             , ['fromDate' => $fromDate, 'toDate' => $toDate]
         );
+
+        $storeType = self::getStoreType($store);
+        if (in_array('gtf', $storeType)) {
+            $dateTimeRangeTs = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq, true);
+            $redisOrder = RedisGtf::getAllOrderLinesByDate($store, $dateTimeRangeTs['fromDate'], $dateTimeRangeTs['toDate']);
+            $orders = array_merge($orders, $redisOrder);
+        }
 
         $ordersResult = array();
         foreach ($orders as $o) {
@@ -1229,13 +1263,8 @@ class Dashboard extends Model
         $storeType = self::getStoreType($store);
         if (in_array('gtf', $storeType)) {
             $dateTimeRangeTs = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq, true);
-            $redisOrder = RedisGtf::getTotalOrderByDate($store, $dateTimeRangeTs['fromDate'], $dateTimeRangeTs['toDate']);
-            $orders[] = (object)array(
-                "total_order" => $redisOrder['total'] ?? 0,
-                "total_order_amount" => $redisOrder['totalAmount'] ?? 0,
-                "note_attributes" => '',
-                "name" => 'gft',
-            );
+            $redisOrder = RedisGtf::getAllOrderByDate($store, $dateTimeRangeTs['fromDate'], $dateTimeRangeTs['toDate']);
+            $orders = array_merge($orders, $redisOrder);
         }
 
         $ordersResult = array();
@@ -1250,7 +1279,7 @@ class Dashboard extends Model
                     }
                 }
             }
-            if ($debug == 1 && $campaign_name == 'UNKNOWN') {
+            if ($debug == 1 && ($campaign_name == 'UNKNOWN' || $campaign_name == '')) {
                 dump($o->name);
             }
 

@@ -67,7 +67,13 @@ class RedisGtf extends Model
             ->search( $query, $documentsAsArray = true );
 
         if ($results->getCount() == 0) {
-            $ordersResult[] = array('total_order' => 0, 'total_order_amount' => 0, 'name' => 'gft');
+            $ordersResult[] = (object)array(
+                'total_order' => 0,
+                'total_order_amount' => 0,
+                'name' => 'gft',
+                'country_code' => 'UNKNOWN',
+                'note_attributes' => json_encode(array())
+            );
             return $ordersResult;
         }
         foreach ($results->getDocuments() as $k => $v) {
@@ -108,7 +114,7 @@ class RedisGtf extends Model
             ->search( $query, $documentsAsArray = true );
 
         if ($results->getCount() == 0) {
-            $ordersResult[] = array(
+            $ordersResult[] = (object)array(
                 'sku' => '',
                 'product_type_name' => '',
                 'product_type_code' => '',

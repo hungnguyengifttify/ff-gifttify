@@ -133,8 +133,8 @@ class RedisGtf extends Model
                 'name' => $order->id,
                 'product_type_name' => 'TIP',
                 'product_type_code' => 'TIP',
-                'total_order' => 1,
-                'total_quantity' => 1,
+                'total_order' => 0,
+                'total_quantity' => 0,
                 'total_order_amount' => ($order->tip / $order->currency->rate),
             );
 
@@ -143,8 +143,8 @@ class RedisGtf extends Model
                 'name' => $order->id,
                 'product_type_name' => 'SHIPPING_FEE',
                 'product_type_code' => 'SHIPPING_FEE',
-                'total_order' => 1,
-                'total_quantity' => 1,
+                'total_order' => 0,
+                'total_quantity' => 0,
                 'total_order_amount' => ($order->shippingTotal / $order->currency->rate),
             );
 

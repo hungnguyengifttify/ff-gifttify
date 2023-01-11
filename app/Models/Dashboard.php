@@ -512,10 +512,10 @@ class Dashboard extends Model
             if (!isset($ordersResult[$o->country_code])) {
                 $ordersResult[$o->country_code]['total_order'] = $o->total_order;
                 $ordersResult[$o->country_code]['total_order_amount'] = $o->total_order_amount;
+            } else {
+                $ordersResult[$o->country_code]['total_order'] += $o->total_order;
+                $ordersResult[$o->country_code]['total_order_amount'] += $o->total_order_amount;
             }
-
-            $ordersResult[$o->country_code]['total_order'] += $o->total_order;
-            $ordersResult[$o->country_code]['total_order_amount'] += $o->total_order_amount;
         }
 
         $fbAds = DB::table('fb_campaign_insights')
@@ -1083,10 +1083,10 @@ class Dashboard extends Model
     public static function getAdsStaffFromCampaignName ($campaignName) {
         $result = array();
         $adsStaff = "UNKNOWN";
-        if (preg_match('/.*phong.*/', strtolower($campaignName), $result)) {
-            $adsStaff = 'Phong';
-        } elseif (preg_match('/.*VA.*/', $campaignName, $result)) {
-            $adsStaff = 'Việt Anh';
+        if (preg_match('/.*hoai.*/', strtolower($campaignName), $result)) {
+            $adsStaff = 'Hoài';
+        } elseif (preg_match('/.*tien.*/', strtolower($campaignName), $result)) {
+            $adsStaff = 'Tiến';
         } elseif (preg_match('/.*hoang.*/', strtolower($campaignName), $result)) {
             $adsStaff = 'Hoàng';
         } elseif (preg_match('/^m .*/', strtolower($campaignName), $result)) {

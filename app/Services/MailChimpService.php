@@ -20,13 +20,18 @@ class MailChimpService
 
     public $viewID = '230760666';
 
-    function __construct()
+    function __construct($config=[])
     {
         $this->service = new ApiClient();
-
+        $apiKey = Config::get('mailchimp.apiKey');
+        $server = Config::get('mailchimp.server');
+        if(!empty($config)) {
+            $apiKey = $config['apiKey'];
+            $server = $config['server'];
+        }
         $this->service ->setConfig([
-            'apiKey' => Config::get('mailchimp.apiKey'),
-            'server' => Config::get('mailchimp.server')
+            'apiKey' => $apiKey,
+            'server' => $server
         ]);
     }
 

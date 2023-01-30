@@ -30,15 +30,37 @@ class UploadOrderToMailChimp extends Command
      *
      * @return int
      */
+    public function handle(){
+        $configMailchimp = config('mailchimp');
+        if(!empty($configMailchimp['servers'])){
+            $listServer = explode(',', $configMailchimp['servers']);
+            $listApiKey = explode(',', $configMailchimp['apiKeys']);
+            $listStoreSite = explode(',', $configMailchimp['storeSites']);
+            $listStoreId = explode(',', $configMailchimp['storeIds']);
+            $listRedisDB = explode(',', $configMailchimp['redisDbs']);
+            for($i=0; $i < count($listServer); $i++){
+                $server = $listServer[$i];
+                $apiKey = $listApiKey[$i];
+                $siteDomain = $listStoreSite[$i];
+                $storeID = $listStoreId[$i];
+                $redisDB = $listRedisDB[$i];
+                $this->handlePushOrderToMailchimp($server, $apiKey, $siteDomain, $storeID, $redisDB);
+            }
+        }else{
+            $server = $configMailchimp['server'];
+            $apiKey = $configMailchimp['apiKey'];
+            $siteDomain = 'https://thecreattify.com';
+            $storeID = 'store_k6gosw5gwhooezt3i61m';
+            $redisDB = 1;
+            $this->handlePushOrderToMailchimp($server, $apiKey, $siteDomain, $storeID, $redisDB);
+        }
 
-    public function handle()
-    {
-        $siteDomain = 'https://thecreattify.com';
-        $storeID = 'store_k6gosw5gwhooezt3i61m';
+    }
+
+    public function handlePushOrderToMailchimp($server, $apiKey, $siteDomain, $storeID, $redisDB){
         $pageOrder = 0;
-
-        $mailchimp = new MailChimpService();
-
+        $pageLimit = 30;
+        $mailchimp = new MailChimpService(['server' => $server, 'apiKey' => $apiKey]);
         // Code check
         // $response = $mailchimp->service->ecommerce->stores();
         // $a = $mailchimp->service->ecommerce->deleteStoreCart($storeID, 'TC_JWYIcY1Zq');
@@ -46,12 +68,11 @@ class UploadOrderToMailChimp extends Command
         // $b = $mailchimp->service->ecommerce->getOrder($storeID, 'TC_rlizJyftb');
         // $b = $mailchimp->service->ecommerce->getStoreCarts($storeID);
         // dd($b);
-
         do {
             $pageOrder++;
-            $data = RedisGtf::getRedisOrdersList(1, [], '', $pageOrder, 80, true);
+            $data = RedisGtf::getRedisOrdersList($redisDB, [], '', $pageOrder, $pageLimit, true);
             foreach ($data['results'] as $v) {
-               
+
                 // Code check
                 // if($v['email'] != 'hatv1592@gmail.com'){
                 //     continue;
@@ -254,7 +275,7 @@ class UploadOrderToMailChimp extends Command
 
                         dump('Update đơn hàng ID: "'. $v["id"] .'" Thành công cho email: ' . $v["email"]);
                     }
-                }catch (Exception $e) {     
+                }catch (Exception $e) {
                     Log::info('Import/Upate cart ID: '.$v["id"]. ' - '. $v["email"].' thất bại.');
                     dump('Insert/update order '.$v["id"].' email: ' . $v["email"].' thất bại');
                 }

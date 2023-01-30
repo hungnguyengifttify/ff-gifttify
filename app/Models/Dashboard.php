@@ -1237,7 +1237,7 @@ class Dashboard extends Model
         }
 
         foreach ($gaAds->all() as $v) {
-            $v->campaign_name = ($v->campaign_name == '(not set)') ? 'UNKNOWN' : $v->campaign_name;
+            $v->campaign_name = ($v->campaign_name == '(not set)' || $v->campaign_name == '') ? 'UNKNOWN' : $v->campaign_name;
             if (!isset($adsResult[$v->campaign_name])) {
                 $adsResult[$v->campaign_name]['account_status'] = '';
                 $adsResult[$v->campaign_name]['account_name'] = '';
@@ -1274,7 +1274,7 @@ class Dashboard extends Model
             if ($note_attributes) {
                 foreach ($note_attributes as $note) {
                     if ($note->name == 'utm_campaign') {
-                        $campaign_name = $note->value;
+                        $campaign_name = $note->value ?? 'UNKNOWN';
                         break;
                     }
                 }
@@ -1287,9 +1287,10 @@ class Dashboard extends Model
                 $ordersResult[$campaign_name]['campaign_name'] = $campaign_name ?? 'UNKNOWN';
                 $ordersResult[$campaign_name]['total_order'] = 0;
                 $ordersResult[$campaign_name]['total_order_amount'] = 0;
+            } else {
+                $ordersResult[$campaign_name]['total_order'] += $o->total_order;
+                $ordersResult[$campaign_name]['total_order_amount'] += $o->total_order_amount;
             }
-            $ordersResult[$campaign_name]['total_order'] += $o->total_order;
-            $ordersResult[$campaign_name]['total_order_amount'] += $o->total_order_amount;
         }
 
         $campaignReports = array_merge(array_keys($ordersResult) , array_keys($adsResult));

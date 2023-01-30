@@ -128,25 +128,29 @@ class RedisGtf extends Model
         foreach ($results->getDocuments() as $k => $v) {
             $order = json_decode($v['$']);
 
-            $ordersResult[] = (object)array(
-                'sku' => '',
-                'name' => $order->id,
-                'product_type_name' => 'TIP',
-                'product_type_code' => 'TIP',
-                'total_order' => 0,
-                'total_quantity' => 0,
-                'total_order_amount' => ($order->tip / $order->currency->rate),
-            );
+            if (isset($order->tip) && $order->tip > 0) {
+                $ordersResult[] = (object)array(
+                    'sku' => '',
+                    'name' => $order->id,
+                    'product_type_name' => 'TIP',
+                    'product_type_code' => 'TIP',
+                    'total_order' => 0,
+                    'total_quantity' => 0,
+                    'total_order_amount' => ($order->tip / $order->currency->rate),
+                );
+            }
 
-            $ordersResult[] = (object)array(
-                'sku' => '',
-                'name' => $order->id,
-                'product_type_name' => 'SHIPPING_FEE',
-                'product_type_code' => 'SHIPPING_FEE',
-                'total_order' => 0,
-                'total_quantity' => 0,
-                'total_order_amount' => ($order->shippingTotal / $order->currency->rate),
-            );
+            if (isset($order->shippingTotal) && $order->shippingTotal > 0) {
+                $ordersResult[] = (object)array(
+                    'sku' => '',
+                    'name' => $order->id,
+                    'product_type_name' => 'SHIPPING_FEE',
+                    'product_type_code' => 'SHIPPING_FEE',
+                    'total_order' => 0,
+                    'total_quantity' => 0,
+                    'total_order_amount' => ($order->shippingTotal / $order->currency->rate),
+                );
+            }
 
             foreach ($order->items as $item) {
                 $ordersResult[] = (object)array(

@@ -45,6 +45,130 @@ class RedisGtf extends Model
         return array('total' => $total, 'totalAmount' => $totalAmount);
     }
 
+    public static function getAllOrderByDate($store = 'thecreattify', $fromDateTs = '', $toDateTs = '') {
+        $redisConfig = Config::get("database.redis.$store");
+        $client = Setup::connect( $redisConfig['host'], $redisConfig['port'], $redisConfig['password'], 0 );
+        $search = new Query( $client, 'idx:order' );
+
+        $query = new QueryBuilder();
+        $query->setTokenize()
+            ->setFuzzyMatching()
+            ->addCondition('status', ['completed'], 'AND', TRUE);
+
+        $fromDate = $fromDateTs * 1;
+        $toDate = $toDateTs * 1;
+
+        $ordersResult = array();
+
+        $results = $search
+            ->sortBy( 'paidAt', $order = 'DESC' )
+            ->numericFilter( 'paidAt', $fromDate, $toDate )
+            ->limit( 0, $pageSize = 100000 ) // If set, we limit the results to the offset and number of results given. The default is 0 10
+            ->search( $query, $documentsAsArray = true );
+
+        if ($results->getCount() == 0) {
+            $ordersResult[] = (object)array(
+                'total_order' => 0,
+                'total_order_amount' => 0,
+                'name' => 'gft',
+                'country_code' => 'UNKNOWN',
+                'note_attributes' => json_encode(array())
+            );
+            return $ordersResult;
+        }
+        foreach ($results->getDocuments() as $k => $v) {
+            $order = json_decode($v['$']);
+            $totalAmount = ($order->total / $order->currency->rate);
+            $noteAttributesArr = array();
+            $noteAttributesArr[] = (object)array('name' => 'utm_campaign', 'value' => $order->utmCampaign ?? 'UNKNOWN' );
+            $ordersResult[] = (object)array(
+                'name' => $order->id,
+                'country_code' => $order->address->country ?? 'UNKNOWN',
+                'total_order' => 1,
+                'total_order_amount' => $totalAmount,
+                'note_attributes' => json_encode($noteAttributesArr)
+            );
+        }
+        return $ordersResult;
+    }
+
+    public static function getAllOrderLinesByDate($store = 'thecreattify', $fromDateTs = '', $toDateTs = '') {
+        $redisConfig = Config::get("database.redis.$store");
+        $client = Setup::connect( $redisConfig['host'], $redisConfig['port'], $redisConfig['password'], 0 );
+        $search = new Query( $client, 'idx:order' );
+
+        $query = new QueryBuilder();
+        $query->setTokenize()
+            ->setFuzzyMatching()
+            ->addCondition('status', ['completed'], 'AND', TRUE);
+
+        $fromDate = $fromDateTs * 1;
+        $toDate = $toDateTs * 1;
+
+        $ordersResult = array();
+
+        $results = $search
+            ->sortBy( 'paidAt', $order = 'DESC' )
+            ->numericFilter( 'paidAt', $fromDate, $toDate )
+            ->limit( 0, $pageSize = 100000 ) // If set, we limit the results to the offset and number of results given. The default is 0 10
+            ->search( $query, $documentsAsArray = true );
+
+        if ($results->getCount() == 0) {
+            $ordersResult[] = (object)array(
+                'sku' => '',
+                'product_type_name' => '',
+                'product_type_code' => '',
+                'total_order' => 0,
+                'total_order_amount' => 0,
+                'total_quantity' => 0,
+                'name' => 'gft'
+            );
+            return $ordersResult;
+        }
+        foreach ($results->getDocuments() as $k => $v) {
+            $order = json_decode($v['$']);
+
+            if (isset($order->tip) && $order->tip > 0) {
+                $ordersResult[] = (object)array(
+                    'sku' => '',
+                    'name' => $order->id,
+                    'product_type_name' => 'TIP',
+                    'product_type_code' => 'TIP',
+                    'total_order' => 0,
+                    'total_quantity' => 0,
+                    'total_order_amount' => ($order->tip / $order->currency->rate),
+                );
+            }
+
+            if (isset($order->shippingTotal) && $order->shippingTotal > 0) {
+                $ordersResult[] = (object)array(
+                    'sku' => '',
+                    'name' => $order->id,
+                    'product_type_name' => 'SHIPPING_FEE',
+                    'product_type_code' => 'SHIPPING_FEE',
+                    'total_order' => 0,
+                    'total_quantity' => 0,
+                    'total_order_amount' => ($order->shippingTotal / $order->currency->rate),
+                );
+            }
+
+            foreach ($order->items as $item) {
+                $ordersResult[] = (object)array(
+                    'sku' => $item->variant->sku,
+                    'product_type_name' => $item->product->productType ?? 'UNKNOWN',
+                    'product_type_code' => $item->product->productType ?? 'UNKNOWN',
+                    'name' => $order->id,
+                    'country_code' => $order->address->country ?? 'UNKNOWN',
+                    'total_order' => 1/count($order->items),
+                    'total_quantity' => $item->quantity,
+                    'total_order_amount' => ($item->price * $item->quantity) / $order->currency->rate,
+                );
+            }
+
+        }
+        return $ordersResult;
+    }
+
     public static function getRedisOrdersList($db = 1, $dateRanges = array(), $status = '', $page = 1, $limit = 10, $isArray = false) {
         $queryArr = array(
             'db' => $db,

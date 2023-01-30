@@ -498,11 +498,24 @@ class Dashboard extends Model
         $orders = DB::select("select shipping_address->>\"$.country_code\" as country_code,count(*) as total_order, sum(total_price)/$radioCurrency as total_order_amount from orders where store='$store' and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') >= :fromDate and CONVERT_TZ(shopify_created_at,'UTC','$mysqlTimeZone') <= :toDate group by shipping_address->>\"$.country_code\";"
             , ['fromDate' => $fromDate, 'toDate' => $toDate]
         );
+
+        $storeType = self::getStoreType($store);
+        if (in_array('gtf', $storeType)) {
+            $dateTimeRangeTs = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq, true);
+            $redisOrder = RedisGtf::getAllOrderByDate($store, $dateTimeRangeTs['fromDate'], $dateTimeRangeTs['toDate']);
+            $orders = array_merge($orders, $redisOrder);
+        }
+
         $ordersResult = array();
         foreach ($orders as $o) {
             $o->country_code = $o->country_code ?? 'UNKNOWN';
-            $ordersResult[$o->country_code]['total_order'] = $o->total_order;
-            $ordersResult[$o->country_code]['total_order_amount'] = $o->total_order_amount;
+            if (!isset($ordersResult[$o->country_code])) {
+                $ordersResult[$o->country_code]['total_order'] = $o->total_order;
+                $ordersResult[$o->country_code]['total_order_amount'] = $o->total_order_amount;
+            } else {
+                $ordersResult[$o->country_code]['total_order'] += $o->total_order;
+                $ordersResult[$o->country_code]['total_order_amount'] += $o->total_order_amount;
+            }
         }
 
         $fbAds = DB::table('fb_campaign_insights')
@@ -563,6 +576,13 @@ class Dashboard extends Model
             ;"
             , ['fromDate' => $fromDate, 'toDate' => $toDate]
         );
+
+        $storeType = self::getStoreType($store);
+        if (in_array('gtf', $storeType)) {
+            $dateTimeRangeTs = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq, true);
+            $redisOrder = RedisGtf::getAllOrderLinesByDate($store, $dateTimeRangeTs['fromDate'], $dateTimeRangeTs['toDate']);
+            $orders = array_merge($orders, $redisOrder);
+        }
 
         $ordersTips = DB::select("
             select count(Distinct ol.order_id) as total_order, 'TIP' as product_type_name, 'TIP' as product_type_code, sum((ol.price*ol.quantity) - ol.total_discount)/$radioCurrency as total_order_amount, sum(ol.quantity) as total_quantity
@@ -801,6 +821,13 @@ class Dashboard extends Model
             , ['fromDate' => $fromDate, 'toDate' => $toDate]
         );
 
+        $storeType = self::getStoreType($store);
+        if (in_array('gtf', $storeType)) {
+            $dateTimeRangeTs = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq, true);
+            $redisOrder = RedisGtf::getAllOrderLinesByDate($store, $dateTimeRangeTs['fromDate'], $dateTimeRangeTs['toDate']);
+            $orders = array_merge($orders, $redisOrder);
+        }
+
         $ordersResult = array();
         foreach ($orders as $o) {
             $designerCode = self::getDesignerFromSku ($o->sku);
@@ -923,6 +950,13 @@ class Dashboard extends Model
             ;"
             , ['fromDate' => $fromDate, 'toDate' => $toDate]
         );
+
+        $storeType = self::getStoreType($store);
+        if (in_array('gtf', $storeType)) {
+            $dateTimeRangeTs = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq, true);
+            $redisOrder = RedisGtf::getAllOrderLinesByDate($store, $dateTimeRangeTs['fromDate'], $dateTimeRangeTs['toDate']);
+            $orders = array_merge($orders, $redisOrder);
+        }
 
         $ordersResult = array();
         foreach ($orders as $o) {
@@ -1049,10 +1083,10 @@ class Dashboard extends Model
     public static function getAdsStaffFromCampaignName ($campaignName) {
         $result = array();
         $adsStaff = "UNKNOWN";
-        if (preg_match('/.*phong.*/', strtolower($campaignName), $result)) {
-            $adsStaff = 'Phong';
-        } elseif (preg_match('/.*VA.*/', $campaignName, $result)) {
-            $adsStaff = 'Việt Anh';
+        if (preg_match('/.*hoai.*/', strtolower($campaignName), $result)) {
+            $adsStaff = 'Hoài';
+        } elseif (preg_match('/.*tien.*/', strtolower($campaignName), $result)) {
+            $adsStaff = 'Tiến';
         } elseif (preg_match('/.*hoang.*/', strtolower($campaignName), $result)) {
             $adsStaff = 'Hoàng';
         } elseif (preg_match('/^m .*/', strtolower($campaignName), $result)) {
@@ -1203,7 +1237,7 @@ class Dashboard extends Model
         }
 
         foreach ($gaAds->all() as $v) {
-            $v->campaign_name = ($v->campaign_name == '(not set)') ? 'UNKNOWN' : $v->campaign_name;
+            $v->campaign_name = ($v->campaign_name == '(not set)' || $v->campaign_name == '') ? 'UNKNOWN' : $v->campaign_name;
             if (!isset($adsResult[$v->campaign_name])) {
                 $adsResult[$v->campaign_name]['account_status'] = '';
                 $adsResult[$v->campaign_name]['account_name'] = '';
@@ -1229,13 +1263,8 @@ class Dashboard extends Model
         $storeType = self::getStoreType($store);
         if (in_array('gtf', $storeType)) {
             $dateTimeRangeTs = self::getDatesByRangeDateLabel($store, $rangeDate, $fromDateReq, $toDateReq, true);
-            $redisOrder = RedisGtf::getTotalOrderByDate($store, $dateTimeRangeTs['fromDate'], $dateTimeRangeTs['toDate']);
-            $orders[] = (object)array(
-                "total_order" => $redisOrder['total'] ?? 0,
-                "total_order_amount" => $redisOrder['totalAmount'] ?? 0,
-                "note_attributes" => '',
-                "name" => 'gft',
-            );
+            $redisOrder = RedisGtf::getAllOrderByDate($store, $dateTimeRangeTs['fromDate'], $dateTimeRangeTs['toDate']);
+            $orders = array_merge($orders, $redisOrder);
         }
 
         $ordersResult = array();
@@ -1245,12 +1274,12 @@ class Dashboard extends Model
             if ($note_attributes) {
                 foreach ($note_attributes as $note) {
                     if ($note->name == 'utm_campaign') {
-                        $campaign_name = $note->value;
+                        $campaign_name = $note->value ?? 'UNKNOWN';
                         break;
                     }
                 }
             }
-            if ($debug == 1 && $campaign_name == 'UNKNOWN') {
+            if ($debug == 1 && ($campaign_name == 'UNKNOWN' || $campaign_name == '')) {
                 dump($o->name);
             }
 
@@ -1258,9 +1287,10 @@ class Dashboard extends Model
                 $ordersResult[$campaign_name]['campaign_name'] = $campaign_name ?? 'UNKNOWN';
                 $ordersResult[$campaign_name]['total_order'] = 0;
                 $ordersResult[$campaign_name]['total_order_amount'] = 0;
+            } else {
+                $ordersResult[$campaign_name]['total_order'] += $o->total_order;
+                $ordersResult[$campaign_name]['total_order_amount'] += $o->total_order_amount;
             }
-            $ordersResult[$campaign_name]['total_order'] += $o->total_order;
-            $ordersResult[$campaign_name]['total_order_amount'] += $o->total_order_amount;
         }
 
         $campaignReports = array_merge(array_keys($ordersResult) , array_keys($adsResult));

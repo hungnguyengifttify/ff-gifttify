@@ -13,8 +13,26 @@ class DashboardController extends Controller {
 
     public function index(Request $request)
     {
+        $debug = $request->input('debug') ?? 0;
+        $labelDate = $request->input('labelDate') ?? 'Today';
+        $fromDateReq = $request->input('fromDate') ?? '';
+        $toDateReq = $request->input('toDate') ?? '';
+        $range_report = array_search ($labelDate, Dashboard::$rangeDate);
+
+        $dateTimeRange = Dashboard::getDatesByRangeDateLabel('thecreattify', $range_report, $fromDateReq, $toDateReq);
+        $fromDate = $dateTimeRange['fromDate'];
+        $toDate = $dateTimeRange['toDate'];
+
+        $params = array(
+            'fromDate' => new \DateTime($fromDate),
+            'toDate' => new \DateTime($toDate),
+            'labelDate' => $labelDate,
+        );
+
         $rangeDates = Dashboard::$rangeDate;
-        unset($rangeDates['custom_range']);
+        if ($labelDate !== 'Custom Range') {
+            unset($rangeDates['custom_range']);
+        }
         $rangeDates = array_keys($rangeDates);
 
         $stores = Dashboard::getStoresList();
@@ -22,7 +40,12 @@ class DashboardController extends Controller {
         $reports = array();
         foreach ($rangeDates as $v) {
             foreach ($stores as $store) {
-                $value = Dashboard::getReportByDate($store, $v);
+                if ($v == 'custom_range') {
+                    $value = Dashboard::getReportByDate($store, $v, $fromDateReq, $toDateReq, $debug);
+                } else {
+                    $value = Dashboard::getReportByDate($store, $v, '', '', $debug);
+                }
+
                 $reports[$store][] = $value;
 
                 if (!isset($reports['all'][$v])) {
@@ -48,7 +71,7 @@ class DashboardController extends Controller {
             }
         }
 
-        return view('report.dashboard_sum', array('reports' => $reports, 'storesConfig' => $storesConfig));
+        return view('report.dashboard_sum', array('params' => $params, 'reports' => $reports, 'storesConfig' => $storesConfig));
     }
 
     public function report_detail(Request $request, $store = 'thecreattify') {

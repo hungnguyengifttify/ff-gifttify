@@ -16,7 +16,10 @@ class UploadOrderToMailChimp extends Command
      *
      * @var string
      */
-    protected $signature = 'mailchimp:push_order';
+
+    protected $signature = 'mailchimp:push_order
+        {--mode=1} {--server=} {--apiKey=} {--siteDomain=} {--storeID=} {--redisDB=}';
+
 
     /**
      * The console command description.
@@ -31,6 +34,28 @@ class UploadOrderToMailChimp extends Command
      * @return int
      */
     public function handle(){
+        $mode = (int)$this->option('mode');
+        if ($mode == 1) {
+            $this->handleModeDefault();
+        } else {
+            $this->handleModeAll();
+        }
+    }
+
+    public function handleModeAll(){
+        $server = trim($this->option('server'));
+        $apiKey = trim($this->option('apiKey'));
+        $siteDomain = trim($this->option('siteDomain'));
+        $storeID = trim($this->option('storeID'));
+        $redisDB = (int)$this->option('redisDB');
+        if(!$server || !$apiKey || !$siteDomain || !$storeID || $redisDB <= 0){
+            dump('Error: Invalid parameters');
+            return;
+        }
+        $this->handlePushOrderToMailchimp($server, $apiKey, $siteDomain, $storeID, $redisDB, false);
+    }
+
+    public function handleModeDefault(){
         $configMailchimp = config('mailchimp');
         if(!empty($configMailchimp['servers'])){
             $listServer = explode(',', $configMailchimp['servers']);
@@ -54,10 +79,9 @@ class UploadOrderToMailChimp extends Command
             $redisDB = 1;
             $this->handlePushOrderToMailchimp($server, $apiKey, $siteDomain, $storeID, $redisDB);
         }
-
     }
 
-    public function handlePushOrderToMailchimp($server, $apiKey, $siteDomain, $storeID, $redisDB){
+    public function handlePushOrderToMailchimp($server, $apiKey, $siteDomain, $storeID, $redisDB, $modeDefault=true){
         $pageOrder = 0;
         $pageLimit = 30;
         $mailchimp = new MailChimpService(['server' => $server, 'apiKey' => $apiKey]);
@@ -280,7 +304,9 @@ class UploadOrderToMailChimp extends Command
                     dump('Insert/update order '.$v["id"].' email: ' . $v["email"].' thất bại');
                 }
             }
-            break;
+            if($modeDefault){
+                break;
+            }
         } while (empty($data) === false);
         // sleep(10);
     }

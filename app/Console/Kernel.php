@@ -36,6 +36,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('products_csv:import whelands.com')->everyMinute();
         $schedule->command('mailchimp:push_order')->everyFiveMinutes();
         $schedule->command('remix:scheduleproduct')->everyMinute();
+        $schedule->command('remix:reviewproduct')->cron('0 1 * * *');
     }
 
     /**

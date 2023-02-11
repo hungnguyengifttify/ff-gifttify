@@ -64,7 +64,7 @@ class Dashboard extends Model
                     'dateTimeZone' => new \DateTimeZone('America/Los_Angeles'),
                 ),
                 'google' => array (
-                    'viewId' => ''
+                    'viewId' => '278096736'
                 )
             ),
 
@@ -416,7 +416,6 @@ class Dashboard extends Model
                 $toDate = $dateTimeEnd->format('Y-m-d 23:59:59');
             }
         }
-
         if ($returnTimestamp) {
             $newDateTimeStart = Carbon::createFromFormat('Y-m-d H:i:s', "$fromDate 00:00:00", $phpTimeZone);
             $newDateTimeEnd = Carbon::createFromFormat('Y-m-d H:i:s', $toDate, $phpTimeZone);
@@ -1266,7 +1265,6 @@ class Dashboard extends Model
             $redisOrder = RedisGtf::getAllOrderByDate($store, $dateTimeRangeTs['fromDate'], $dateTimeRangeTs['toDate']);
             $orders = array_merge($orders, $redisOrder);
         }
-
         $ordersResult = array();
         foreach ($orders as $o) {
             $note_attributes = json_decode($o->note_attributes);
@@ -1287,10 +1285,9 @@ class Dashboard extends Model
                 $ordersResult[$campaign_name]['campaign_name'] = $campaign_name ?? 'UNKNOWN';
                 $ordersResult[$campaign_name]['total_order'] = 0;
                 $ordersResult[$campaign_name]['total_order_amount'] = 0;
-            } else {
-                $ordersResult[$campaign_name]['total_order'] += $o->total_order;
-                $ordersResult[$campaign_name]['total_order_amount'] += $o->total_order_amount;
             }
+            $ordersResult[$campaign_name]['total_order'] += $o->total_order;
+            $ordersResult[$campaign_name]['total_order_amount'] += $o->total_order_amount;
         }
 
         $campaignReports = array_merge(array_keys($ordersResult) , array_keys($adsResult));
@@ -1316,7 +1313,6 @@ class Dashboard extends Model
             $result[$v]['mo'] = ($result[$v]['total_order_amount']) > 0 ? 100*(($result[$v]['totalSpend']+$result[$v]['ga_ad_cost']) / $result[$v]['total_order_amount']) : 0;
         }
         usort($result, [self::class, 'sort_result_by_ads_cost']);
-
         return $result;
 
     }

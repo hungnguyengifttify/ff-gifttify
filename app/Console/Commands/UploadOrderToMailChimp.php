@@ -105,6 +105,7 @@ class UploadOrderToMailChimp extends Command
                 $listProduct = $this->getOrderItems($v);
                 foreach($listProduct as $productInfo){
                     try {
+                        if (!isset($productInfo['product']["id"])) continue;
                         // try {
                         $mailchimp->service->ecommerce->updateStoreProduct(
                             $storeID,
@@ -325,6 +326,7 @@ class UploadOrderToMailChimp extends Command
         $line = [];
         if(count($order['items'])){
             foreach($order['items'] as $item){
+                if (!isset($item['product']["id"])) continue;
                 $tempItem = [];
                 $tempItem['id'] = $item['id'];
                 $tempItem['product_id'] = $item['product']['id'];

@@ -98,6 +98,7 @@ class UpdateFbCampaigns extends Command
                     ]);
                 }
                 $cursor->fetchAfter();
+                sleep(10);
             } while (empty($data) === false);
             sleep(10);
         }

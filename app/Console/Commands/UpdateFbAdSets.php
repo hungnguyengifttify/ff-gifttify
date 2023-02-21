@@ -85,6 +85,7 @@ class UpdateFbAdSets extends Command
                         'configured_status' => $v['configured_status'] ?? '',
                         'effective_status' => $v['effective_status'] ?? '',
                     ]);
+                    sleep(10);
                 }
                 //$cursor->fetchAfter();
                 break;

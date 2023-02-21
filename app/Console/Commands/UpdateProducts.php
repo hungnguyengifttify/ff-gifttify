@@ -41,7 +41,7 @@ class UpdateProducts extends Command
 
         foreach ($stores as $store) {
             $shopifyConfig = Dashboard::getShopifyConfig($store);
-
+            if(in_array($store, ['hippiesy'])) continue;
             $apiKey = $shopifyConfig['apiKey'];
             $password = $shopifyConfig['password'];
             $domain = $shopifyConfig['domain'];

@@ -150,6 +150,7 @@ class UpdateFbAccounts extends Command
                 'business_zip' => $v['business_zip'] ?? '',
                 'created_time' => Carbon::createFromFormat(\DateTime::ISO8601, $v['created_time'], 'UTC') ?? '1900-01-01',
             ]);
+            sleep(10);
         }
 
         $this->info("Cron Job end at ". now());

@@ -88,6 +88,7 @@ class UpdateFbAdSets extends Command
                 }
                 //$cursor->fetchAfter();
                 break;
+                sleep(10);
             } while (empty($data) === false);
             sleep(10);
         }

@@ -18,7 +18,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('fbads:update_campaign_insights')->everyMinute();
         $schedule->command('orders:update')->everyMinute();
         $schedule->command('products:update')->everyTwoHours();
-        $schedule->command('fbads:update_campaigns')->everyTwoMinutes(); #cron('*/9 * * * *');
+        $schedule->command('fbads:update_campaigns')->everyFiveMinutes(); #cron('*/9 * * * *');
         $schedule->command('fbads:update_adsets')->everyTenMinutes();
         $schedule->command('fbads:update_ad_creative')->everyTwoMinutes();
         $schedule->command('fbads:update_ads_insights')->everyMinute();

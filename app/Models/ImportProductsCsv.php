@@ -16,6 +16,7 @@ class ImportProductsCsv extends Model
         'owllify.com' => 4,
         'vanoba.com' => 5,
         'whelands.com' => 6,
+        'gifttifyagency.com' => 1,
     );
 
     protected $table = 'import_products_csv';

@@ -13,8 +13,8 @@ class RemixApi {
 
     public $client;
 
-    function __construct() {
-        $this->url = Config::get('remix.api_url');
+    function __construct($arrConfig=[]) {
+        $this->url = $arrConfig['agency_api_url'] ?? Config::get('remix.api_url');
         $this->id = Config::get('remix.id');
         $this->password = Config::get('remix.password');
 

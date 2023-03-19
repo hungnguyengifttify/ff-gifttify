@@ -186,8 +186,12 @@ class ImportProductsToRemix extends Command
         if ($p->store != 'thecreattify.co') {
             $query = "?db=" . ImportProductsCsv::$storeDb[$p->store];
         }
-
-        $remixApi = new RemixApi();
+        // setting for agency
+        $arrConfig = [];
+        if($p->store == 'gifttifyagency.com'){
+            $arrConfig['agency_api_url'] = Config::get('remix.agency_api_url');
+        }
+        $remixApi = new RemixApi($arrConfig);
         $response = $remixApi->request('POST', 'products/variable' . $query, null, $body);
         if ($response && ($response->getStatusCode() == '201' || $response->getStatusCode() == '200')) {
             $res = $response->getBody()->getContents();

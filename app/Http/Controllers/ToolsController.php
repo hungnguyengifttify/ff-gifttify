@@ -898,8 +898,10 @@ class ToolsController extends Controller {
             dump($fileCsvName, $store);
             dd('Selected store is not correct.');
         }
+        $csvData = preg_match('/(\.csv)$/', $fileCsvName) ?
+            GoogleDriveFiles::getGoogleDriveCsvFile($csvFile) :
+            GoogleDriveFiles::getGoogleDriveExcelFile($csvFile);
 
-        $csvData = GoogleDriveFiles::getGoogleDriveCsvFile($csvFile);
         $products = array();
 
         $productTypeTable = array();

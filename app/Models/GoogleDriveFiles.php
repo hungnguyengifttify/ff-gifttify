@@ -182,45 +182,59 @@ class GoogleDriveFiles extends Model
 
     public static function getGoogleDriveCsvFile ($spreadsheet_url, $autoFillEmptyCell = true, $resultWithKey = true) {
         if (!$spreadsheet_url) return false;
-
-        $result = array();
-        $prev = array();
-        $header = array();
-        $i = 0;
+        $rows = [];
         if (($handle = fopen($spreadsheet_url, "r")) !== FALSE) {
             while (($row = fgetcsv($handle, 1000, ",")) !== FALSE) {
-                $i++;
-                if ($i <= 1) {
-                    $header = $row;
-                    continue;
-                }
-                if ($row[0] != '') {
-                    $prev = $row;
-                }
-
-                $rowResult = array();
-                if ($autoFillEmptyCell) {
-                    foreach ($row as $k => $v) {
-                        if ($v == '') {
-                            $row[$k] = $prev[$k] ?? '';
-                        }
-                        $rowResult[$header[$k]] = $row[$k];
-                    }
-                }
-
-                if ($resultWithKey) {
-                    $result[$row[0]][] = $rowResult;
-                } else {
-                    $result[] = $row;
-                }
-
-                $prev = $row;
+                $rows[] = $row;
             }
             fclose($handle);
         } else {
             dd("Problem reading csv");
         }
-        return $result;
+        return self::processMapData($rows, $resultWithKey, $autoFillEmptyCell);
     }
 
+    public static function getGoogleDriveExcelFile ($spreadsheet_url, $autoFillEmptyCell = true, $resultWithKey = true) {
+        /**  Load $inputFileName to a Spreadsheet Object  **/
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($spreadsheet_url);
+        /**  Convert Spreadsheet Object to an Array for ease of use  **/
+        $rows = $spreadsheet->getActiveSheet()->toArray();
+        return self::processMapData($rows, $resultWithKey, $autoFillEmptyCell);
+    }
+
+    private static function processMapData($rows, $resultWithKey, $autoFillEmptyCell){
+        $result = [];
+        $prev = array();
+        $header = array();
+        $i = 0;
+        foreach($rows as $row) {
+            $i++;
+            if ($i <= 1) {
+                $header = $row;
+                continue;
+            }
+            if ($row[0] != '') {
+                $prev = $row;
+            }
+
+            $rowResult = array();
+            if ($autoFillEmptyCell) {
+                foreach ($row as $k => $v) {
+                    if ($v == '') {
+                        $row[$k] = $prev[$k] ?? '';
+                    }
+                    $rowResult[$header[$k]] = $row[$k];
+                }
+            }
+
+            if ($resultWithKey) {
+                $result[$row[0]][] = $rowResult;
+            } else {
+                $result[] = $row;
+            }
+
+            $prev = $row;
+        }
+        return $result;
+    }
 }

@@ -1049,7 +1049,8 @@ class ToolsController extends Controller {
                     'options' => json_encode($v['options'] ?? '') ?? '',
                     'variants' => json_encode($v['variants'] ?? '') ?? '',
                     'seo' => json_encode($v['seo'] ?? '') ?? '',
-                    'syncedStatus' => 0
+                    'syncedStatus' => 0,
+                    'linkMockupTemplate' => $v['linkMockupTemplate']
                 ]);
             } else if ($shouldDelete) {
                 ImportProductsCsv::where('slug', $v['slug'] ?? '')->where('store', $store)->update(['syncedStatus' => -99]);
@@ -1070,6 +1071,7 @@ class ToolsController extends Controller {
                     'syncedStatus' => $v['syncedStatus'] ?? 0,
                     'syncedImage' => $v['syncedImage'] ?? 0,
                     'store' => $store,
+                    'linkMockupTemplate' => $v['linkMockupTemplate']
                 ]);
             }
         }

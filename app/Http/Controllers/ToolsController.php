@@ -948,7 +948,8 @@ class ToolsController extends Controller {
                 'seo' => array(
                     'title' => $prod['Title'],
                     'description' => $prod['Title']
-                )
+                ),
+                'linkMockupTemplate' => $prod['Link Mockup Template']
             );
 
             $imagesArr = $option1Arr = $option2Arr = $option3Arr = $var_arr = array();

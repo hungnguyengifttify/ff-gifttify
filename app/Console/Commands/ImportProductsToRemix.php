@@ -178,7 +178,7 @@ class ImportProductsToRemix extends Command
             'variants' => json_decode($p->variants),
             'seo' => json_decode($p->seo)
         );
-        if ($p->productType == 'PRO') {
+        if ($p->productType == 'PRO' || $p->productType == 'GIFTTIFY-AGENCY') {
             $body['description'] = $p->description;
         }
 
@@ -190,6 +190,7 @@ class ImportProductsToRemix extends Command
         $arrConfig = [];
         if($p->store == 'gifttifyagency.com'){
             $arrConfig['agency_api_url'] = Config::get('remix.agency_api_url');
+            $body['linkMockupTemplate'] = $p->linkMockupTemplate;
         }
         $remixApi = new RemixApi($arrConfig);
         $response = $remixApi->request('POST', 'products/variable' . $query, null, $body);

@@ -23,6 +23,7 @@ class ImportProductsCsv extends Model
 
     protected $fillable = [
         'shopifyId', 'slug', 'title', 'productType', 'status', 'tags', 'tagsArr', 'images',
-        'options', 'variants', 'seo', 'syncedStatus', 'syncedStatusTime', 'syncedImage', 'syncedImageTime'
+        'options', 'variants', 'seo', 'syncedStatus', 'syncedStatusTime', 'syncedImage', 'syncedImageTime',
+        'linkMockupTemplate'
     ];
 }

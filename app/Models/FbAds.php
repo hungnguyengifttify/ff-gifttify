@@ -43,6 +43,7 @@ class FbAds extends Model
         '824161118540565',
         '235842881979118',
         '589182285704295',
+        '460612252725985',
     );
 
     static $auThecreattifyAccountIds = array(

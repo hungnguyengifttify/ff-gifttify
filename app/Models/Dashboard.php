@@ -214,6 +214,27 @@ class Dashboard extends Model
                     'viewId' => ''
                 )
             ),
+
+            'ip' => array (
+                'storeType' => array('shopify'),
+                'domain' => 'impossiblepuzzle.co',
+                'common' => array (
+                    'phpTimeZone' => 'America/Los_Angeles',
+                    'fbAccountIds' => FbAds::$getcusAccountIds,
+                    'mysqlTimeZone' => 'US/Pacific',
+                    'radioCurrency' => 1
+                ),
+                'shopify' => array (
+                    'apiKey' => env('SHOPIFY_IP_API_KEY', ''),
+                    'password' => env('SHOPIFY_IP_PASSWORD', ''),
+                    'domain' => env('SHOPIFY_IP_DOMAIN', ''),
+                    'apiVersion' => env('SHOPIFY_IP_API_VERSION', ''),
+                    'dateTimeZone' => new \DateTimeZone('America/Los_Angeles'),
+                ),
+                'google' => array (
+                    'viewId' => ''
+                )
+            ),
         );
 
     }

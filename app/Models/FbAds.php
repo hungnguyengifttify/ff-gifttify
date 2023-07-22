@@ -10,7 +10,6 @@ class FbAds extends Model
     use HasFactory;
 
     static $thecreattifyAccountIds = array(
-        '460612252725985',
 //        '588068822423832',
         //'748598509494241',
         //'1038512286982822',
@@ -113,8 +112,13 @@ class FbAds extends Model
         '1131310947769505',
     );
 
+    static $ipAccountIds = array(
+        '460612252725985',
+    );
+
     public static function getAllRunningAccountIds() {
         return array_merge(
+            FbAds::$ipAccountIds,
             FbAds::$thecreattifyAccountIds,
             //FbAds::$auThecreattifyAccountIds,
             //FbAds::$singlecloudyAccountIds,

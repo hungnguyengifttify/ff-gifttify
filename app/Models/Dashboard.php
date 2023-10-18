@@ -212,7 +212,7 @@ class Dashboard extends Model
                     'viewId' => '272705190'
                 )
             ),
-
+/*
             'getcus' => array (
                 'storeType' => array('shopify'),
                 'domain' => 'getcus.gifttify.com',
@@ -233,7 +233,7 @@ class Dashboard extends Model
                     'viewId' => '275497496'
                 )
             ),
-
+*/
             'whelands' => array (
                 'storeType' => array('gtf'),
                 'domain' => 'whelands.com',

@@ -116,8 +116,13 @@ class FbAds extends Model
         '460612252725985',
     );
 
+    static $lumelightartAccountIds = array(
+        '824161118540565'
+    );
+
     public static function getAllRunningAccountIds() {
         return array_merge(
+            FbAds::$lumelightartAccountIds,
             FbAds::$ipAccountIds,
             FbAds::$thecreattifyAccountIds,
             //FbAds::$auThecreattifyAccountIds,

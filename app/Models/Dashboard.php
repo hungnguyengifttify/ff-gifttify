@@ -26,6 +26,26 @@ class Dashboard extends Model
 
     public static function getAllStoreConfig () {
         return array(
+            'lumelightart' => array (
+                'storeType' => array('gtf'),
+                'domain' => 'lumelightart.co',
+                'common' => array (
+                    'phpTimeZone' => 'America/Los_Angeles',
+                    'fbAccountIds' => FbAds::$lumelightartAccountIds,
+                    'mysqlTimeZone' => 'US/Pacific',
+                    'radioCurrency' => 1
+                ),
+                'shopify' => array (
+                    'apiKey' => env('SHOPIFY_LUMELIGHTART_API_KEY', ''),
+                    'password' => env('SHOPIFY_LUMELIGHTART_PASSWORD', ''),
+                    'domain' => env('SHOPIFY_LUMELIGHTART_DOMAIN', ''),
+                    'apiVersion' => env('SHOPIFY_LUMELIGHTART_API_VERSION', ''),
+                    'dateTimeZone' => new \DateTimeZone('America/Los_Angeles'),
+                ),
+                'google' => array (
+                    'viewId' => ''
+                )
+            ),
             'ip' => array (
                 'storeType' => array('shopify'),
                 'domain' => 'impossiblepuzzle.co',

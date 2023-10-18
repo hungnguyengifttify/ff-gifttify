@@ -27,7 +27,7 @@ class Dashboard extends Model
     public static function getAllStoreConfig () {
         return array(
             'lumelightart' => array (
-                'storeType' => array('gtf'),
+                'storeType' => array('shopify'),
                 'domain' => 'lumelightart.co',
                 'common' => array (
                     'phpTimeZone' => 'America/Los_Angeles',
